@@ -608,6 +608,8 @@ select.input { flex: 0 0 auto; cursor: pointer; }
   border-color: transparent;
 }
 .chip .n { opacity: .65; margin-left: 5px; font-size: 11.5px; }
+/* 从侧边栏带着 #模块 进来时，被自动按下的那个开关闪一下，说明"筛的就是它" */
+.chip.is-target { outline: 2px solid var(--pink); outline-offset: 2px; }
 
 .result-count { color: var(--muted-2); font-size: 13px; font-variant-numeric: tabular-nums; }
 .empty {

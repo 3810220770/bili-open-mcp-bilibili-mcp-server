@@ -118,7 +118,8 @@ function slug(text, used) {
     .replace(/[`*_~[\]()]/g, "")
     .replace(/[^\p{L}\p{N}\s-]/gu, "")
     .trim()
-    .replace(/\s+/g, "-");
+    // 与 GitHub 的 slugger 一致：每个空白字符各换一个 "-"，不做连续折叠
+    .replace(/\s/g, "-");
   if (!s) s = "section";
   let out = s;
   let n = 2;
@@ -626,21 +627,23 @@ async function main() {
       ["disclaimer.html", "免责声明"],
     ].map(([h, l]) =>
       '<a href="' + (current && current.root ? current.root : "") + h + '"' +
-      (current && current.href === h ? ' class="is-active"' : "") + ">" + esc(l) + "</a>"
+      (current && current.href != null && current.href === h ? ' class="is-active"' : "") + ">" + esc(l) + "</a>"
     ).join("") +
     "</div>" +
     '<div class="sidebar-group"><div class="sidebar-title">开放能力 · ' + apis.length + " 个接口</div>" +
     moduleGroups.map((g) => {
       const items = apis.filter((d) => groupOf(d) === g);
       return (
-        '<a href="' + (current && current.root ? current.root : "") + "endpoints.html#" + encodeURIComponent(g) + '">' +
+        '<a href="' + (current && current.root ? current.root : "") + "endpoints.html#" + encodeURIComponent(g) + '"' +
+        (current && current.group === g ? ' class="is-active"' : "") + ">" +
         esc(g) + '<span class="count">' + items.length + "</span></a>"
       );
     }).join("") +
     "</div>" +
     '<div class="sidebar-group"><div class="sidebar-title">指南与协议 · ' + guides.length + " 篇</div>" +
     guides.slice(0, 40).map((d) =>
-      '<a href="' + (current && current.root ? current.root : "") + docHref(d) + '">' + esc(d.title) + "</a>"
+      '<a href="' + (current && current.root ? current.root : "") + docHref(d) + '"' +
+      (current && current.doc === docHref(d) ? ' class="is-active"' : "") + ">" + esc(d.title) + "</a>"
     ).join("") +
     "</div></aside>";
 
@@ -845,10 +848,11 @@ async function main() {
     "</select>" +
     '<span class="result-count" data-filter-count></span></div>' +
     '<div class="chips" style="margin-bottom:20px">' +
-    '<button class="chip" data-filter-chip="all" aria-pressed="true">全部模块<span class="n">' + apis.length + "</span></button>" +
+    '<button class="chip" data-filter-chip="all" id="all" aria-pressed="true">全部模块<span class="n">' + apis.length + "</span></button>" +
     moduleGroups.map((g) => {
       const n = apis.filter((d) => groupOf(d) === g).length;
-      return '<button class="chip" data-filter-chip="' + attr(g) + '" aria-pressed="false">' + esc(g) + '<span class="n">' + n + "</span></button>";
+      // id 就是侧边栏「开放能力 · 97 个接口」里那些模块链接的锚点
+      return '<button class="chip" id="' + attr(g) + '" data-filter-chip="' + attr(g) + '" aria-pressed="false">' + esc(g) + '<span class="n">' + n + "</span></button>";
     }).join("") +
     "</div>" +
     '<div class="ep-list">' + apis.map(epRow).join("") + "</div>" +
@@ -924,7 +928,7 @@ async function main() {
       path: "api/" + pad(d.num) + ".html",
       title: d.title,
       desc: (d.title + " — " + (d.url || "") + " — " + (d.summary || "")).slice(0, 200),
-      sidebar: apiSidebar({ root: "../", href: "" }),
+      sidebar: apiSidebar({ root: "../", href: null, group: groupOf(d) }),
       tocHtml: tocHtml(toc),
       main: main,
     }));
@@ -987,7 +991,7 @@ async function main() {
       path: docHref(d),
       title: d.title,
       desc: (d.title + " — " + (d.folder || "") + " — " + (d.summary || "")).slice(0, 200),
-      sidebar: apiSidebar({ root: "../", href: "" }),
+      sidebar: apiSidebar({ root: "../", href: isEvent ? "webhooks.html" : "guides.html", doc: isEvent ? null : docHref(d) }),
       tocHtml: tocHtml(r.toc, "本页目录"),
       main: main,
     }));

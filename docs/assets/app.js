@@ -346,12 +346,34 @@
     });
   }
 
+  /* 侧边栏「开放能力 · N 个接口」里的模块链接形如 endpoints.html#直播能力。
+     落到列表页后要把这个模块的筛选取上，否则页面只是停在原地 —— 看上去像"点了没反应"。 */
+  function wireHashFilter() {
+    var scope = $("[data-filter-scope]");
+    if (!scope) return;
+    function apply() {
+      var raw = location.hash.slice(1);
+      if (!raw) return;
+      var key;
+      try { key = decodeURIComponent(raw); } catch (e) { key = raw; }
+      var chip = doc.getElementById(key);
+      if (!chip || !scope.contains(chip) || !chip.hasAttribute("data-filter-chip")) return;
+      chip.click();
+      chip.classList.add("is-target");
+      setTimeout(function () { chip.classList.remove("is-target"); }, 1200);
+      chip.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+    window.addEventListener("hashchange", apply);
+    apply();
+  }
+
   /* ------------------------------------------------------------ 启动 */
   function boot() {
     wireTheme();
     wireCopy();
     wireTabs();
     wireFilters();
+    wireHashFilter();
     wireSearch();
     wireSidebar();
     wireToc();

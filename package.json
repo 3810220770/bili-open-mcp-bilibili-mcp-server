@@ -57,7 +57,8 @@
     "audit": "node scripts/audit.mjs",
     "check-config": "node scripts/check-project-config.mjs",
     "login": "node scripts/oauth-login.mjs",
-    "site": "node scripts/build-site.mjs"
+    "site": "node scripts/build-site.mjs",
+    "site:check": "node scripts/build-site.mjs && node scripts/check-site.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
