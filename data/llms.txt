@@ -1,0 +1,428 @@
+# bilibili Open Platform · Open Capabilities
+# source: https://open.bilibili.com/doc/4  |  generated: 2026-10-31T07:07:22.100Z
+# format: [#num] type title | METHOD url | scope | folder | params
+
+[#1] multi-api 账号授权 | POST https://api.bilibili.com/x/account-oauth2/v1/token | scope=- | 开放能力
+  desc: 本文档介绍了第三方应用如何接入哔哩哔哩 OAuth 2.0， 可使用户授权第三方应用访问其哔哩哔哩上基本开放信息和其他已授权的相关信息，而无需将用户名和密码提供给第三方应用。
+  url: client_id:string*, client_secret:string*, grant_type:string*, code:string*  ;  resp: refresh_token:string, access_token:string, expires_in:int, scopes:[]string  ;  endpoints: POST https://api.bilibili.com/x/account-oauth2/v1/token | POST https://api.bilibili.com/x/account-oauth2/v1/refresh_token
+[#2] guide 接口签名和状态码 | - | scope=- | 开放能力
+[#3] guide 接口权限白名单 | - | scope=- | 开放能力
+[#4] api 查询用户已授权权限列表 | GET https://member.bilibili.com/arcopen/fn/user/account/scopes | scope=USER_INFO | 开放能力 / 用户管理
+  desc: 调用该接口可查询B站用户已经勾选授权的权限点列表
+  resp: scopes:[]string, openid:string
+[#5] api 获取用户公开信息 | GET https://member.bilibili.com/arcopen/fn/user/account/info | scope=USER_INFO | 开放能力 / 用户管理
+  desc: 调用该接口可获取用户公开信息，例如头像，昵称，openid等
+  resp: name:string, face:string, openid:string
+[#6] api 获取用户union_id | POST https://member.bilibili.com/arcopen/fn/user/account/union_id | scope=USER_INFO | 开放能力 / 用户管理
+  desc: union_id字段为该用户在您开发者权限下多应用的通用字段，只要开发者不改变，该字段不会变化 调用该接口可获取用户的union_id字段 重要:该接口需要根据业务需求单独申请开通**
+  resp: union_id:string
+[#7] guide 接口概览 | - | scope=- | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+[#8] api 文件上传预处理 | POST https://member.bilibili.com/arcopen/fn/archive/video/init | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 该接口用于初始化上传资源，后续文件上传及稿件提交所需部分参数通过该接口获取 文件不超过 100M 时，可通过单个小视频文件上传流程进行交互 调用文件上传预处理接口，参数 `utype` 设置为 `"1"` 调用单个小视频文件上传接口 调用稿件提交接口 文件超过 100M 时，须通过分片上传流程进行交互 调用文件上传预处理接口，参数 `utype` 设置为 `"0"` 调用文件分片上传接口 调用文件分片合片接口 调用稿件提交接口
+  body: name:string*, utype:string  ;  resp: upload_token:string
+[#9] api 文件分片上传 | POST https://openupos.bilivideo.com/video/v2/part/upload | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 该接口用于分片上传视频文件到文件服务器，属于视频实体分片上传阶段 本接口 body 只接受裸文件二进制流。请勿使用 `multipart/form-data`（form 表单）方式上传**，详见下方「常见错误」 分片大小：除最后一个分片外，其余分片大小必须完全一致，建议 10MB。最后一个分片为剩余字节数，可小于或等于其他分片 分片无需以独立文件形式存在**，可在程序中按偏移量从原文件读取后直接上传，详见下文「无需物理切片文件」一节 分
+  url: upload_token:string*, part_number:int*
+[#10] api 文件分片合片 | POST https://member.bilibili.com/arcopen/fn/archive/video/complete | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 视频实体分片上传完成后，调用该接口通知服务器将分片视频合成完整文件 该接口返回成功表示实体文件上传完成，在此之后可以调用稿件提交接口，完成稿件投递 服务端依据 `upload_token` 关联的已上传分片自动完成合并，无需传入分片总数 调用前请确认所有分片均已上传成功。分片号必须连续、无缺号，否则合并会失败 本接口调用后分片内容即固定，不可再通过重传分片修改**。如需修改，须重新走一遍预处理 + 上传流程
+  url: upload_token:string*
+[#11] api 封面上传 | POST https://member.bilibili.com/arcopen/fn/archive/cover/upload | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 格式jpeg、png，文件大小≤5MB，建议尺寸≥1146x717，最低尺寸≥960x600
+  body: file:file*  ;  resp: url:string
+[#12] api 视频稿件提交 | POST https://member.bilibili.com/arcopen/fn/archive/add-by-utoken | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 调用该接口完成稿件投递 调用此接口前需要保证视频/封面上传完成 稿件提交之后会存在审核过程，期间不对外开放 非正式会员单日最多投递5个稿件，可在主站通过答题转为正式会员解除限制
+  url: upload_token:string*  ;  body: title:string*, cover:string, tid:int*, no_reprint:int, desc:string, tag:string*, copyright:int*, source:string, topic_id:int, mission_id:int  ;  resp: resource_id:string
+[#13] api 分区查询 | GET https://member.bilibili.com/arcopen/fn/archive/type/list | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 调用该接口可获取B站分区列表，投稿时tid从接口返回二级分区id中选择
+  resp: id:int, parent:int, name:string, description:string, children:obj
+[#14] api 单个小视频文件上传 | POST https://openupos.bilivideo.com/video/v2/upload | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+  desc: 该接口用于将单个小视频文件一次性上传到文件服务器 视频大小不超过 100MB。超过 100MB 请改用[文件分片上传](https://open.bilibili.com/doc/4/733a520a-c50f-7bb4-17cb-35338ba20500)流程 使用本接口需在[文件上传预处理](https://open.bilibili.com/doc/4/0c532c6a-e6fb-0aff-8021-905ae2409095)时将
+  url: upload_token:string*
+[#15] guide 业务说明 | - | scope=- | 开放能力 / 视频稿件管理 / 用户端唤起粉端投稿
+  desc: 本功能为在第三方唤起粉端进行稿件分享投递功能。
+[#16] api 唤起粉端投稿接口说明 | POST https://member.bilibili.com/arcopen/fn/resource/add_share | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 用户端唤起粉端投稿
+  desc: 用于获取唤起哔哩哔哩客户端投稿页面并预填内容的URL
+  body: scene_code:string*, biz_code:string*, common_msg:string*  ;  sub(common_msg参考字段(可和运营沟通商量增删改字段)): source:string*, cover:string, title:string, type_id:int*, topic_id:int*, delivery_mode:int*, video_material_url:string[]*  ;  signVersion=1.0
+[#17] api 查询单一视频稿件详情 | GET https://member.bilibili.com/arcopen/fn/archive/view | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 视频稿件查询
+  desc: 调用该接口可查询授权用户的单一稿件信息 授权用户包括该稿件的作者、联合投稿人
+  url: resource_id:string*  ;  resp: resource_id:string, cover:string, tid:int, no_reprint:int, desc:string, tag:string, copyright:int, video_info:obj, video_info.cid:int, video_info.filename:string, video_info.duration:int, video_info.share_url:string, video_info.iframe_url:string, addit_info:obj, addit_info.state:int, addit_info.state_desc:string, addit_info.reject_reason:string, ctime:int, ptime:int
+[#18] api 查询用户视频稿件列表 | GET https://member.bilibili.com/arcopen/fn/archive/viewlist | scope=ARC_BASE | 开放能力 / 视频稿件管理 / 视频稿件查询
+  desc: 调用该接口可查询授权用户的稿件列表
+  url: pn:int*, ps:int*, status:string  ;  resp: resource_id:string, title:string, cover:string, tid:int, no_reprint:int, desc:string, tag:string, copyright:int, video_info:obj, video_info.cid:int, video_info.filename:string, video_info.duration:int, video_info.share_url:string, video_info.iframe_url:string, addit_info:obj, addit_info.state:int, addit_info.state_desc:string, addit_info.reject_reason:string, ctime:int, ptime:int
+[#19] api 视频稿件编辑 | POST https://member.bilibili.com/arcopen/fn/archive/edit | scope=ARC_BASE | 开放能力 / 视频稿件管理
+  desc: 调用该接口可完成稿件编辑 仅允许编辑稿件中的描述信息部分，比如title，desc等。不允许更改视频本身 若需要修改视频本身，请重新投稿 稿件编辑后，需重新进行审核 注意：请求body参数需要将所有字段传递过来，不需要修改的字段传原值。建议编辑前使用查询接口获取原值**
+  body: resource_id:string*, title:string*, cover:string, tid:int*, no_reprint:int, desc:string  ;  resp: resource_id:string
+[#20] api 视频稿件删除 | POST https://member.bilibili.com/arcopen/fn/archive/delete | scope=ARC_BASE | 开放能力 / 视频稿件管理
+  desc: 调用该接口可删除授权用户的稿件 删除过程不可逆，请谨慎操作
+  body: resource_id:string*
+[#21] api 文章提交 | POST https://member.bilibili.com/arcopen/fn/article/add | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理
+  desc: 调用该接口完成文章稿件投递 若需要传入的图片url，请传入经过【图片上传】接口生成的url 文章稿件提交之后会存在审核过程，期间不对外开放
+  body: title:string*, category:int*, template_id:int*, summary:string*, content:string*, banner_url:string, original:int, image_urls:string, tags:string, list_id:int, up_closed_reply:int, top_video_bvid:string  ;  resp: id:int
+[#22] api 文章编辑 | POST https://member.bilibili.com/arcopen/fn/article/edit | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理
+  desc: 调用该接口可完成文章编辑 文章编辑后，需重新进行审核 注意：请求body参数需要将所有字段传递过来，不需要修改的字段传原值。建议编辑前使用【查询文章详情】接口获取原值**
+  body: id:int64*
+[#23] api 文章删除 | POST https://member.bilibili.com/arcopen/fn/article/delete | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理
+  desc: 调用该接口可完成文章删除 删除过程不可逆，请谨慎操作
+  body: ids:array*
+[#24] api 查询文章详情 | GET https://member.bilibili.com/arcopen/fn/article/detail | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理 / 查看文章
+  desc: 调用该接口可以查看文章详情信息
+  body: id:int*
+[#25] api 查询文章列表 | GET https://member.bilibili.com/arcopen/fn/article/list | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理 / 查看文章
+  desc: 调用该接口可以获取该up主投稿的所有文章
+  body: pn:int, ps:int, sort:int, group:int, category:int  ;  resp: id:int, category.id:int, category.parent_id:int, category.name:string, title:string, summary:string, banner_url:string, template_id:int, state:int, reason:string, image_urls:[]string, publish_time:int, ctime:int, states.view:int, states.favorite:int, states.like:int, states.dislike:int, states.reply:int, states.share:int, states.coin:int, words:int, list.id:int, list.name:string, list.image_url:string, list.summary:string, list.word:int, list.publish_time:int, list.ctime:int, list.update_time:int, apply_time:string, top_video_bvid:string, all:int, audit:int, passed:int, notPassed:int, type:int
+[#26] api 获取文章的分类列表 | GET https://member.bilibili.com/arcopen/fn/article/categories | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理 / 查看文章
+  desc: 调用该接口可以获取文章的分类列表
+  resp: id:int, parent_id:int, name:string
+[#27] api 获取视频、文章卡片信息 | GET https://member.bilibili.com/arcopen/fn/article/card | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文章管理 / 查看文章
+  desc: 调用该接口可以获取获取视频、文章卡片信息，用于插入在文章内容中
+  body: resource_id:int*
+[#28] api 文集提交 | POST https://member.bilibili.com/arcopen/fn/article/anthology/add | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文集管理
+  desc: 调用该接口可以创建文集
+  body: name:string*, summary:string, image_url:string  ;  resp: id:int, name:string
+[#29] api 文集信息编辑 | POST https://member.bilibili.com/arcopen/fn/article/anthology/edit | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文集管理 / 文集编辑
+  desc: 调用该接口可以修改文集信息 注意：请求body参数需要将所有字段传递过来，不需要修改的字段传原值。建议编辑前使用【查询文集详情】接口获取原值**
+  body: list_id:int*, name:string*, image_url:string, summary:string
+[#30] api 文集下文章列表修改 | POST https://member.bilibili.com/arcopen/fn/article/belong | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文集管理 / 文集编辑
+  desc: 调用该接口可以修改文集下文章列表
+  body: list_id:int*, article_ids:string*
+[#31] api 文集删除 | POST https://member.bilibili.com/arcopen/fn/article/anthology/delete | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文集管理
+  desc: 调用该接口可以删除文集 删除过程不可逆，请谨慎操作
+  body: id:int*
+[#32] api 查询文集列表 | GET https://member.bilibili.com/arcopen/fn/article/anthology/list | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文集管理 / 查看文集
+  desc: 调用该接口可以获取该up主的所有文集
+  resp: lists.id:int, lists.name:string, lists.image_url:string, lists.update_time:int, lists.ctime:int, lists.publish_time:int, lists.summary:string, lists.state:int, lists.apply_time:string, lists.check_time:string, lists.total:int, lists.words:int, lists.reason:string, total:int
+[#33] api 查询文集详情 | GET https://member.bilibili.com/arcopen/fn/article/anthology/detail | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 文集管理 / 查看文集
+  desc: 调用该接口可以查询某个文集的详情内容
+  body: id:int*  ;  resp: list.id:int, list.name:string, list.image_url:string, list.update_time:int, list.ctime:int, list.publish_time:int, list.summary:string, list.words:int, list.read:int, list.state:int, articles.id:int, articles.title:string, articles.state:int, articles.publish_time:int, total:int
+[#34] api 专栏稿件图片上传 | POST https://member.bilibili.com/arcopen/fn/article/upload/image | scope=ATC_BASE | 开放能力 / 专栏稿件管理 / 图片上传
+  desc: 调用该接口可以上传普通图片和带有bilibi标志和up主昵称的水印图片 支持格式jpg、png，文件大小≤5MB
+  body: file:file*, watermark:bool
+[#35] api 获取用户数据 | GET https://member.bilibili.com/arcopen/fn/data/user/stat | scope=USER_DATA | 开放能力 / 数据开放服务 / 用户数据
+  desc: 调用该接口可获取用户维度数据，包括关注数、粉丝数、投稿数等
+  resp: following:int, follower:int, arc_passed_total:int
+[#36] api 获取单视频数据 | GET https://member.bilibili.com/arcopen/fn/data/arc/stat | scope=ARC_DATA | 开放能力 / 数据开放服务 / 视频数据
+  desc: 调用该接口可获取单个稿件维度数据，包括转赞评、收藏、分享等数据 授权用户包括该稿件的作者、联合投稿人
+  url: resource_id:string*  ;  resp: title:string, ptime:int, view:int, danmaku:int, reply:int, favorite:int, coin:int, share:int, like:int
+[#37] api 获取整体视频增量数据 | GET https://member.bilibili.com/arcopen/fn/data/arc/inc-stats | scope=ARC_DATA | 开放能力 / 数据开放服务 / 视频数据
+  desc: 调用该接口可获取用户整体稿件维度近30天的增量数据，包括转赞评、收藏、分享等数据
+  resp: inc_click:int, inc_dm:int, icn_reply:int, inc_fav:int, inc_coin:int, inc_share:int, inc_like:int, inc_elec:int
+[#38] api 获取单一专栏数据 | GET https://member.bilibili.com/arcopen/fn/data/art/stat | scope=ATC_DATA | 开放能力 / 数据开放服务 / 专栏数据
+  desc: 调用该接口可以获取专栏数据
+  body: ids:string*  ;  resp: id:int, category.id:int, category.parent_id:int, category.name:string, title:string, summary:string, banner_url:string, template_id:int, state:int, reason:string, image_urls:[]string, publish_time:int, ctime:int, states.view:int, states.favorite:int, states.like:int, states.dislike:int, states.reply:int, states.share:int, states.coin:int, words:int, list.id:int, list.name:string, list.image_url:string, list.summary:string, list.word:int, list.publish_time:int, list.ctime:int, list.update_time:int, top_video_bvid:string
+[#39] api 获取整体专栏增量数据 | GET https://member.bilibili.com/arcopen/fn/data/art/inc-stats | scope=ATC_DATA | 开放能力 / 数据开放服务 / 专栏数据
+  desc: 调用该接口可获取用户整体专栏维度近30天的增量数据，包括转赞评、收藏、分享等数据
+  resp: icn_reply:int, inc_read:int, inc_fav:int, inc_likes:int, inc_share:int, inc_coin:int
+[#40] guide 接入指引 | - | scope=- | 开放能力 / 直播能力
+[#41] api 获取直播间基础信息 | GET https://member.bilibili.com/arcopen/fn/live/room/info | scope=LIVE_ROOM_DATA | 开放能力 / 直播能力
+  desc: 查询直播间基本信息
+  resp: open_id:string, room_id:int, title:string, is_streaming:bool, is_banned:bool
+[#42] api 获取直播间详细信息 | POST https://member.bilibili.com/arcopen/fn/live/room/detail | scope=LIVE_ROOM_DATA | 开放能力 / 直播能力
+  desc: 查询直播间详细
+  resp: anchor_info:object, anchor_info.face:string, anchor_info.name:string, anchor_info.open_id:string, area:object, area.area_id_name:string, show:object, show.cover:string, show.desc:string, show.key_frame:string, show.live_start_time:int, show.room_id:int, show.title:string, status:object, status.live_screen_type:int, status.live_status:int
+[#43] api 直播房间长链信息及心跳ID | POST https://member.bilibili.com/arcopen/fn/live/room/ws-start | scope=LIVE_ROOM_DATA | 开放能力 / 直播能力 / 直播间长连和消息
+  desc: 获取直播间长链及长链心跳ID
+  resp: conn_id:string, websocket_info.auth_body:string, websocket_info.wss_link:[]string
+[#44] protocol 直播间消息websocket协议 | - | scope=- | 开放能力 / 直播能力 / 直播间长连和消息
+[#45] api 直播房间长链心跳 | POST https://member.bilibili.com/arcopen/fn/live/room/ws-heartbeat | scope=- | 开放能力 / 直播能力 / 直播间长连和消息
+  desc: 直播房间长链心跳
+  url: client_id:string*  ;  body: conn_id:string*
+[#46] api 直播房间批量长链心跳 | POST https://member.bilibili.com/arcopen/fn/live/room/ws-batch-heartbeat | scope=- | 开放能力 / 直播能力 / 直播间长连和消息
+  desc: 直播房间批量长链心跳
+  url: client_id:string*  ;  body: conn_ids:[]string*  ;  resp: failed_conn_ids:[]string
+[#47] protocol 长连CMD说明 | - | scope=- | 开放能力 / 直播能力 / 直播间长连和消息
+  desc: [TOC]
+[#48] guide 一键开播能力说明 | - | scope=- | 开放能力 / 直播能力 / 开播能力嵌入(一键开播)
+[#49] guide 业务流程说明 | - | scope=- | 开放能力 / 直播能力 / 开播能力嵌入(一键开播)
+[#50] api 开播授权 | GET https://member.bilibili.com/liveopen/fn/live/thirdPartyLive/grantUrl | scope=LIVE_ROOM_DATA | 开放能力 / 直播能力 / 开播能力嵌入(一键开播) / 开播接口列表
+  desc: 获取第三方开播授权链接。
+  url: biz_code:string*, open_id:string*, live_area_id:integer*, third_live_uuid:string*  ;  resp: grant_url:string
+[#51] guide 授权回调 | POST undefined | scope=- | 开放能力 / 直播能力 / 开播能力嵌入(一键开播) / 开播接口列表
+[#52] api 开始直播 | POST https://member.bilibili.com/liveopen/fn/live/thirdPartyLive/startLive | scope=LIVE_ROOM_DATA | 开放能力 / 直播能力 / 开播能力嵌入(一键开播) / 开播接口列表
+  desc: 用户通过开播授权后，使用回调返回的开播信息进行推流 注：需要先调用`grantUrl`接口获取授权，用户确认后再调用本接口
+  body: biz_code:string*, open_id:string*, live_token:string*  ;  sub(注意：当开播失败时data信息为空，请参考失败示例): push_url:string*, live_key:string*, start_time:int64*
+[#53] api 结束直播 | POST https://member.bilibili.com/liveopen/fn/live/thirdPartyLive/endLive | scope=LIVE_ROOM_DATA | 开放能力 / 直播能力 / 开播能力嵌入(一键开播) / 开播接口列表
+  desc: 用户通过一键开播后，调用该接口后会关闭对应的直播
+  body: biz_code:string*, open_id:string*, live_key:string*, third_live_uuid:string*  ;  resp: open_id:string, end_time:int64
+[#54] api 获取直播间流信息 | POST https://member.bilibili.com/arcopen/fn/live/room/stream | scope=LIVE_STREAM_DATA | 开放能力 / 直播能力 / 直播视频流相关
+  desc: 查询和获取直播间的直播流信息 该接口为限定接口，仅提供给合作方使用，如需使用请进行商业前期对接**
+  resp: area:object, area.area_id_name:string, show:object, show.room_id:int, show.title:string, stream:object, stream.xxxxx:object, stream.xxxxx.desc:string, stream.xxxxx.flv_url:string, stream.xxxxx.hls_url:string
+[#55] guide 发送弹幕 | - | scope=- | 开放能力 / 直播能力 / 消息发送
+  desc: - 该接口和功能为限定功能，请确保和商务运营有过沟通后，再联系开放平台进行接入。直接申请对应权限或者联系开放平台无效。
+[#56] guide 接入指引 | - | scope=- | 开放能力 / 活动接入
+[#57] guide 通用奖励接口 | POST undefined | scope=- | 开放能力 / 活动接入
+  desc: **请注意：本页面接口为第三方实现接口后接入B站。
+[#58] guide 服务说明 | - | scope=- | 开放能力 / 经营号客服
+[#59] api 发送消息 | POST https://member.bilibili.com/arcopen/fn/market/customer/conversation/send_msg | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可发送消息。
+  body: conversation_id:int, user_open_id:string, msg_type:int*, msg:string*  ;  resp: msg_key:string
+[#60] api 获取用户来源 | POST https://member.bilibili.com/arcopen/fn/market/customer/conversation/user_from | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可获取用户来源
+  body: conversation_id:int*, user_open_id:string  ;  resp: user_basic_dto:struct, source_up_info_dto:struct, tag_remark_dto:struct, data_type:int, view_time:string, source_up_open_id:string, source_up_name:string, source_bvid:string, source_btitle:string  ;  sub(tag_remark_dto对象): tag_color:string*, tag_id:int*, tag_title:string*, remark:string*
+[#61] api 修改客服状态 | POST https://member.bilibili.com/arcopen/fn/market/customer/conversation/staff_status_update | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可修改客服状态
+  body: status:int*, is_close_conversation:int*
+[#62] api 关闭会话 | POST https://member.bilibili.com/arcopen/fn/market/customer/conversation/close | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可关闭会话
+  body: conversation_id:int*
+[#63] api 上传图片 | POST https://member.bilibili.com/arcopen/fn/market/customer/image_upload | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可上传图片
+  body: file:file*  ;  resp: url:string
+[#64] api 获客工具列表查询 | POST https://member.bilibili.com/arcopen/fn/market/customer/conversation/acquisition_tool_list | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可查询当前授权经营号店铺的获客工具列表。 支持按工具类型、工具名称筛选及分页查询。 仅返回未删除的留资卡、企微卡、链接卡，不返回电话卡片。 返回的 `tool_id` 可用于发送消息接口，作为 `msg_type=10030` 时消息内容中的 `id`。
+  body: tool_type:int, tool_name:string, page_no:int, page_size:int  ;  resp: total:long, list:array  ;  sub(list元素): tool_id:long, tool_type:int, tool_name:string, card_title:string, benefit:string, button_text:string, image_url:string, clue_type:string, is_sms_verification:int, success_reply_message:string, wechat_tool_id:long, page_id:string, page_outer_type:int
+[#65] api 更新用户客资 | POST https://member.bilibili.com/arcopen/fn/market/customer/conversation/cus_info_update | scope=SHOP_BA_CHAT | 开放能力 / 经营号客服 / 接口文档
+  desc: 调用该接口可更新用户客资信息（手机号、微信号、省市、备注）。 传入 `conversation_id` 时，额外触发人工线索上报，并推送 `USER_UPDATE_INFO` 事件通知客服工作台刷新面板；不传则仅更新客资，不触发线索上报。
+  body: user_open_id:string*, phone:string, wechat:string, province:string, city:string, remark:string, conversation_id:int
+[#66] guide 服务说明 | - | scope=- | 开放能力 / 交易电商 / 电商
+[#67] api 获取店铺信息 | GET https://member.bilibili.com/arcopen/fn/v2/market/shop/info/get | scope=SHOP_STORE_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 店铺模块接口
+  desc: 调用该接口可获取店铺相关信息
+  resp: shop_name:string, shop_face:string, shop_id:string, shop_id_value:int
+[#68] api 商品发布 | POST https://member.bilibili.com/arcopen/fn/market/common/product_add | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可新增商品
+  body: category_leaf_id:int*, name:string*, pic:string*, description:string, text_description:string, freight_id:int*, delivery_delay_day:int, presell_type:int, commit:bool, product_type:int, operate_status:int, scheduled_on_shelf_time:long, limit_per_buyer:int, product_format:string, after_sale_service:struct*, spec_info:struct*, spec_pic:string*, spec_prices:list*, ext_property:struct, supply_day_return_selector:string*, spec_values:list*, property_name:string*, values:list*, value_name:stiring*, stock_num:int*, price:int*, code:string, sell_properties:list*, value_name:string*, extra:array<struct>*, name:string*, key:string*, value:string*, type:string*  ;  resp: product_id:int, skus:list, sku_id:int
+[#69] api 查询商品列表 | GET https://member.bilibili.com/arcopen/fn/v2/market/commodity/item/list | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可获取商品分页信息
+  url: items_ids:[]int, start_update_time:int, end_update_time:int, status:int, recycling_status:int, page_num:int*, page_size:int*  ;  resp: list:List, items_id:int, name:string, images:[]string, status:int, recycling_status:int, create_time:int, update_time:int, delivery_time:int, sale_step:int, skus:List, sku_id:int, image:string, shop_code:string, sn:string, price:int, sku_specs:List, spec_key_name:string, spec_value_name:string, total:int, page_num:int, page_size:int, size:int, pages:int, has_next_page:bool
+[#70] api 查询发品配置 | POST https://member.bilibili.com/arcopen/fn/market/common/product_get_product_publish_rule | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可查询店铺和类目查询商品发布规则，包含发货时效、无理由退货等规则。
+  body: category_id:int*  ;  resp: fulfillment_rule:struct, normal_rule:struct, support:bool, delay_options:[]int32, after_sale_rule:struct, supply_day_return_rule:struct, enable:bool, options:list, name:string, value:string
+[#71] api 查询商品详情 | POST https://member.bilibili.com/arcopen/fn/market/common/product_detail | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可查询商品详情
+  body: product_id:int*  ;  resp: product_id:int, category_leaf_id:int, name:string, pic:string, description:string, text_description:string, freight_id:int, delivery_delay_day:int, presell_type:int, product_type:int, operate_status:int, scheduled_on_shelf_time:long, limit_per_buyer:int, product_format:string, after_sale_service:struct, spec_info:struct, spec_pic:string, spec_prices:list, supply_day_return_selector:string, spec_values:list, property_name:string, values:list, value_name:stiring, sku_id:int, stock_num:int, price:int, code:string, sell_properties:list, value_name:string
+[#72] api 编辑商品 | POST https://member.bilibili.com/arcopen/fn/market/common/product_edit | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可编辑商品，不能编辑除普通现货以外的商品（闪购、虚拟、预售商品等）
+  body: product_id:int*, category_leaf_id:int*, name:string*, pic:string*, description:string, text_description:string, freight_id:int*, delivery_delay_day:int, presell_type:int, commit:bool, product_type:int, operate_status:int, scheduled_on_shelf_time:long, limit_per_buyer:int, product_format:string, after_sale_service:struct*, spec_info:struct*, spec_pic:string, spec_prices:list*, ext_property:struct, supply_day_return_selector:string*, spec_values:list*, property_name:string*, values:list*, value_name:stiring*, stock_num:int*, price:int*, code:string, sell_properties:list*, value_name:string*, extra:array<struct>*, name:string*, key:string*, value:string*, type:string*  ;  resp: product_id:int, skus:list, sku_id:int
+[#73] api 删除商品 | POST https://member.bilibili.com/arcopen/fn/market/common/product_del | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可删除商品
+  body: product_id:int
+[#74] api 图片上传 | POST https://member.bilibili.com/arcopen/fn/v2/market/commodity/image/upload | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: Scope: \`SHOP_COMMODITY_INFO \` &nbsp;&nbsp;&nbsp;&nbsp;需要申请权限 &nbsp;&nbsp;&nbsp;&nbsp;需要用户授权
+  body: file:File*  ;  resp: url:string
+[#75] api 查询商品类目属性列表 | POST https://member.bilibili.com/arcopen/fn/market/common/product_get_cate_property | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可查询商品类目属性列表
+  body: category_leaf_id:int*  ;  resp: data:list, property_id:int32, property_name:string, required:bool, type:string, diy_type:int32, options:list, value:string, value_id:int32
+[#76] api 查询类目列表 | GET https://member.bilibili.com/arcopen/fn/market/commodity/category/qualified/list | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可获取商品的类目相关信息
+  url: client_id:string*, access_token:string*, cate_ids:[]int, parent_cate_id:int*  ;  resp: list:List, list.cate_id:int, list.cate_name:string, list.cate_id:int, list.is_leaf:bool
+[#77] api 添加商品定制信息 | POST https://member.bilibili.com/arcopen/fn/common/market_add_customization_product | scope=SHOP_COMMODITY_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 商品模块接口
+  desc: 调用该接口可添加商品定制信息
+  body: item_id:Long*, price:Long*, ext_property:struct*, extra:struct*, name:String*, value:String*, key:String*, type:String*  ;  resp: token:string
+[#78] api 订单列表查询 | POST https://member.bilibili.com/arcopen/fn/market/common/order_searchList | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 调用该接口可查询订单列表
+  body: product:string, refund_status:int, tracking_no:string, create_time_start:int, create_time_end:int, pay_time_start:int, pay_time_end:int, pre_step:int, order_status:list, update_time_start:int, update_time_end:int, size:int*, page:int*, sort_rule:string  ;  resp: shop_order_list:list, total:int64, shop_id:int, shop_name:string, order_id:string, order_level:int, order_type:int, order_type_desc:string, order_status:int, order_status_desc:string, pay_time:int, finish_time:int, create_time:int, update_time:int, cancel_reason:string, buyer_words:string, order_mark_list:list, shop_flag:int, pay_type:string, channel_payment_no:int, order_amount:int, pay_amount:int, post_amount:int, modify_amount:int, promotion_amount:int, post_tel:string, post_receiver:string, post_addr:struct, ship_time:int, logistics_info:list, sku_order_list:list, post_origin_amount:int, tax_amount:int, merge_order_id:string, open_id:string, uname:string, user_id_info:list, province:struct, city:struct, town:struct, encrypt_detail:string, name:string, id:string, tracking_no:string, company:string, company_name:string, product_info:list, sku_id:int, product_count:int, sku_order_id:string, goods_price:int, order_id:string, parent_order_id:string, order_type:int, finish_time:int, exp_ship_time:int, goods_type:int, product_id:int, sku_id:int, spec:string, cate_id:int, origin_amount:int, item_num:int, sum_amount:int, product_pic:string, product_name:string, after_sale_info:struct, receive_type:int, product_id_str:string, tax_amount:int, promotion_detail:struct, shop_code:struct, gift_product_type:string, gift_relation_order_ids:string, refund_status:int, promotion_info_list:list, discount_info:struct, settle_info:struct, discount_type:int, coupon_type:int, discount_id:int, discount_name:string, discount_amount:int, discount_origin_amount:int, step:int, target_scene_id:int, coupon_id:int, ratio_type:int, platform_cost:int, shop_cost:int, suppler_activity_id:int, coupon_settle_type:int, crystal_num:int, reduction_magic_stone:int, show_name:string, activity_merged:int, layer:int, encrypt_id_card_no:string, encrypt_id_card_name:string, phone_no:string
+[#79] api 订单详情 | POST https://member.bilibili.com/arcopen/fn/market/common/order_detail | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 调用该接口可查询订单详情
+  body: shop_order_id:string*  ;  resp: shop_id:int, shop_name:string, order_id:string, order_level:int, order_type:int, order_type_desc:string, order_status:int, order_status_desc:string, pay_time:int, finish_time:int, create_time:int, update_time:int, cancel_reason:string, buyer_words:string, order_mark_list:[]string, shop_flag:int, pay_type:int, channel_payment_no:string, order_amount:int, pay_amount:int, post_amount:int, modify_amount:int, promotion_amount:int, post_tel:string, post_receiver:string, post_addr:struct, ship_time:int, logistics_info:list, sku_order_list:list, user_id_info:struct, post_origin_amount:int, tax_amount:int, merge_relation_id:string, open_id:string, uname:string, up_id:int64, up_name:string, up_type:string, content_id:long, confirm_status:int, encrypt_id_card_no:string, encrypt_id_card_name:string, phone_no:string, province:struct, city:struct, town:struct, detail:string, name:string, id:string, tracking_no:string, company:string, company_name:string, product_info:list, sku_id:int, product_count:int, sku_order_id:string, order_id:string, parent_order_id:string, goods_price:int, order_level:int, order_type:int, author_id:int, author_name:string, promotion_amount:int, exp_ship_time:int, goods_type:int, product_id:int, spec:string, cate_id:int, origin_amount:int, item_num:int, sum_amount:int, promotion_detail:struct, product_pic:string, is_comment:int, product_name:string, post_amount:int, after_sale_info:struct, relation_order:struct, receive_type:int, product_id_str:string, account_list:struct, tax_amount:int, order_phase_list:list, shop_code:string, gift_product_type:string, gift_relation_order_ids:string, up_id:int64, up_name:string, promotion_info_list:list, discount_info:struct, settle_info:struct, discount_type:int, coupon_type:int, discount_id:int, discount_name:string, discount_amount:int, discount_origin_amount:int, step:int, target_scene_id:int, coupon_id:int, ratio_type:int, platform_cost:int, shop_cost:int, suppler_activity_id:int, coupon_settle_type:int, crystal_num:int, reduction_magic_stone:int, show_name:string, activity_merged:int, layer:int, refund_status:int, relation_order_id:string, external_order_id:string, account_info:list, account_name:string, account_type:string, account_id:string, phase_order_id:int, total_phase:int, current_phase:int, pay_success:bool, phase_pay_type:string, phase_pay_time:int, channel_payment_no:string, phase_pay_amount:int, current_phase_status_desc:string
+[#80] api 商家备注 | POST https://member.bilibili.com/arcopen/fn/market/common/order_remark | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 调用该接口可进行订单备注
+  body: order_id:int*, remark:string*, shop_flag:int*
+[#81] api 商家回传订单审核结果 | POST https://member.bilibili.com/arcopen/fn/market/common/order_review | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 商家回传订单审核结果接口
+  body: task_type:int*, object_id:string*, reject_code:int*  ;  resp: code:int
+[#82] api 订单敏感信息解密 | POST https://member.bilibili.com/arcopen/fn/market/common/order_batch_decrypt | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 支持解密身份证姓名、身份证号，无次数限制, 接口支持解密在文档字段有“密文”红色标识字段值：收件人电话收件人姓名；详细地址；账号值；证件号；证件姓名 最大支持一次解密50条数据
+  body: cipher_infos:List*  ;  resp: decrypt_infos:List, err_no:Int64, err_msg:String  ;  sub(cipher_infos结构体内容): auth_id:string*, cipher_text:string*  ;  sub(cipher_infos结构体内容): cipher_text:String, decrypt_text:String, data_type:Int64
+[#83] api 带货订单查询 | POST https://member.bilibili.com/arcopen/fn/market/common/page | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 调用该接口可查询带货订单信息
+  body: openId:string*, pageSize:int, nextPageIndex:int, queryTimeType:int, queryStartTime:int64, queryEndTime:int64, orderIds:string  ;  resp: success:bool, code:int64, message:string, data:object, pageNum:int, pageSize:int, total:int64, list:list, orderId:string, orderStatus:int, goodsId:string, goodsName:string, goodsImgUrl:string, merchantName:string, shopId:string, settlePrice:int64, commRatio:int64, commissionAmount:int64, payTime:string, entryTime:string, upSettleTime:string, upUid:string, commNickname:string, commScene:int, contentType:int, contentId:string, salesType:int, payStepId:int
+[#84] multi-api 修改订单地址 | POST https://member.bilibili.com/arcopen/fn/market/common/address_apply | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 调用该接口可同步改地址申请的审核状态（通过/拒绝）
+  body: order_id:string*, apply_id:string*, check_status:int*, check_remark:string  ;  resp: apply_id:string, order_id:string, status:string, review_time:string  ;  endpoints: POST https://member.bilibili.com/arcopen/fn/market/common/address_apply | POST https://member.bilibili.com/arcopen/fn/market/common/address_modify | POST https://member.bilibili.com/arcopen/fn/market/common/address_apply_status
+[#85] guide 抽卡机抽卡结果回调 | POST undefined | scope=SHOP_ORDER_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 订单模块接口
+  desc: 买家支付完成后，调用该接口进行抽卡结果回调
+  body: order_id:Long, total_num:Integer, success_num:Integer, fail_reason:String, itemList:List  ;  resp: code:int, message:string, data:string
+[#86] api 发货回调 | POST https://member.bilibili.com/arcopen/fn/market/common/logistics_add | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可添加物流，进行订单发货
+  body: order_id:string*, pack_list:list*, address_id:string, is_reject_refund:bool, shipped_order_info:list*, logistics_code:string*, company:string, company_code:string*, shipped_order_id:string*, sku_id:int*  ;  resp: error_list:list, shipped_order_info:list, company:string, logistics_code:string, company_code:string, order_id:string, shipped_order_id:string, sku_id:int, message:string
+[#87] api 游戏账号交易发货 | POST https://member.bilibili.com/arcopen/fn/common/market_add_virtual_logistics | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 针对游戏账号交易的订单发货，可以使用此接口进行发货操作。
+  body: order_id:string*, pack_list:array*, remark:string*, shipped_order_info:array*, shipped_order_id:string*, sku_id:long*, fulfillment_attachment_dtos:array, file_id:string*  ;  resp: code:int, message:string, data:object, error_list:array, remark:string, shipped_order_info:array, order_id:string, shipped_order_id:string, sku_id:long, message:string
+[#88] api 物流更新 | POST https://member.bilibili.com/arcopen/fn/market/common/logistics_edit | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可更新物流
+  body: order_id:string*, logistics_code_origin:string*, logistics_code:string*, company_code:string*
+[#89] api 获取快递公司列表 | POST https://member.bilibili.com/arcopen/fn/market/common/logistics_company_list | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可获取快递公司列表
+  resp: code:int, name:string
+[#90] api 地址库创建 | POST https://member.bilibili.com/arcopen/fn/market/common/address_create | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可创建地址库
+  body: user_name:string*, mobile:string, province_id:int*, city_id:int*, town_id:int*, detail:string*, fixed_phone:string  ;  resp: address_id:int
+[#91] api 批量查询地址库列表 | POST https://member.bilibili.com/arcopen/fn/market/common/address_list | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可查询地址库
+  body: page_size:int*, page_no:int*, order_by:string*, order_field:string*  ;  resp: total:Int64, page_no:Int64, page_size:Int64, address_list:List, address_id:Int64, reciever_name:String, is_default:Int64, is_send_default:Int64, create_time:String, update_time:String, receiver_provinc:String, receiver_city:String, receiver_district:String, receiver_detail:String
+[#92] api 获取全量省份信息 | POST https://member.bilibili.com/arcopen/fn/market/common/address_get_province | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可获取省份
+  resp: province_id:int, province:string
+[#93] api 根据省获取全量三级地址 | POST https://member.bilibili.com/arcopen/fn/market/common/address_get_areas_by_province | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可根据省份获取全量地址
+  body: province_id:int*
+[#94] api 运费模板列表查询 | POST https://member.bilibili.com/arcopen/fn/market/common/logistics_freight_template_list | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口
+  desc: 调用该接口可查询运费模板列表
+  body: page_size:int*, page_no:int*, name:string*  ;  resp: count:int, list:list, page_size:int, page_no:int, id:int, template_name:string, product_province:string, product_city:string, calculate_type:int, transfer_type:int, rule_type:int
+[#95] api 获取预授权上传地址 | POST https://member.bilibili.com/arcopen/fn/common/market_get_upload_url | scope=SHOP_LOGISTICS_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口 / 文件上传
+  desc: 获取一次性的预授权上传地址，使用获取到的地址进行文件上传
+  body: name:string*, size:int64*, extension:string*  ;  resp: upload_url:string, file_id:string
+[#96] guide 上传文件 | PUT undefined | scope=- | 开放能力 / 交易电商 / 电商 / 接口 / 履约模块接口 / 文件上传
+  desc: 通过`获取预授权上传地址`获取一次性的预授权上传地址，使用获取到的地址进行文件上传
+[#97] api 售后列表查询 | POST https://member.bilibili.com/arcopen/fn/market/common/after_sale_query_list | scope=SHOP_AFTERSALES_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 售后模块接口
+  desc: 调用该接口可查询退货列表
+  body: order_id:int, after_sale_type:int, reason:int, logistics_status:int, refund_type:int, arbitrate_status:int, start_time:int, end_time:int, amount_start:int, amount_end:int, order_by:string, page:int*, size:int*, after_sale_id:int, after_sale_status:list, update_start_time:int, update_end_time:int  ;  resp: after_sale_list:list, has_more:bool, total:int, page:int, size:int, after_sale_info:struct, order_info:struct, text_info:struct, after_sale_id:int, after_sale_type:int, after_sale_status:int, order_id:int, apply_time:int, update_time:int, status_deadline:int, refund_amount:int, refund_post_amount:int, after_sale_num:int, refund_type:int, arbitrate_status:int, create_time:int, return_logistics_code:string, refund_status:int, exchange_sku_info:struct, logistics_status:int, shop_order_id:int, sku_order_infos:struct, sku_order_id:int, item_num:int, product_name:string, product_id:int, product_image:string, sku_id:int, after_sale_item_num:int, after_sale_pay_amount:int, price:int, after_sale_status_text:string, after_sale_type_text:string, return_logistics_text:string, after_sale_refund_type_text:string, reason_text:string, arbitrate_status_text:string, sku_id:Long, num:Integer, url:String, name:String, price:Long, specDesc:String
+[#98] api 售后详情 | POST https://member.bilibili.com/arcopen/fn/market/common/after_sale_query_detail | scope=SHOP_AFTERSALES_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 售后模块接口
+  desc: 调用该接口可查询退货详情
+  body: after_sale_id:int*, need_operate_record:bool  ;  resp: process_info:struct, order_info:struct, after_sale_info:struct, arbitrate_info:struct, logistics_info:struct, record_logs_list:struct, after_sale_id:int, after_sale_status:int, after_sale_status_desc:string, refund_type:int, refund_type_text:string, refund_status:int, refund_amount:int, refund_post_amount:int, apply_time:int, update_time:int, reason:string, after_sale_type:int, after_sale_type_text:string, reason_remark:string, evidence:list, after_sale_apply_count:int, return_address:struct, post_address:struct, real_refund_amount:int, got_pkg:int, status_deadline:int, exchange_sku_info:struct, part_type:int, refund_fail_reason:string, apply_role:int, refund_time:int, return_method:int, logistics_status:int, detail:string, detail:STRING, province:Struct, city:Struct, area:Struct, id:INTEGER, name:STRING, sku_id:Long, num:Integer, url:String, name:String, price:Long, specDesc:String, arbitrate_id:int, arbitrate_status:int, arbitrate_status_deadline:int, arbitrate_create_time:int, arbitrate_update_time:int, return_logistics:struct, exchange_logistics:Struct, tracking_no:string, company_name:string, company_code:string, logistics_time:int, operator:string, time:string, text:string, images:list, action:string, role:int, desc_kvs:list, shop_order_id:int, sku_order_infos:list, sku_order_id:int, item_quantity:int, create_time:int, product_name:string, product_id:int, product_image:string, sku_id:int, sku_refund_amount:int, after_sale_item_num:int, price:int
+[#99] api 售后审核 | POST https://member.bilibili.com/arcopen/fn/market/common/after_sale_check_after_sale | scope=SHOP_AFTERSALES_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 售后模块接口
+  desc: 商家操作售后审核
+  body: after_sale_id:Long*, is_agree:Integer*, comment:String, address_id:Integer, opt_user:String, reject_type:Integer
+[#100] api 确认收货 | POST https://member.bilibili.com/arcopen/fn/market/common/after_sale_confirm_receipt | scope=SHOP_AFTERSALES_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 售后模块接口
+  desc: 商家操作确认收货
+  body: after_sale_id:Long*, opt_user:String
+[#101] api 换货发货 | POST https://member.bilibili.com/arcopen/fn/market/common/after_sale_barter_ship | scope=SHOP_AFTERSALES_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 售后模块接口
+  desc: ●换货链路，商家操作发货
+  body: after_sale_id:Long*, tracking_no:String*, logistics_company_code:String*, opt_user:String
+[#102] api 售后终止 | POST https://member.bilibili.com/arcopen/fn/market/common/after_sale_stop | scope=SHOP_AFTERSALES_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 售后模块接口
+  desc: 商家操作终止售后（仅支持退换货链路，用户提交物流后终止）
+  body: after_sale_id:Long*, type:Integer, comment:String, opt_user:String
+[#103] api 查询库存 | GET https://member.bilibili.com/arcopen/fn/v2/market/stock/query | scope=SHOP_STOCK_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 库存模块接口
+  desc: 调用该接口可查询库存
+  url: sku_id_list:[]int*  ;  resp: list:list, isolate_stock:int, performs_stock:int, stock:int, sku_id:int
+[#104] api 库存更新 | POST https://member.bilibili.com/arcopen/fn/v2/market/stock/update | scope=SHOP_STOCK_INFO | 开放能力 / 交易电商 / 电商 / 接口 / 库存模块接口
+  desc: 调用该接口可更新库存
+  body: modify_stock_list:list*, sku_id:int*, zp_entity_stock_offset:int*, mode:int  ;  resp: failed_skus:list, message:string, stock_id:int
+[#105] api 商品推广链接生成 | POST https://member.bilibili.com/arcopen/fn/market/live/commerce/generate/promotion/url | scope=SHOP_LIVE_COMMERC_DATA | 开放能力 / 交易电商 / 带货 / 接口
+  desc: 根据商品链接生成对应联盟的带货推广链接
+  body: items_url:string*, url_list:List, channel_code:string*, place_type:int*, type:int*, url:string*  ;  resp: items_name:string, items_url:string, url_list:List, type:int, jump_url:string, promotion_error_message:string
+[#106] guide 服务说明 | - | scope=- | 开放能力 / 交易电商 / 用户票务信息
+[#107] api 用户优先购信息 | POST https://member.bilibili.com/arcopen/fn/common/market_create_early_purchase | scope=SHOP_TICKET_ORDER_DATA | 开放能力 / 交易电商 / 用户票务信息 / 接口
+  desc: 用于回传已经购买权益的用户信息
+  body: itemsId:Long*, open_id:Long*, mainAccountInfo:AccountInfo*, name:String*, idCard:String*, idCardType:Byte*, mobile:String*, attachAccountInfo:List<AccountInfo>  ;  resp: code:Integer, message:String, data:Void
+[#108] api 敏感信息解密 | POST https://member.bilibili.com/arcopen/fn/common/market_ticket_decrypt | scope=SHOP_TICKET_ORDER_DATA | 开放能力 / 交易电商 / 用户票务信息 / 接口
+  desc: 票务实名信息解密接口，用于解密票务字段中的敏感信息
+  body: cipher_infos:List<CipherInfo>*, auth_id:String*, cipher_text:String*  ;  resp: code:Integer, message:String, data:TicketDecryptResult
+[#109] guide 服务说明 | - | scope=- | 开放能力 / 充电业务
+  desc: - 目前该功能仅为主动邀请使用，请在有对应运营对接后，再进行接口申请和使用
+[#110] api 查询充电记录 | POST https://member.bilibili.com/arcopen/fn/common/charge_order_search_list | scope=UPOWER_ORDER_DATA | 开放能力 / 充电业务 / 接口
+  desc: 查询已授权用户对特定UP主的充电记录
+  body: list:list*, source:string*, open_id:int*, privilege_type:list*  ;  resp: data.list:list, data.identity_list:list, buy_time:int, days:int, log_id:string, open_id:string, state_desc:string, up_info:list, open_id:string, privilege_str:string, expire_time:int
+[#111] guide 服务说明 | - | scope=- | 开放能力 / 课堂业务
+  desc: - 目前该功能仅为主动邀请使用，请在有对应运营对接后，再进行接口申请和使用
+[#112] api 订单号查询订单信息 | POST https://member.bilibili.com/arcopen/fn/common/by_orderno_for_course_order | scope=COURSE_ORDER_DATA | 开放能力 / 课堂业务 / 接口
+  desc: 通过购课订单号查询课堂购课的订单信息
+  body: order_no:string*, up_open_id:string*  ;  resp: code:int64, data:object[], biz_type:string, channel:string, channel_fee:string, ctime:string, order_no:string, pay_cashier_amount:string, pay_default_bp_amount:string, pay_ios_bp_amount:string, product_id:int32, product_type:string, real_price:string, refund_cashier_amount:string, refund_ctime:string, refund_default_bp_amount false:string, refund_ios_bp_amount:string, refund_price:string, refund_success_time:string, status:string, success_time:string, title:string, message:string, request_id:string, ttl:int32
+[#113] api 学员看课进度列表 | POST https://member.bilibili.com/arcopen/fn/common/student_study_progress_list | scope=COURSE_ORDER_DATA | 开放能力 / 课堂业务 / 接口
+  desc: 批量获取授权 UP 主名下已开通督学课程/套餐的学员学习汇总数据。数据以 T-1 日快照为准，次日 12:00 前更新；当日实时数据不在本接口范围内。
+  body: up_open_id:int64*, statistics_date:string, student_open_id:int64, buy_start_date:string, buy_end_date:string, season_id:int64, package_id:int64, study_start_date:string, study_end_date:string, watch_ratio_lt:int32, watched_ep_lt:int32, pn:int32*, ps:int32*  ;  resp: code:int64, data:object, statistics_date:string, total:int64, pn:int32, ps:int32, items:object[], order_no:string, watch_id:int64, watch_name:string, watch_type:string, purchase_date:string, watched_ep_count:int64, total_ep_count:int64, watch_ratio:int32, last_study_date:string, message:string, request_id:string, ttl:int32
+[#114] api 学员看课明细 | POST https://member.bilibili.com/arcopen/fn/common/student_study_progress_detail | scope=COURSE_ORDER_DATA | 开放能力 / 课堂业务 / 接口
+  desc: 查询单个学员在单个看课对象下的章节-课时级完成情况。看课对象可以是课程或套餐。数据以 T-1 日快照为准，次日 12:00 前更新；当日实时数据不在本接口范围内。
+  body: up_open_id:int64*, student_open_id:int64*, watch_id:int64*, statistics_date:string  ;  resp: code:int64, data:object, order_no:string, watch_id:int64, statistics_date:string, items:object[], episode_id:int64, episode_type:string, episode_title:string, section_id:int64, section_title:string, watched:bool, last_study_date:string, message:string, request_id:string, ttl:int32
+[#115] guide 接入指引 | - | scope=- | 开放能力 / 数据资源接入
+[#116] guide 三方通用资源接口 | POST undefined | scope=- | 开放能力 / 数据资源接入
+  desc: **请注意：本页面接口为第三方实现接口后B站来调用。
+[#117] guide 用前须知 | - | scope=- | 开放能力 / 站内版权授权曲库
+  desc: ~~本功能为**有限开放**功能。~~ 本功能暂未开通，请等待开通后再进行申请使用。 本功能只限于**企业用户**申请使用。 本功能仅限于**在哔哩哔哩平台内的直播场景中用于直播背景音使用**，请勿将本功能用于除上述场景外的其他场景！ 使用本功能相关接口前需要**提前进行沟通申请开通功能**，开通功能邮件请参考文件末尾的申请邮件说明。
+[#118] api 获取媒体元数据 | POST https://member.bilibili.com/arcopen/fn/music/meta/list | scope=COPYRIGHT_MUSIC_DATA | 开放能力 / 站内版权授权曲库 / 接口列表
+  desc: 使用关键字搜索音乐信息
+  body: metadata_ids:string*  ;  resp: infos:List, mapKey:Object, metadata_id:string, title:string, artist_name:int, album:int, cover_url:string
+[#119] api 获取媒体资源信息 | POST https://member.bilibili.com/arcopen/fn/music/list | scope=COPYRIGHT_MUSIC_DATA | 开放能力 / 站内版权授权曲库 / 接口列表
+  desc: 使用资源唯一ID获取对应媒体资源详细信息
+  body: metadata_ids:string*  ;  resp: info:Object, mapKey:Object, transcode_resources_info:List, resource_id:string, transcode_url:string, duration:int, size:int, format:string
+[#120] api 搜索媒体信息 | POST https://member.bilibili.com/arcopen/fn/music/search | scope=COPYRIGHT_MUSIC_DATA | 开放能力 / 站内版权授权曲库 / 接口列表
+  desc: 使用资源唯一ID查询对应资源的详细信息
+  body: keyword:string*, page:int*, page_size:int*  ;  resp: total:int, infos:List, metadata_id:string, title:string, artist_name:string
+[#121] guide 概述 | - | scope=- | 开放能力 / 消息推送
+  desc: 当特定事件（Event）发生时，开放平台可以通过HTTPS POST的方式将事件推送到开发者配置好的回调地址，开发者无须通过查询即可第一时间获取到事件的变化。
+[#122] guide 用户授权 | - | scope=USER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 基础授权
+  desc: - 用户授权给开发者的应用
+[#123] guide 解除授权 | - | scope=USER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 基础授权
+  desc: - 用户解除对应用的授权
+[#124] event 订单创建消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单创建消息
+[#125] event 订单支付消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单支付消息
+[#126] event 订单取消消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单取消消息
+[#127] event 订单完成消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单完成消息
+[#128] event 订单金额修改消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单金额修改消息
+[#129] event 订单备注消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单备注消息
+[#130] event 订单发货消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 订单发货消息
+[#131] event 买家收货信息变更申请消息 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 买家收货信息变更申请消息
+[#132] guide 买家修改地址通知 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 买家修改地址通知
+[#133] guide 发货物流信息变更 | - | scope=SHOP_ORDER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: - 发货物流信息变更
+[#134] event 阶段确认收货消息 | - | scope=- | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 订单模块
+  desc: **Scope:** `SHOP_ORDER_INFO`(需要申请权限、需要用户授权)
+[#135] event 买家发起售后申请消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 买家发起售后申请消息
+[#136] event 售后取消消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 售后取消消息
+[#137] event 退款成功消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 退款成功消息
+[#138] event 拒绝退货申请消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 拒绝退货申请消息
+[#139] event 拒绝退款消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 拒绝退款消息
+[#140] event 买家发起客服仲裁消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 买家发起客服仲裁消息
+[#141] event 客服仲裁结果消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 客服仲裁结果消息
+[#142] event 买家取消仲裁消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 买家取消仲裁消息
+[#143] event 买家退货消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 买家退货给卖家消息
+[#144] event 同意售后申请消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 同意售后申请消息
+[#145] event 换货卖家发货消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 换货卖家发货消息
+[#146] event 协商期商家上传凭证消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 协商期商家上传凭证消息
+[#147] event 仲裁客服介入消息消息 | - | scope=SHOP_AFTERSALES_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 售后模块
+  desc: - 仲裁客服介入消息消息
+[#148] event 商品审核通过消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品审核通过
+[#149] event 商品封禁消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品封禁
+[#150] event 商品创建消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品创建
+[#151] event 商品删除消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品删除
+[#152] event 商品下架消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品下架
+[#153] event 商品上架消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品上架
+[#154] event 商品审核驳回消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品审核驳回
+[#155] event 商品审核中止消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品审核中止
+[#156] event 商品提交审核消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品提交审核
+[#157] event 商品解除封禁消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品解除封禁
+[#158] event 商品删除恢复消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品删除恢复
+[#159] event 商品更新消息 | - | scope=SHOP_COMMODITY_INFO | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 商品模块
+  desc: - 商品更新
+[#160] event 出票成功消息 | - | scope=SHOP_TICKET_ORDER_DATA | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 票务相关
+  desc: Scope: `SHOP_TICKET_ORDER_DATA` 需要申请权限 需要用户授权
+[#161] event 退款成功消息 | - | scope=SHOP_TICKET_ORDER_DATA | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 票务相关
+  desc: Scope: `SHOP_TICKET_ORDER_DATA` 需要申请权限 需要用户授权
+[#162] event 核销成功消息 | - | scope=SHOP_TICKET_ORDER_DATA | 开放能力 / 消息推送 / 推送事件列表 / 交易电商 / 票务相关
+  desc: Scope: `SHOP_TICKET_ORDER_DATA` 需要申请权限 需要用户授权
+[#163] guide 用户进入对话 | - | scope=SHOP_BA_CHAT | 开放能力 / 消息推送 / 推送事件列表 / 经营号客服
+  desc: Scope: `SHOP_BA_CHAT` 需要申请权限 需要用户授权
+[#164] event 消息通知 | - | scope=SHOP_BA_CHAT | 开放能力 / 消息推送 / 推送事件列表 / 经营号客服
+  desc: Scope: `SHOP_BA_CHAT` 需要申请权限 需要用户授权
+[#165] event 关闭消息 | - | scope=SHOP_BA_CHAT | 开放能力 / 消息推送 / 推送事件列表 / 经营号客服
+  desc: Scope: `SHOP_BA_CHAT` 需要申请权限 需要用户授权
+[#166] guide 留资结果 | - | scope=- | 开放能力 / 消息推送 / 推送事件列表 / 经营号客服
+  desc: **Scope:** `SHOP_BA_CHAT` 需要申请权限 需要用户授权
+[#167] event 投稿开发浏览消息 | - | scope=USER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 视频稿件
+  desc: - 通过开发者应用投递的视频稿件开放浏览
+[#168] event 投稿失败消息 | - | scope=USER_INFO | 开放能力 / 消息推送 / 推送事件列表 / 视频稿件
+  desc: - 通过开发者应用投递的视频稿件投稿失败
+[#169] guide 沙盒 | - | scope=- | 开放能力 / 沙盒环境
+  desc: 沙盒环境是一种测试环境，可以帮助开发者快速体验开放平台现有功能。
+[#170] guide 文档中未列出的功能 | - | scope=- | 开放能力

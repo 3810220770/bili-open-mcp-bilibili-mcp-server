@@ -1,0 +1,221 @@
+{
+ "source": "#169 沙盒环境",
+ "host": "https://member.bilibili.com/mock",
+ "entries": [
+  {
+   "group": "用户管理",
+   "feature": "获取用户公开信息",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/data/user/account/info"
+  },
+  {
+   "group": "用户管理",
+   "feature": "获取用户已授权权限列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/user/account/scopes"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "文件上传预处理",
+   "url": "https://member.bilibili.com/mock/video/part/init"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "文件分片上传",
+   "url": "https://member.bilibili.com/mock/video/part/upload"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "文件分片合片",
+   "url": "https://member.bilibili.com/mock/video/part/complete"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "封面上传",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/cover/upload"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "稿件提交",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/add"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "分区查询",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/type/list"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "稿件编辑",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/edit"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "查询单一稿件详情",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/view"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "查询用户稿件列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/viewlist"
+  },
+  {
+   "group": "视频稿件管理",
+   "feature": "稿件删除",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/archive/delete"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "文章提交",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/add"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "文章编辑",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/edit"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "文章删除",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/delete"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "查询文章详情",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/detail"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "查询文章列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/list"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "查询文章分类列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/categories"
+  },
+  {
+   "group": "专栏稿件管理",
+   "feature": "查询视频、文章卡片信息",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/card"
+  },
+  {
+   "group": "专栏文集管理",
+   "feature": "文集提交",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/anthology/add"
+  },
+  {
+   "group": "专栏文集管理",
+   "feature": "文集信息编辑",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/anthology/edit"
+  },
+  {
+   "group": "专栏文集管理",
+   "feature": "文集下文章列表修改",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/belong"
+  },
+  {
+   "group": "专栏文集管理",
+   "feature": "文集删除",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/anthology/delete"
+  },
+  {
+   "group": "专栏文集管理",
+   "feature": "查询文集列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/anthology/list"
+  },
+  {
+   "group": "专栏文集管理",
+   "feature": "查询文集详情",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/article/anthology/detail"
+  },
+  {
+   "group": "数据开放服务",
+   "feature": "获取用户数据",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/data/user/stat"
+  },
+  {
+   "group": "数据开放服务",
+   "feature": "获取单个稿件数据",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/data/arc/stat"
+  },
+  {
+   "group": "数据开放服务",
+   "feature": "获取整体稿件增量数据",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/data/arc/inc-stats"
+  },
+  {
+   "group": "数据开放服务",
+   "feature": "获取单一专栏数据",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/data/art/stat"
+  },
+  {
+   "group": "数据开放服务",
+   "feature": "获取整体专栏增量数据",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/data/art/inc-stats"
+  },
+  {
+   "group": "直播能力",
+   "feature": "获取直播间基础信息",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/live/room/info"
+  },
+  {
+   "group": "直播能力",
+   "feature": "直播房间长链信息及心跳ID",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/live/room/ws-start"
+  },
+  {
+   "group": "直播能力",
+   "feature": "长链心跳",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/live/room/ws-heartbeat"
+  },
+  {
+   "group": "直播能力",
+   "feature": "批量心跳",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/live/room/ws-batch-heartbeat"
+  },
+  {
+   "group": "服务市场",
+   "feature": "获取店铺信息",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/shop/info/get"
+  },
+  {
+   "group": "服务市场",
+   "feature": "发货回调",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/order/stock/out"
+  },
+  {
+   "group": "服务市场",
+   "feature": "订单列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/order/list"
+  },
+  {
+   "group": "服务市场",
+   "feature": "获取类目列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/commodity/category/qualified/list"
+  },
+  {
+   "group": "服务市场",
+   "feature": "查询发品配置",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/commodity/category/publish/config"
+  },
+  {
+   "group": "服务市场",
+   "feature": "图片上传",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/commodity/image/upload"
+  },
+  {
+   "group": "服务市场",
+   "feature": "查询运费模板",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/commodity/freight/template/list"
+  },
+  {
+   "group": "服务市场",
+   "feature": "发布商品",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/commodity/item/create"
+  },
+  {
+   "group": "服务市场",
+   "feature": "查询商品列表",
+   "url": "https://member.bilibili.com/mock/arcopen/fn/market/commodity/item/list"
+  }
+ ]
+}

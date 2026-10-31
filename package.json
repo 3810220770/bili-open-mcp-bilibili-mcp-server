@@ -1,0 +1,25 @@
+{
+  "name": "bili-open-mcp",
+  "version": "2.0.0",
+  "description": "MCP server for the bilibili Open Platform API (open.bilibili.com/doc/4): doc search, structured endpoint specs, request signing and live calls.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "bili-open-mcp": "src/server.mjs"
+  },
+  "scripts": {
+    "build": "node scripts/build-spec.mjs",
+    "start": "node src/server.mjs",
+    "selftest": "node scripts/selftest.mjs",
+    "audit": "node scripts/audit.mjs",
+    "check-config": "node scripts/check-project-config.mjs",
+    "login": "node scripts/oauth-login.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

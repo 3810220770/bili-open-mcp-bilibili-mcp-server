@@ -1,0 +1,14 @@
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# 凭据：绝不入库
+secrets/
+*.env
+.env*
+
+# 运行产物
+*.log
+.gh-login.log
