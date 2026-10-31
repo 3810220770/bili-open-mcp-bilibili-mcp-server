@@ -19,6 +19,7 @@
     { "k": "risk", "label": "有风控", "desc": "缺指纹/Cookie 时 -352 风控校验失败或 HTTP 412" },
     { "k": "priv", "label": "可能私有", "desc": "接口通，但对方隐私设置未公开" },
     { "k": "gone", "label": "已失效", "desc": "路径下线或迁移" },
+    { "k": "binary", "label": "二进制/XML", "desc": "protobuf / deflate XML，需自行解析" },
     { "k": "post", "label": "写操作", "desc": "POST + csrf，未静默实测" }
   ],
   "groups": [
@@ -483,6 +484,42 @@
             { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
             { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
           ]
+        },
+        {
+          "id": "video-related",
+          "name": "相关推荐",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/archive/related",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（61 KB）",
+          "params": [{ "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" }],
+          "returns": "list[]{ aid, bvid, title, pic, owner, stat }"
+        },
+        {
+          "id": "video-online-total",
+          "name": "当前同时在看人数",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/player/online/total",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "cid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" }
+          ],
+          "returns": "total、count、show_switch"
+        },
+        {
+          "id": "video-videoshot",
+          "name": "进度条预览图（视频缩略图）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/player/videoshot",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "index", "in": "query", "type": "number", "required": false, "desc": "第几组预览图，从 1 起" }
+          ],
+          "returns": "pvdata、img_x_len、img_y_len、image[]（拼成大图后的切片地址）"
         }
       ]
     },
@@ -601,6 +638,44 @@
           "probe": "POST + csrf，未静默实测",
           "params": [{ "name": "bvid", "in": "form", "type": "string", "required": true, "desc": "BV 号" }],
           "notes": ["等价于点赞 + 投 2 币 + 收藏；币不足时只完成能做的部分"]
+        },
+        {
+          "id": "write-toview-add",
+          "name": "加入稍后再看",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/history/toview/add",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "bvid", "in": "form", "type": "string", "required": true, "desc": "BV 号" }
+          ]
+        },
+        {
+          "id": "write-toview-del",
+          "name": "移出稍后再看",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/history/toview/del",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "viewed", "in": "form", "type": "string", "required": true, "desc": "要移除的 aid，逗号分隔" }
+          ]
+        },
+        {
+          "id": "write-toview-clear",
+          "name": "清空稍后再看",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/history/toview/clear",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [],
+          "notes": ["不可逆；批量删除优先用 toview/del"]
         }
       ]
     },
@@ -703,7 +778,8 @@
           "method": "GET",
           "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space",
           "status": "risk",
-          "probe": "裸 GET 实测 HTTP 412（风控页），需 wbi + 完整浏览器头",
+          "probe": "裸 GET 实测过 HTTP 412（风控页），也实测过 code 0 —— 时好时坏，缺 wbi 或浏览器头时基本 412",
+          "expectCodes": [0, -352, -403, 412, -101],
           "params": [
             { "name": "host_mid", "in": "query", "type": "number", "required": true, "desc": "目标用户 mid" },
             { "name": "offset", "in": "query", "type": "string", "required": false, "desc": "翻页游标，取自上次返回" }
@@ -931,6 +1007,30 @@
           "status": "priv",
           "probe": "无 Cookie 实测 code 53013 用户隐私设置未公开",
           "params": [{ "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }]
+        },
+        {
+          "id": "fav-folder-collected",
+          "name": "TA 订阅的收藏夹",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v3/fav/folder/collected/list",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "up_mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "fav-resource-ids",
+          "name": "收藏夹内的稿件 id 列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v3/fav/resource/ids",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code -400（需有效 media_id）",
+          "expectCodes": [-400, 0],
+          "params": [{ "name": "media_id", "in": "query", "type": "number", "required": true, "desc": "收藏夹 id，0 是默认收藏夹" }],
+          "returns": "data[]：{ id, type, bv_id, bvid } —— 比 resource/list 轻，适合批量拉 id"
         }
       ]
     },
@@ -1237,6 +1337,293 @@
           "probe": "无 Cookie 实测 HTTP 404 —— 路径已调整",
           "params": [],
           "notes": ["创作中心数据接口随前端改版频繁变动，用前先抓一次 member.bilibili.com 的实际 XHR 对齐"]
+        }
+      ]
+    },
+    {
+      "id": "dm",
+      "name": "弹幕",
+      "icon": "💭",
+      "desc": "视频弹幕全部是 protobuf / 压缩 XML，不是 JSON —— 普通 HTTP 客户端拿到的是一串二进制，需要按协议解。发弹幕是写操作。",
+      "items": [
+        {
+          "id": "dm-seg",
+          "name": "分段弹幕（protobuf）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/dm/web/seg.so",
+          "status": "binary",
+          "probe": "无 Cookie 实测 HTTP 200 application/octet-stream（193 字节），非 JSON",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" },
+            { "name": "segment_index", "in": "query", "type": "number", "required": true, "desc": "第几段，每段 6 分钟，从 1 起" }
+          ],
+          "returns": "DmSegMobileReply（protobuf）：repeated elems{ id, progress(毫秒), mode, fontsize, color, midHash, content, ctime, weight, idStr }",
+          "notes": [
+            "Content-Type 是 application/octet-stream，用 fetch().arrayBuffer() 取原始字节再解",
+            "protobuf 定义见 bilibili-API-collect 的 dm.proto；node 用 protobufjs、python 用 blackboxprotobuf 都能解"
+          ]
+        },
+        {
+          "id": "dm-list-xml",
+          "name": "旧版弹幕 XML（deflate 压缩）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v1/dm/list.so",
+          "status": "binary",
+          "probe": "无 Cookie 实测 HTTP 200 text/xml（197 字节，deflate 压缩体）",
+          "params": [{ "name": "oid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" }],
+          "returns": "<i><d p=\"时间,模式,字号,颜色,时间戳,池,用户hash,行号\">正文</d>…</i>",
+          "notes": ["响应体是 raw deflate（无 zlib 头），需 inflateRaw 解压；现在网页端已改用 seg.so，这条留作兼容"]
+        },
+        {
+          "id": "dm-view",
+          "name": "弹幕池配置 / 元信息",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/dm/web/view",
+          "status": "binary",
+          "probe": "无 Cookie 实测 HTTP 200 application/octet-stream（306 字节），非 JSON",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" }
+          ],
+          "returns": "DmWebViewReply（protobuf）：state、text、dm_sge、count、commandDms、dmSetting"
+        },
+        {
+          "id": "dm-history",
+          "name": "历史弹幕（按日期）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/dm/history",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" },
+            { "name": "date", "in": "query", "type": "string", "required": true, "desc": "YYYY-MM-DD" }
+          ]
+        },
+        {
+          "id": "dm-post",
+          "name": "发送视频弹幕",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/dm/post",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "type", "in": "form", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "form", "type": "number", "required": true, "desc": "分 P 的 cid" },
+            { "name": "msg", "in": "form", "type": "string", "required": true, "desc": "弹幕内容" },
+            { "name": "bvid", "in": "form", "type": "string", "required": false, "desc": "BV 号" },
+            { "name": "progress", "in": "form", "type": "number", "required": true, "desc": "出现时间，毫秒" },
+            { "name": "mode", "in": "form", "type": "number", "required": false, "desc": "1 滚动 · 4 底部 · 5 顶部" },
+            { "name": "fontsize", "in": "form", "type": "number", "required": false, "desc": "25 / 18" },
+            { "name": "color", "in": "form", "type": "number", "required": false, "desc": "十进制颜色，白 16777215" },
+            { "name": "rnd", "in": "form", "type": "number", "required": true, "desc": "秒级时间戳" }
+          ],
+          "notes": ["弹幕有等级/时长门槛，新号常见 -403 或 1003212 弹幕发送间隔过短"]
+        },
+        {
+          "id": "dm-thumbup",
+          "name": "弹幕点赞",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/dm/thumbup/add",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "dmid", "in": "form", "type": "number", "required": true, "desc": "弹幕 id（protobuf 里的 id / idStr）" },
+            { "name": "oid", "in": "form", "type": "number", "required": true, "desc": "分 P 的 cid" },
+            { "name": "op", "in": "form", "type": "number", "required": true, "desc": "1 点赞，2 取消" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "message",
+      "name": "私信（api.vc.bilibili.com）",
+      "icon": "✉️",
+      "desc": "私信不在 api.bilibili.com 上，走 api.vc.bilibili.com；网页端还叠了一层长连同步。取会话与发消息都要登录。",
+      "items": [
+        {
+          "id": "msg-sessions",
+          "name": "会话列表",
+          "method": "GET",
+          "url": "https://api.vc.bilibili.com/session_svr/v1/session_svr/get_sessions",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "session_type", "in": "query", "type": "number", "required": true, "desc": "1 = 私信，2 = 粉丝群" },
+            { "name": "group_fold", "in": "query", "type": "number", "required": false, "desc": "1 折叠未关注人的会话" },
+            { "name": "unfollow_fold", "in": "query", "type": "number", "required": false, "desc": "0" },
+            { "name": "sort_rule", "in": "query", "type": "number", "required": false, "desc": "2 = 按时间" },
+            { "name": "build", "in": "query", "type": "number", "required": false, "desc": "0" },
+            { "name": "mobi_app", "in": "query", "type": "string", "required": false, "desc": "web" }
+          ],
+          "returns": "session_list[]{ talker_id, session_type, unread_count, last_msg, top_ts }"
+        },
+        {
+          "id": "msg-fetch",
+          "name": "会话内消息",
+          "method": "GET",
+          "url": "https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "talker_id", "in": "query", "type": "number", "required": true, "desc": "对方 uid" },
+            { "name": "session_type", "in": "query", "type": "number", "required": true, "desc": "1 = 私信" },
+            { "name": "size", "in": "query", "type": "number", "required": false, "desc": "条数" },
+            { "name": "begin_seqno", "in": "query", "type": "number", "required": false, "desc": "翻页游标" },
+            { "name": "end_seqno", "in": "query", "type": "number", "required": false, "desc": "翻页游标" }
+          ],
+          "notes": ["每条 message 的 content 是 JSON 字符串，要再解一次（文本、图片、分享卡片结构各不相同）"]
+        },
+        {
+          "id": "msg-unread-dm",
+          "name": "私信未读",
+          "method": "GET",
+          "url": "https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "unread_type", "in": "query", "type": "number", "required": false, "desc": "0" },
+            { "name": "show_dm", "in": "query", "type": "number", "required": false, "desc": "1" }
+          ]
+        },
+        {
+          "id": "msg-send",
+          "name": "发送私信",
+          "method": "POST",
+          "url": "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "msg[sender_uid]", "in": "form", "type": "number", "required": true, "desc": "自己的 uid" },
+            { "name": "msg[receiver_id]", "in": "form", "type": "number", "required": true, "desc": "对方 uid" },
+            { "name": "msg[receiver_type]", "in": "form", "type": "number", "required": true, "desc": "1 = 用户" },
+            { "name": "msg[msg_type]", "in": "form", "type": "number", "required": true, "desc": "1 = 文本" },
+            { "name": "msg[msg_status]", "in": "form", "type": "number", "required": false, "desc": "0" },
+            { "name": "msg[timestamp]", "in": "form", "type": "number", "required": true, "desc": "秒级时间戳" },
+            { "name": "msg[content]", "in": "form", "type": "string", "required": true, "desc": "JSON 字符串，如 {\"content\":\"你好\"}" },
+            { "name": "csrf", "in": "form", "type": "string", "required": true, "desc": "bili_jct" },
+            { "name": "csrf_token", "in": "form", "type": "string", "required": true, "desc": "同 csrf" }
+          ],
+          "notes": [
+            "参数名带方括号，urlencode 后是 msg%5Bsender_uid%5D；bili_web_call 会照原样编码",
+            "未互关 / 被拉黑 / 触发风控都会失败，code 25005 之类是权限问题不是格式问题"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "series",
+      "name": "合集与系列",
+      "icon": "🗂️",
+      "desc": "UP 主的合集（season）与系列（series）—— 空间页那排 tab 背后的接口。",
+      "items": [
+        {
+          "id": "series-seasons-list",
+          "name": "合集与系列列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/polymer/web-space/seasons_series_list",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "page_num", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "page_size", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ],
+          "returns": "items_lists{ seasons_list[], series_list[], seasons_total, series_total }"
+        },
+        {
+          "id": "series-seasons-archives",
+          "name": "合集内稿件",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code -404 啥都木有（需有效 season_id）",
+          "expectCodes": [-404, 0],
+          "params": [
+            { "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "season_id", "in": "query", "type": "number", "required": true, "desc": "合集 id" },
+            { "name": "sort_reverse", "in": "query", "type": "boolean", "required": false, "desc": "false 正序" },
+            { "name": "page_num", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "page_size", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "series-archives",
+          "name": "系列内稿件",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/series/archives",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "series_id", "in": "query", "type": "number", "required": true, "desc": "系列 id" },
+            { "name": "only_normal", "in": "query", "type": "boolean", "required": false, "desc": "true 只排正式稿件" },
+            { "name": "sort", "in": "query", "type": "string", "required": false, "desc": "desc" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bangumi",
+      "name": "番剧与影视",
+      "icon": "🎞️",
+      "desc": "番剧索引与播放地址走 pgc 前缀，鉴权和主站不完全一样：部分接口要登录 + 大会员。",
+      "items": [
+        {
+          "id": "bangumi-index",
+          "name": "番剧索引（按分类筛）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/pgc/season/index/result",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（success，6.4 KB）",
+          "probeQuery": "st=1&order=3&season_version=-1&spoken_language_type=-1&area=-1&is_finish=-1&copyright=-1&season_status=-1&season_month=-1&year=-1&style_id=-1&sort=0&page=1&season_type=1&pagesize=10&type=1",
+          "params": [
+            { "name": "season_type", "in": "query", "type": "number", "required": true, "desc": "1 番剧，2 电影，3 纪录片，4 国创，5 电视剧，7 综艺" },
+            { "name": "page", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "pagesize", "in": "query", "type": "number", "required": false, "desc": "每页条数" },
+            { "name": "order", "in": "query", "type": "number", "required": false, "desc": "排序：3 追番人数，4 最高评分，2 播放数，5 开播时间" },
+            { "name": "sort", "in": "query", "type": "number", "required": false, "desc": "0 降序，1 升序" },
+            { "name": "area", "in": "query", "type": "string", "required": false, "desc": "地区，-1 全部" },
+            { "name": "year", "in": "query", "type": "string", "required": false, "desc": "年份，-1 全部" },
+            { "name": "is_finish", "in": "query", "type": "number", "required": false, "desc": "0 连载，1 完结，-1 全部" }
+          ],
+          "returns": "result{ list[]{ season_id, title, cover, index_show, order }, total, has_next }"
+        },
+        {
+          "id": "bangumi-playurl",
+          "name": "番剧播放地址",
+          "method": "GET",
+          "url": "https://api.bilibili.com/pgc/player/web/playurl",
+          "status": "wbi",
+          "probe": "无 Cookie 实测 -404 啥都木有（需有效 ep_id；付费集要登录 + 大会员）",
+          "expectCodes": [-404, 0, -10403],
+          "params": [
+            { "name": "ep_id", "in": "query", "type": "number", "required": true, "desc": "剧集 id" },
+            { "name": "qn", "in": "query", "type": "number", "required": false, "desc": "清晰度" },
+            { "name": "fnval", "in": "query", "type": "number", "required": false, "desc": "16 = DASH" },
+            { "name": "fnver", "in": "query", "type": "number", "required": false, "desc": "0" },
+            { "name": "fourk", "in": "query", "type": "number", "required": false, "desc": "1" }
+          ],
+          "notes": ["-10403 地区限制，28604 大会员专享 —— 这两个码在这一族接口里很常见"]
+        },
+        {
+          "id": "live-medal-wall",
+          "name": "直播间粉丝勋章墙",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [{ "name": "target_id", "in": "query", "type": "number", "required": true, "desc": "主播 uid" }],
+          "returns": "list[]{ medal{ level, name, color }, receive_time }"
         }
       ]
     },

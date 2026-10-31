@@ -43,6 +43,7 @@ const EXPECT = {
   risk: { codes: [-352, -403, -799, -101], note: "-352/-403/-799 风控（HTTP 412 也算命中）" },
   wbi: { codes: [0, -403, -352], note: "无签名时通或 -403" },
   priv: { codes: [53013, -400, 0], note: "53013 隐私未公开" },
+  binary: { http: [200], note: "HTTP 200 二进制 / XML（非 JSON）" },
   gone: { http: [404], note: "HTTP 404 已下线" },
 };
 
@@ -56,6 +57,10 @@ const SAMPLE = {
   protocol: "0,1", format: "0,1,2", codec: "0,1", qn: 10000, fnval: 16, ptype: 8, dolby: 5,
   panorama: 1, fourk: 1, mode: 3, sort: 2, order: "totalrank", need_sys_area: 1,
   parent_area_id: 1, area_id: 0, sort_type: "online",
+  segment_index: 1, date: "2024-01-01", talker_id: 1, session_type: 1, size: 20,
+  season_id: 1, page_num: 1, page_size: 10, sort_reverse: "false", series_id: 1, index: 1,
+  ep_id: 1, fnver: 0, target_id: 1, unread_type: 0, show_dm: 1, group_fold: 1, unfollow_fold: 0,
+  sort_rule: 2, build: 0, mobi_app: "web", only_normal: "true", count: 10,
 };
 
 function buildUrl(item) {

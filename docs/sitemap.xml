@@ -36,6 +36,9 @@
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/video-playurl.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/video-conclusion.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/video-newlist.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/video-related.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/video-online-total.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/video-videoshot.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-archive-like.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-archive-coin.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-fav-deal.html</loc></url>
@@ -43,6 +46,9 @@
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-reply-add.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-reply-action.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-triple.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-toview-add.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-toview-del.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/write-toview-clear.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/reply-list.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/reply-main.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/reply-reply.html</loc></url>
@@ -67,6 +73,8 @@
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/history-cursor.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/space-coin-video.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/space-like-video.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/fav-folder-collected.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/fav-resource-ids.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/search-all-v2.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/search-type.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/search-square.html</loc></url>
@@ -88,6 +96,22 @@
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/creative-archives.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/creative-archive-pre.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/creative-upstat.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/dm-seg.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/dm-list-xml.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/dm-view.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/dm-history.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/dm-post.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/dm-thumbup.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/msg-sessions.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/msg-fetch.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/msg-unread-dm.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/msg-send.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/series-seasons-list.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/series-seasons-archives.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/series-archives.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/bangumi-index.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/bangumi-playurl.html</loc></url>
+  <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/live-medal-wall.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/sign-finger.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/sign-wbi.html</loc></url>
   <url><loc>https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web/sign-csrf.html</loc></url>

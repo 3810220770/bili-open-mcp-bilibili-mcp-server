@@ -52,7 +52,7 @@ bili-open-mcp/
 │  └─ open-platform.json 开放平台凭据      ← BILI_CRED_FILE
 ├─ scripts/
 │  ├─ build-spec.mjs    Markdown → data/*.json / llms.txt
-│  ├─ build-site.mjs    data/*.json → docs/ 静态文档站（含隐藏能力 88 页）
+│  ├─ build-site.mjs    data/*.json → docs/ 静态文档站（含隐藏能力 112 页）
 │  ├─ check-site.mjs    站点自检：死链 / 锚点 / 资源 / 模板残留 / 混合内容
 │  ├─ probe-web.mjs     主站隐藏能力可复现核验（逐条实打，核对实测状态）
 │  ├─ audit.mjs         数据与文档一致性检查
@@ -64,7 +64,7 @@ bili-open-mcp/
 │  ├─ llms.txt          紧凑清单，给 AI 一次性读
 │  ├─ status-codes.json 118 个错误码
 │  ├─ mock.json         43 个沙盒 mock 接口
-│  └─ web.json          88 个主站 Web 隐藏能力（举报 / 拉黑 / 动态 / 评论 / 直播 …）
+│  └─ web.json          112 个主站 Web 隐藏能力（举报 / 拉黑 / 动态 / 评论 / 弹幕 / 直播 …）
 └─ examples/
    ├─ bili_open.py      零依赖 Python 客户端（签名/请求/OAuth2/上传）
    ├─ video_upload.py   视频投稿全流程
@@ -141,18 +141,19 @@ npm run check-config # 用 opencode 项目配置里的命令实际拉起服务
 剩下那一大片 —— **举报、拉黑、动态、评论、收藏、历史、消息、直播、创作中心** —— 都在主站
 `www/api.bilibili.com` 与 `api.live.bilibili.com` 上，走浏览器 Cookie，不走 2.0 签名。
 
-全部收进了 [`data/web.json`](data/web.json)：**88 条 / 13 组**，每条带方法、完整地址、参数、返回码、
+全部收进了 [`data/web.json`](data/web.json)：**112 条 / 17 组**，每条带方法、完整地址、参数、返回码、
 坑位与**无 Cookie 实测状态**。三种读法：
 
 | 想要 | 怎么做 |
 | --- | --- |
-| 在浏览器里翻 | [在线文档站的「隐藏能力」页](https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web.html)（88 个详情页） |
+| 在浏览器里翻 | [在线文档站的「隐藏能力」页](https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web.html)（112 个详情页） |
 | 让 AI 过滤 | `bili_endpoints { "source": "web" }`、`{ "source": "web", "pathContains": "举报" }`、`{ "source": "all" }` |
 | 整块喂给 AI | resource `bili://web` |
 | 核对是否失效 | `npm run web:probe` —— 按声明的参数重新打一遍，逐条比对预期 |
 
-组一览：举报 3 · 账号与登录态 9 · 用户与空间 9 · 视频与播放 11 · 写操作 7 · 评论 6 · 动态 3 ·
-关系与消息 9 · 收藏/历史/稍后再看 6 · 搜索 4 · 直播 14 · 创作中心 3 · 签名与风控工具箱 4。
+组一览：举报 3 · 账号与登录态 9 · 用户与空间 9 · 视频与播放 14 · 写操作 10 · 评论 6 · 动态 3 ·
+弹幕 6 · 关系与消息 9 · 私信 4 · 收藏/历史/稍后再看 8 · 合集与系列 3 · 搜索 4 · 直播 14 ·
+番剧与影视 3 · 创作中心 3 · 签名与风控工具箱 4。
 
 ### 举报
 
@@ -273,7 +274,7 @@ https://account.bilibili.com/pc/account-pc/auth/oauth?client_id=<ClientID>&gourl
 | --- | --- | --- |
 | resource | `bili://catalog` | 170 篇压成的一页纸清单（llms.txt） |
 | resource | `bili://doc/{ref}` | 单篇文档原文 Markdown |
-| resource | `bili://web` | 88 个主站 Web 隐藏能力目录（举报 / 拉黑 / 动态 / 评论 / 收藏 / 直播 …），带无 Cookie 实测状态 |
+| resource | `bili://web` | 112 个主站 Web 隐藏能力目录（举报 / 拉黑 / 动态 / 评论 / 弹幕 / 直播 …），带无 Cookie 实测状态 |
 | prompt | `integrate-bili-api` | 按开放平台规范生成接入任务说明（参数 `ref`） |
 
 ## 凭据
@@ -314,7 +315,7 @@ npm run build
 ## 统计
 
 - 文档 170 篇：95 篇单接口 + 2 篇多接口（共 **100 个端点**）、41 个推送事件、30 篇指南、2 篇协议说明
-- 主站 Web 隐藏能力 **88 条 / 13 组**（`data/web.json`），72 条可由 `npm run web:probe` 复现核验
+- 主站 Web 隐藏能力 **112 条 / 17 组**（`data/web.json`），90 条 GET 可由 `npm run web:probe` 复现核验
 - 1243 个参数对象，**100% 带类型**；359/364 个请求参数带「必传」标记
 - 20 个 scope、118 个错误码
 

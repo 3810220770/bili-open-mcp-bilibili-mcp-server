@@ -588,15 +588,16 @@ async function main() {
   );
   const webStatusMeta = (k) => (web.statusLegend || []).find((s) => s.k === k) || { k, label: k, desc: "" };
   const webTone = (k) =>
-    ({ ok: "badge-ok", "need-cookie": "badge-info", wbi: "badge-scope", risk: "badge-warn", priv: "badge-muted", gone: "badge-muted", post: "badge-warn" })[k] || "badge-muted";
+    ({ ok: "badge-ok", "need-cookie": "badge-info", wbi: "badge-scope", risk: "badge-warn", priv: "badge-muted", gone: "badge-muted", binary: "badge-scope", post: "badge-warn" })[k] || "badge-muted";
   WEB_COUNT = webItems.length;
   const webAuthOf = (k) =>
     k === "ok" || k === "gone" ? "无需凭据"
-      : k === "wbi" ? "需 Cookie + wbi"
-        : k === "risk" ? "需 Cookie · 有风控"
-          : k === "priv" ? "按对方隐私设置"
-            : k === "post" ? "需 Cookie + csrf"
-              : "需 Cookie";
+      : k === "binary" ? "无需凭据 · 响应是二进制"
+        : k === "wbi" ? "需 Cookie + wbi"
+          : k === "risk" ? "需 Cookie · 有风控"
+            : k === "priv" ? "按对方隐私设置"
+              : k === "post" ? "需 Cookie + csrf"
+                : "需 Cookie";
   const shortUrl = (u) => String(u).replace(/^https?:\/\/[^/]+/, "");
   const webHost = (u) => {
     const m = /^https?:\/\/([^/]+)/.exec(String(u));

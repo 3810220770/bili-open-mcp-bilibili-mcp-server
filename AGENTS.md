@@ -291,7 +291,7 @@
 典型问法：「所有需要 `SHOP_ORDER_INFO` 的 POST 接口」「上传类接口有哪些」→ `{host:"openupos.bilivideo.com"}`。
 「举报怎么调」「有哪些写操作」→ `{source:"web", pathContains:"举报"}`。
 
-`source:"web"` 的数据来自 `data/web.json`：88 条主站 Web 隐藏能力（开放平台文档里没有的那些），
+`source:"web"` 的数据来自 `data/web.json`：112 条主站 Web 隐藏能力（开放平台文档里没有的那些），
 每条带方法 / 完整地址 / 参数 / 返回码 / 无 Cookie 实测状态。整块读用 resource `bili://web`，
 逐条复核用 `npm run web:probe`。
 
@@ -511,7 +511,7 @@ scene：1 用户资料（头像/签名/昵称）· 2 稿件 · 3 评论 · 4 动
 | --- | --- | --- |
 | resource | `bili://catalog` | `llms.txt` 全文，客户端可直接挂成上下文 |
 | resource | `bili://doc/{ref}` | 单篇文档原文 Markdown |
-| resource | `bili://web` | 88 条主站 Web 隐藏能力（举报 / 拉黑 / 动态 / 评论 / 直播 …），Markdown 全文，带实测状态 |
+| resource | `bili://web` | 112 条主站 Web 隐藏能力（举报 / 拉黑 / 动态 / 评论 / 弹幕 / 私信 / 直播 …），Markdown 全文，带实测状态 |
 | prompt | `integrate-bili-api` | 参数 `ref`，产出「把该接口接入现有项目」的完整任务说明（含 5 条硬性要求） |
 
 ---
@@ -900,7 +900,7 @@ HTTP 心跳 #45（`client_id` + `conn_id`）/ 批量 #46 是替代方案。示�
 - **白名单（#3）**：某接口配置白名单后只有列表内 uid 能调，报 `127305 白名单限制`；默认关闭。
 - **未列出的功能（#170）**：文档只放已有商务合作的能力；有别的需求走邮件 `openplatform-feedback@bilibili.com`，需写明合作内容、量化收益、公司信息、对接人。
   但「文档没写」不等于「调不到」—— 主站 Web 上那一大片（举报 / 拉黑 / 动态 / 评论 / 收藏 / 历史 / 消息 / 直播 / 创作中心）
-  走的是浏览器 Cookie，不走 2.0 签名，已收进 `data/web.json`：**88 条 / 13 组**。
+  走的是浏览器 Cookie，不走 2.0 签名，已收进 `data/web.json`：**112 条 / 17 组**。
   读法：`bili_endpoints {source:"web"}` 过滤，resource `bili://web` 整块读，`bili_web_call` 直接调。
 
 ---
