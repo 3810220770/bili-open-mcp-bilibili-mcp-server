@@ -429,6 +429,7 @@ const NAV = [
   { href: "", label: "首页" },
   { href: "tools.html", label: "工具" },
   { href: "endpoints.html", label: "接口" },
+  { href: "web.html", label: "隐藏能力" },
   { href: "guides.html", label: "指南" },
   { href: "webhooks.html", label: "推送" },
   { href: "errors.html", label: "错误码" },
@@ -524,6 +525,7 @@ function footer(root) {
     "<div><h4>参考</h4>" +
     '<a href="' + root + 'tools.html">19 个工具</a>' +
     '<a href="' + root + 'endpoints.html">100 个端点</a>' +
+    '<a href="' + root + 'web.html">' + WEB_COUNT + " 个隐藏能力</a>" +
     '<a href="' + root + 'guides.html">指南与协议</a>' +
     '<a href="' + root + 'webhooks.html">41 个推送事件</a>' +
     '<a href="' + root + 'errors.html">118 个错误码</a>' +
@@ -557,6 +559,8 @@ function tocHtml(toc, title) {
    5. 生成
    ========================================================================== */
 const OUT_FILES = [];
+/** 隐藏能力条数：main() 读 data/web.json 后填上，footer 在 layout() 时才求值，能取到 */
+let WEB_COUNT = 0;
 /* GitHub Pages 强制 HTTPS，页面里任何 http:// 的图片/脚本都会被浏览器按混合内容拦掉。
    原文里 7 张 bilibili CDN 图写的是 http://（同样的 https:// 地址实测 200），统一升到 https。 */
 const upgradeMixed = (html) =>
@@ -578,6 +582,26 @@ async function main() {
   const index = readJson(path.join(DATA, "index.json"));
   const codes = readJson(path.join(DATA, "status-codes.json"));
   const mock = readJson(path.join(DATA, "mock.json"));
+  const web = readJson(path.join(DATA, "web.json"));
+  const webItems = web.groups.flatMap((g) =>
+    g.items.map((it) => Object.assign({}, it, { groupId: g.id, groupName: g.name, groupIcon: g.icon }))
+  );
+  const webStatusMeta = (k) => (web.statusLegend || []).find((s) => s.k === k) || { k, label: k, desc: "" };
+  const webTone = (k) =>
+    ({ ok: "badge-ok", "need-cookie": "badge-info", wbi: "badge-scope", risk: "badge-warn", priv: "badge-muted", gone: "badge-muted", post: "badge-warn" })[k] || "badge-muted";
+  WEB_COUNT = webItems.length;
+  const webAuthOf = (k) =>
+    k === "ok" || k === "gone" ? "无需凭据"
+      : k === "wbi" ? "需 Cookie + wbi"
+        : k === "risk" ? "需 Cookie · 有风控"
+          : k === "priv" ? "按对方隐私设置"
+            : k === "post" ? "需 Cookie + csrf"
+              : "需 Cookie";
+  const shortUrl = (u) => String(u).replace(/^https?:\/\/[^/]+/, "");
+  const webHost = (u) => {
+    const m = /^https?:\/\/([^/]+)/.exec(String(u));
+    return m ? m[1] : "";
+  };
   const mcp = await mcpIntrospect();
 
   const docs = index.docs.slice().sort((a, b) => a.num - b.num);
@@ -622,6 +646,7 @@ async function main() {
       ["", "首页"],
       ["tools.html", "19 个工具"],
       ["endpoints.html", "接口总览"],
+      ["web.html", "隐藏能力"],
       ["guides.html", "指南与协议"],
       ["webhooks.html", "推送事件"],
       ["errors.html", "错误码"],
@@ -644,6 +669,13 @@ async function main() {
         esc(g) + '<span class="count">' + items.length + "</span></a>"
       );
     }).join("") +
+    "</div>" +
+    '<div class="sidebar-group"><div class="sidebar-title">主站 Web · ' + webItems.length + " 个隐藏能力</div>" +
+    web.groups.map((g) =>
+      '<a href="' + (current && current.root ? current.root : "") + "web.html#" + encodeURIComponent(g.id) + '"' +
+      (current && current.webGroup === g.id ? ' class="is-active"' : "") + ">" +
+      esc(g.name) + '<span class="count">' + g.items.length + "</span></a>"
+    ).join("") +
     "</div>" +
     '<div class="sidebar-group"><div class="sidebar-title">指南与协议 · ' + guides.length + " 篇</div>" +
     guides.slice(0, 40).map((d) =>
@@ -717,6 +749,7 @@ async function main() {
       [endpointCount, "个 HTTP 端点"],
       [events.length, "个推送事件"],
       [Object.keys(codes).length, "个错误码"],
+      [webItems.length, "个隐藏能力"],
       [mcp.tools.length, "个 MCP 工具"],
       [mock.entries.length, "个沙盒接口"],
     ].map(([n, l]) => '<div class="stat"><b>' + n + "</b><span>" + esc(l) + "</span></div>").join("") +
@@ -731,6 +764,7 @@ async function main() {
       ["📡", "直播长连协议", "官方直播间 WebSocket 协议：16 字节包头、Operation 表、zlib 多包拆解，附可运行的 Python 客户端。"],
       ["🔔", "Webhook 验签", "41 个推送事件的内容字段，以及 SHA1(secret + 原始 body) 的验签代码 —— 这是最容易错的一步，必须用原始字节。"],
       ["🍪", "主站 Cookie 调用", "另一套体系：用你自己的浏览器 Cookie 调主站 Web 接口，POST 自动补 csrf，/wbi/ 路径自动算 w_rid。"],
+      ["🚩", "隐藏能力全收齐", "开放平台文档里没有的那些 —— 举报、拉黑、动态、评论、收藏、历史、消息、直播、创作中心，" + webItems.length + " 条主站 Web 接口，每条带无 Cookie 实测状态与坑位说明。"],
     ].map(([i, t, d]) =>
       '<div class="card"><h3><span class="ico">' + i + "</span>" + esc(t) + "</h3><p>" + esc(d) + "</p></div>"
     ).join("") +
@@ -871,6 +905,182 @@ async function main() {
     main: epMain,
     toc: false,
   }));
+
+  /* ============ 隐藏能力（主站 Web，非开放平台文档） ============ */
+  const webMethodBadge = (it) => {
+    const m = String(it.method).toUpperCase();
+    const cls = ["GET", "POST", "PUT", "DELETE"].includes(m) ? m : "";
+    return '<span class="badge badge-method' + (cls ? " badge-" + cls : "") + '">' + esc(it.method) + "</span>";
+  };
+  const webStatusBadge = (it) => {
+    const meta = webStatusMeta(it.status);
+    return '<span class="badge ' + webTone(it.status) + '" title="' + attr(meta.desc + (it.probe ? " · " + it.probe : "")) + '">' + esc(meta.label) + "</span>";
+  };
+  const webSample = (it) => {
+    const path = shortUrl(it.url);
+    if (it.sample) return it.sample;
+    if (it.method === "GET") {
+      const q = (it.params || [])
+        .filter((p) => p.in === "query" && !["w_rid", "wts"].includes(p.name))
+        .map((p) => p.name + "=<…>")
+        .join("&");
+      return 'bili_web_call { "path": "' + path + (q ? "?" + q : "") + '" }';
+    }
+    if (it.method === "POST") {
+      const body = (it.params || [])
+        .filter((p) => p.in === "form" && !["csrf", "csrf_token"].includes(p.name))
+        .map((p) => '    "' + p.name + '": "<…>"')
+        .join(",\n");
+      return 'bili_web_call { "path": "' + path + '",\n  "form": {\n' + body + "\n  } }";
+    }
+    return '// ' + path + "\n// 见 examples/live_ws.py 的完整客户端";
+  };
+
+  const webRow = (it) =>
+    '<a class="ep" href="web/' + attr(it.id) + '.html"' +
+    ' data-item data-group="' + attr(it.groupName) + '" data-select="' + attr(String(it.method).toUpperCase()) + '"' +
+    ' data-search="' + attr([it.name, it.url, it.groupName, it.method, (it.notes || []).join(" "), (it.params || []).map((p) => p.name + " " + (p.desc || "")).join(" ")].join(" ")) + '">' +
+    webMethodBadge(it) +
+    '<div><div class="ep-title">' + esc(it.name) + "</div>" +
+    '<div class="ep-path">' + esc(shortUrl(it.url)) + "</div>" +
+    '<div class="ep-folder">' + esc(it.groupIcon + " " + it.groupName) + "</div></div>" +
+    '<div class="ep-scopes">' + webStatusBadge(it) + "</div>" +
+    "</a>";
+
+  const webLegend =
+    '<div class="chips" style="margin:0 0 18px">' +
+    web.statusLegend
+      .map((s) => '<span class="badge ' + webTone(s.k) + '" title="' + attr(s.desc) + '">' + esc(s.label) + "</span>")
+      .join(" ") +
+    "</div>";
+
+  const webMain =
+    '<h1 class="page-title">隐藏能力 · 主站 Web</h1>' +
+    '<p class="page-lede">' + esc(web.lede) + "</p>" +
+    '<div class="callout callout-warning"><div class="callout-ico">!</div><div>' +
+    "<div class=\"callout-title\">实测状态</div>" + esc(web.probe.note) +
+    " 核验时间 " + esc(web.probe.at) + "，脚本 <code>" + esc(web.probe.by) + "</code>（<code>npm run web:probe</code>）。" +
+    "</div></div>" +
+    '<p class="page-lede" style="font-size:14px">' + esc(web.authNote) + "</p>" +
+    webLegend +
+    '<div data-filter-scope><div class="toolbar">' +
+    '<input class="input" data-filter-input type="search" placeholder="搜能力名、路径、参数…" aria-label="筛选隐藏能力">' +
+    '<select class="input" data-filter-select aria-label="按方法筛选">' +
+    '<option value="">全部方法</option>' +
+    ["GET", "POST", "WS", "规则"].map((m) => '<option value="' + m + '">' + m + "</option>").join("") +
+    "</select>" +
+    '<span class="result-count" data-filter-count></span></div>' +
+    '<div class="chips" style="margin-bottom:20px">' +
+    '<button class="chip" data-filter-chip="all" id="all" aria-pressed="true">全部<span class="n">' + webItems.length + "</span></button>" +
+    web.groups
+      .map(
+        (g) =>
+          '<button class="chip" id="' + attr(g.id) + '" data-filter-chip="' + attr(g.name) + '" aria-pressed="false">' +
+          esc(g.icon + " " + g.name) + '<span class="n">' + g.items.length + "</span></button>"
+      )
+      .join("") +
+    "</div>" +
+    web.groups
+      .map(
+        (g) =>
+          '<h2 class="page-title" style="font-size:20px;margin:28px 0 8px" id="g-' + attr(g.id) + '">' +
+          esc(g.icon + " " + g.name) + "</h2>" +
+          '<p style="color:var(--muted);margin:0 0 14px">' + esc(g.desc) + "</p>" +
+          '<div class="ep-list">' + g.items.map((it) => webRow(Object.assign({}, it, { groupName: g.name, groupIcon: g.icon }))).join("") + "</div>"
+      )
+      .join("") +
+    '<div class="empty" data-filter-empty hidden>没有匹配的隐藏能力</div></div>';
+
+  write("web.html", layout({
+    path: "web.html", current: "web.html",
+    title: "隐藏能力 · 主站 Web",
+    desc: "开放平台文档里没有的 " + webItems.length + " 个哔哩哔哩主站 Web 接口：举报、拉黑、动态、评论、收藏、历史、消息、直播、创作中心，全部带实测状态。",
+    sidebar: apiSidebar({ root: "", href: "web.html" }),
+    main: webMain,
+    toc: false,
+  }));
+
+  /* ===== 隐藏能力详情页 ===== */
+  const webParamTable = (title, rows) => {
+    if (!rows || !rows.length) return "";
+    return (
+      '<h3 id="' + slug(title, new Set()) + '">' + esc(title) + "</h3>" +
+      '<div class="prose-table"><table><thead><tr><th>名称</th><th>位置</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody>' +
+      rows
+        .map((p) =>
+          "<tr><td><code>" + esc(p.name) + "</code></td><td>" + esc(p.in || "") + "</td><td>" + esc(p.type || "") + "</td><td>" +
+          (p.required ? '<span class="req">是</span>' : '<span style="color:var(--muted-2)">否</span>') +
+          "</td><td>" + esc(p.desc || "") + "</td></tr>"
+        )
+        .join("") +
+      "</tbody></table></div>"
+    );
+  };
+  const webCodeTable = (rows) => {
+    if (!rows || !rows.length) return "";
+    return (
+      '<h3 id="' + slug("返回码", new Set()) + '">返回码</h3>' +
+      '<div class="prose-table"><table><thead><tr><th>code</th><th>含义</th></tr></thead><tbody>' +
+      rows.map((c) => "<tr><td><code>" + esc(c.code) + "</code></td><td>" + esc(c.desc) + "</td></tr>").join("") +
+      "</tbody></table></div>"
+    );
+  };
+  const webNotesList = (rows) => {
+    if (!rows || !rows.length) return "";
+    return '<h3>要点与坑</h3><ul>' + rows.map((n) => "<li>" + esc(n) + "</li>").join("") + "</ul>";
+  };
+
+  webItems.forEach((it) => {
+    if (it.method !== "GET" && it.method !== "POST" && it.method !== "WS") {
+      // 「规则」类条目没有可调地址，仍然给独立页，正文里不放调用示例
+    }
+    const meta = webStatusMeta(it.status);
+    const used = new Set();
+    const toc = [];
+    if ((it.params || []).length) toc.push({ lv: 3, text: "参数", id: slug("参数", used) });
+    if ((it.codes || []).length) toc.push({ lv: 3, text: "返回码", id: slug("返回码", used) });
+    toc.push({ lv: 3, text: "调用方式", id: slug("调用方式", used) });
+
+    const main =
+      '<nav class="breadcrumb"><a href="../web.html">隐藏能力</a><span class="sep">/</span>' +
+      esc(it.groupName) + '<span class="sep">/</span><span>' + esc(it.name) + "</span></nav>" +
+      '<h1 class="page-title">' + esc(it.name) + "</h1>" +
+      '<div class="api-head"><div class="api-meta">' +
+      webMethodBadge(it) +
+      webStatusBadge(it) +
+      '<span class="badge badge-info">' + esc(it.groupIcon + " " + it.groupName) + "</span>" +
+      "</div>" +
+      '<div class="api-url"><span class="u">' + esc(it.url) + '</span><button class="code-copy" type="button" data-copy="' + attr(it.url) + '">复制</button></div>' +
+      '<p style="margin:14px 0 0;color:var(--muted);font-size:14px">' + esc(webAuthOf(it.status) + " · " + meta.label + " · " + meta.desc) +
+      (webHost(it.url) ? " · <code>" + esc(webHost(it.url)) + "</code>" : "") + "</p></div>" +
+      '<div class="callout callout-note"><div class="callout-ico">i</div><div><div class="callout-title">无凭据实测</div>' +
+      esc(it.probe || "—") + "</div></div>" +
+      (it.returns ? "<h3>返回</h3><p>" + esc(it.returns) + "</p>" : "") +
+      webParamTable("参数", it.params) +
+      webCodeTable(it.codes) +
+      webNotesList(it.notes) +
+      '<h3 id="' + slug("调用方式", new Set()) + '">调用方式</h3>' +
+      codeBlock(webSample(it), "javascript") +
+      (it.source ? '<hr><p style="color:var(--muted);font-size:14px">出处：' + esc(it.source) + "。原始记录见 <code>data/web.json</code>，可用 <code>npm run web:probe</code> 复现本条状态。</p>" : "") +
+      '<p style="color:var(--muted);font-size:14px">同组其它能力：' +
+      webItems
+        .filter((x) => x.groupId === it.groupId && x.id !== it.id)
+        .map((x) => '<a href="' + attr(x.id) + '.html">' + esc(x.name) + "</a>")
+        .join(" · ") +
+      "</p>";
+
+    write("web/" + it.id + ".html", layout({
+      root: "../",
+      path: "web/" + it.id + ".html",
+      title: it.name,
+      desc: (it.name + " — " + it.url + " — " + meta.label).slice(0, 200),
+      current: "web.html",
+      webGroup: it.groupId,
+      sidebar: apiSidebar({ root: "../", webGroup: it.groupId }),
+      main,
+      tocHtml: tocHtml(toc),
+    }));
+  });
 
   /* ======================= 接口详情 ======================= */
   const paramTable = (title, rows) => {
@@ -1159,6 +1369,14 @@ async function main() {
   Object.keys(codes).forEach((c) => si.push({ t: c, u: "errors.html", d: codes[c], k: "错误码" }));
   mcp.tools.forEach((t) => si.push({ t: t.name, u: "tools.html#" + t.name, d: (t.description || "").split("\n")[0].slice(0, 120), k: "工具" }));
   mock.entries.forEach((e) => si.push({ t: e.feature, u: "mock.html", d: e.url, k: "沙盒" }));
+  webItems.forEach((it) =>
+    si.push({
+      t: it.name,
+      u: "web/" + it.id + ".html",
+      d: [it.method, shortUrl(it.url), it.groupName, webStatusMeta(it.status).label].join(" · "),
+      k: "隐藏能力",
+    })
+  );
   MD_PAGES.forEach(([, out, title, desc]) => si.push({ t: title, u: out, d: desc, k: "文档" }));
   write("assets/search-index.json", JSON.stringify(si));
 
@@ -1177,6 +1395,7 @@ async function main() {
   console.log("  接口详情 : " + OUT_FILES.filter((f) => f.indexOf("api/") === 0).length);
   console.log("  指南详情 : " + OUT_FILES.filter((f) => f.indexOf("guide/") === 0).length);
   console.log("  事件详情 : " + OUT_FILES.filter((f) => f.indexOf("event/") === 0).length);
+  console.log("  隐藏能力 : " + OUT_FILES.filter((f) => f.indexOf("web/") === 0).length);
   console.log("搜索索引   : " + si.length + " 条");
   console.log("MCP 工具   : " + mcp.tools.length + " 个（实取自 server.mjs）");
   console.log("接口       : " + apis.length + " 篇 / " + endpointCount + " 个端点");
@@ -1184,6 +1403,7 @@ async function main() {
   console.log("推送事件   : " + events.length);
   console.log("错误码     : " + Object.keys(codes).length);
   console.log("沙盒接口   : " + mock.entries.length);
+  console.log("隐藏能力   : " + webItems.length + " 个 / " + web.groups.length + " 组（主站 Web）");
   console.log("总字节     : " + total.toLocaleString("en-US") + " (" + (total / 1024 / 1024).toFixed(2) + " MB)");
   console.log("本地预览   : npx --yes serve docs   然后打开 http://localhost:3000");
 }

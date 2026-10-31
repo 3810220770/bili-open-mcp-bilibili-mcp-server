@@ -34,6 +34,18 @@ try {
 const DOC_ROOT = INDEX.docRoot;
 const DOCS = INDEX.docs;
 
+// 主站 Web 隐藏能力目录（data/web.json）—— 开放平台文档里没有的那些接口
+let WEB = { groups: [], statusLegend: [] };
+try {
+  WEB = JSON.parse(fs.readFileSync(path.join(DATA_DIR, "web.json"), "utf8"));
+} catch {
+  /* 未生成时降级为空 */
+}
+const WEB_ITEMS = (WEB.groups || []).flatMap((g) =>
+  g.items.map((it) => Object.assign({}, it, { groupId: g.id, groupName: g.name }))
+);
+const WEB_STATUS = (k) => (WEB.statusLegend || []).find((s) => s.k === k) || { k, label: k, desc: "" };
+
 // ---------------------------------------------------------------- helpers
 const fileCache = new Map();
 function readDocBody(d) {
@@ -429,36 +441,62 @@ server.registerTool(
   {
     title: "接口清单过滤",
     description:
-      "按 method / scope / host / 路径关键词过滤全部端点，返回 #ref、METHOD、PATH、scope。适合「所有需要 SHOP_ORDER_INFO 的 POST 接口」这类问题，比全文搜索更准。默认最多 40 条。",
+      "按 method / scope / host / 路径关键词过滤端点，返回 #ref、METHOD、PATH、scope。适合「所有需要 SHOP_ORDER_INFO 的 POST 接口」这类问题，比全文搜索更准。默认最多 40 条。" +
+      "source:\"web\" 时改列开放平台文档里没有的「隐藏能力」（主站 Web，如举报 / 拉黑 / 动态 / 评论 / 直播），source:\"all\" 两边一起列。默认最多 40 条。",
     inputSchema: {
       method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]).optional(),
       scope: z.string().optional().describe("权限点，如 ARC_BASE"),
       host: z.string().optional().describe("member.bilibili.com / openupos.bilivideo.com / api.bilibili.com"),
       pathContains: z.string().optional().describe("路径或标题关键词"),
+      source: z.enum(["open", "web", "all"]).optional().describe("open=开放平台（默认），web=主站隐藏能力，all=两边都列"),
       limit: z.number().int().min(1).max(120).optional(),
     },
   },
-  async ({ method, scope, host, pathContains, limit = 40 }) => {
-    let list = allEndpoints().filter((d) => d.type === "api");
-    if (method) list = list.filter((d) => d.method === method.toUpperCase());
-    if (scope) list = list.filter((d) => (d.scopes || []).includes(scope.toUpperCase()));
-    if (host) list = list.filter((d) => new URL(d.url).host === host);
-    if (pathContains) {
-      const q = pathContains.toLowerCase();
-      list = list.filter((d) => (d.url + d.title + d.path).toLowerCase().includes(q));
-    }
-    list.sort((a, b) => a.num - b.num);
-    if (!list.length) return text("没有匹配的端点。去掉一些过滤条件再试，或用 bili_docs_search。");
-    const shown = list.slice(0, limit);
+  async ({ method, scope, host, pathContains, source = "open", limit = 40 }) => {
+    const openPart = () => {
+      let list = allEndpoints().filter((d) => d.type === "api");
+      if (method) list = list.filter((d) => d.method === method.toUpperCase());
+      if (scope) list = list.filter((d) => (d.scopes || []).includes(scope.toUpperCase()));
+      if (host) list = list.filter((d) => new URL(d.url).host === host);
+      if (pathContains) {
+        const q = pathContains.toLowerCase();
+        list = list.filter((d) => (d.url + d.title + d.path).toLowerCase().includes(q));
+      }
+      list.sort((a, b) => a.num - b.num);
+      return list.map((d) => ({ kind: "open", d }));
+    };
+    const webPart = () => {
+      let list = WEB_ITEMS.slice();
+      if (method) list = list.filter((w) => String(w.method).toUpperCase() === method.toUpperCase());
+      if (host) list = list.filter((w) => String(w.url).includes(host));
+      if (pathContains) {
+        const q = pathContains.toLowerCase();
+        list = list.filter((w) => (w.name + w.url + w.groupName + (w.notes || []).join(" ")).toLowerCase().includes(q));
+      }
+      if (scope) list = [];
+      return list.map((w) => ({ kind: "web", w }));
+    };
+
+    let rows = [];
+    if (source === "open") rows = openPart();
+    else if (source === "web") rows = webPart();
+    else rows = openPart().concat(webPart());
+
+    if (!rows.length) return text("没有匹配的端点。去掉一些过滤条件再试，或用 bili_docs_search。");
+    const shown = rows.slice(0, limit);
+    const line = (r) =>
+      r.kind === "open"
+        ? `#${r.d.num} ${r.d.method} ${shortPath(r.d.url)} ⟨${new URL(r.d.url).host}⟩  [${(r.d.scopes || ["—"]).join(",")}]  ${r.d.title}`
+        : `web:${r.w.id} ${r.w.method} ${shortPath(r.w.url)} ⟨${new URL(r.w.url).host}⟩  [${WEB_STATUS(r.w.status).label}]  ${r.w.name}`;
     return text(
       [
-        `命中 ${list.length} 条${list.length > shown.length ? `，显示前 ${shown.length}` : ""}`,
+        `命中 ${rows.length} 条${rows.length > shown.length ? `，显示前 ${shown.length}` : ""}${source === "all" ? "（开放平台 + 主站隐藏能力）" : ""}`,
         "",
-        ...shown.map(
-          (d) =>
-            `#${d.num} ${d.method} ${shortPath(d.url)} ⟨${new URL(d.url).host}⟩  [${(d.scopes || ["—"]).join(",")}]  ${d.title}`
-        ),
-      ].join("\n")
+        ...shown.map(line),
+        source === "open" && WEB_ITEMS.length ? `\n另有 ${WEB_ITEMS.length} 个主站隐藏能力：bili_endpoints { source: "web" }` : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
     );
   }
 );
@@ -1225,6 +1263,30 @@ server.registerTool(
 );
 
 // ---------------------------------------------------------------- 资源与提示
+function webCatalogText() {
+  return [
+    `# 主站 Web 隐藏能力（${WEB_ITEMS.length} 个 / ${(WEB.groups || []).length} 组）`,
+    "",
+    "开放平台（open.bilibili.com）只放已商务合作的能力；其余在主站 www/api.bilibili.com 与 api.live.bilibili.com 上，走浏览器 Cookie，不走 2.0 签名。",
+    WEB.authNote || "",
+    "",
+    ...(WEB.groups || []).flatMap((g) => [
+      `## ${g.name}（${g.items.length}）`,
+      g.desc || "",
+      "",
+      ...g.items.map((it) => {
+        const bits = [`- \`${it.method} ${shortPath(it.url)}\` **${it.name}** — ${WEB_STATUS(it.status).label}`];
+        if (it.params && it.params.length)
+          bits.push(`  参数: ${it.params.map((p) => p.name + (p.required ? "*" : "")).join(", ")}`);
+        if (it.notes && it.notes.length) bits.push(`  注意: ${it.notes[0]}`);
+        bits.push(`  实测: ${it.probe || "—"}`);
+        return bits.join("\n");
+      }),
+      "",
+    ]),
+  ].join("\n");
+}
+
 try {
   server.registerResource(
     "catalog",
@@ -1236,6 +1298,19 @@ try {
     },
     async (uri) => ({
       contents: [{ uri: uri.href, mimeType: "text/plain; charset=utf-8", text: fs.readFileSync(path.join(DATA_DIR, "llms.txt"), "utf8") }],
+    })
+  );
+
+  server.registerResource(
+    "web",
+    "bili://web",
+    {
+      title: "主站 Web 隐藏能力目录",
+      description: `${WEB_ITEMS.length} 个开放平台文档里没有的接口（举报 / 拉黑 / 动态 / 评论 / 收藏 / 历史 / 消息 / 直播 / 创作中心），含参数、返回码与无 Cookie 实测状态。`,
+      mimeType: "text/markdown; charset=utf-8",
+    },
+    async (uri) => ({
+      contents: [{ uri: uri.href, mimeType: "text/markdown; charset=utf-8", text: webCatalogText() }],
     })
   );
 

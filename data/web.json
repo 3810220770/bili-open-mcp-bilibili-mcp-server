@@ -1,0 +1,1312 @@
+{
+  "kind": "web",
+  "title": "主站 Web 隐藏能力",
+  "subtitle": "开放平台文档里没有的那些接口",
+  "generatedAt": "2026-10-31",
+  "lede": "开放平台（open.bilibili.com）只放出已商务合作的能力，文档自己也写着「其它能力不走文档，请发邮件咨询」（见 170_文档中未列出的功能）。剩下那一大片 —— 举报、拉黑、动态、评论、收藏、历史、消息、直播、创作中心 —— 都在主站 www/api.bilibili.com 与 api.live.bilibili.com 上，走浏览器 Cookie，不走 2.0 签名。这一页把它们收齐：方法、地址、参数、返回码、实测状态、坑，一条不落，全部可以通过 bili_web_call 直接调。",
+  "authNote": "主站体系只认 Cookie（SESSDATA / bili_jct 等），与开放平台的 client_id + secret + HMAC 签名互不通用。写操作会自动补 csrf=bili_jct；/wbi/、/polymer/、/v2/reply/wbi/ 路径会自动算 w_rid + wts。",
+  "probe": {
+    "at": "2026-10-31",
+    "by": "scripts/probe-web.mjs",
+    "ua": "Chrome/124 · Windows · Referer https://www.bilibili.com/",
+    "cookie": false,
+    "note": "每条状态都是无 Cookie、无签名直接 GET 拿到的真实返回，由 npm run web:probe 复现。写操作（POST + csrf）不静默调用，一律标「未实测」。"
+  },
+  "statusLegend": [
+    { "k": "ok", "label": "公开可调", "desc": "无凭据即 code 0" },
+    { "k": "need-cookie", "label": "需 Cookie", "desc": "无 Cookie 返回 -101 账号未登录" },
+    { "k": "wbi", "label": "需 wbi", "desc": "要 w_rid + wts，bili_web_call 自动算" },
+    { "k": "risk", "label": "有风控", "desc": "缺指纹/Cookie 时 -352 风控校验失败或 HTTP 412" },
+    { "k": "priv", "label": "可能私有", "desc": "接口通，但对方隐私设置未公开" },
+    { "k": "gone", "label": "已失效", "desc": "路径下线或迁移" },
+    { "k": "post", "label": "写操作", "desc": "POST + csrf，未静默实测" }
+  ],
+  "groups": [
+    {
+      "id": "report",
+      "name": "举报",
+      "icon": "🚩",
+      "desc": "两个入口别混：按用户举报走 /x/space/report，按单条评论举报走 /x/v2/reply/report。合法组合一律先拉 /x/space/report/options，不要写死。",
+      "items": [
+        {
+          "id": "report-options",
+          "name": "举报选项白名单",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/report/options",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 reason_list（5 组）+ tag_version=1",
+          "params": [],
+          "returns": "reason_list[]：{ reason, reason_text, scene_list[]{ scene, scene_text } }；tag_version",
+          "notes": [
+            "reason 5 传播色情/赌博/垃圾广告/诱导交易、1 色情低俗、4 引战人身攻击 → 支持 scene 1~7；reason 3 违法违禁、2 虚假不实信息 → 仅 scene 1",
+            "scene：1 用户资料 · 2 稿件 · 3 评论 · 4 动态 · 5 私信 · 6 专栏 · 7 其他（收藏夹、播单）",
+            "tag_version 也以本接口为准，当前为 1"
+          ],
+          "source": "实测；README.md §举报"
+        },
+        {
+          "id": "report-user",
+          "name": "举报用户",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/space/report",
+          "status": "need-cookie",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测；前端调用链已核对",
+          "params": [
+            { "name": "mid", "in": "form", "type": "number", "required": true, "desc": "被举报用户 mid" },
+            { "name": "reason", "in": "form", "type": "number", "required": true, "desc": "取自 /x/space/report/options" },
+            { "name": "scene", "in": "form", "type": "number", "required": true, "desc": "1~7，与 reason 必须是一对合法组合" },
+            { "name": "tag_version", "in": "form", "type": "number", "required": true, "desc": "取自 /x/space/report/options，当前 1" },
+            { "name": "specific_reason", "in": "form", "type": "string", "required": false, "desc": "细分原因，无值时不发" },
+            { "name": "specific_reason_v2", "in": "form", "type": "string", "required": false, "desc": "细分原因 V2，无值时不发" }
+          ],
+          "returns": "code 0 举报成功",
+          "codes": [
+            { "code": "0", "desc": "举报成功" },
+            { "code": "12008", "desc": "已举报过" },
+            { "code": "12019", "desc": "举报过于频繁" },
+            { "code": "-509", "desc": "请求过于频繁" },
+            { "code": "-111", "desc": "csrf 校验失败（bili_jct 没带上）" }
+          ],
+          "notes": [
+            "body 是 application/x-www-form-urlencoded；bili_web_call 传 form 会自动补 csrf",
+            "specific_reason / specific_reason_v2 没值时 axios 会丢掉，最小 body 是 mid=&reason=&scene=&csrf= —— 实测 75 字节",
+            "space.bilibili.com 的 index-*.js 里 IC = ({mid, scene, reason, specific_reason, specific_reason_v2, tag_version}) => Re.request({ url: '/x/space/report', method: 'POST', data: {...} })"
+          ],
+          "sample": "bili_web_call { \"path\": \"/x/space/report\", \"form\": { \"mid\": 3546657551551003, \"reason\": 5, \"scene\": 1, \"tag_version\": 1 } }",
+          "source": "README.md §举报 · AGENTS.md §5d"
+        },
+        {
+          "id": "report-comment",
+          "name": "举报单条评论",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/reply/report",
+          "status": "need-cookie",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测；该接口风控更紧，静默调用常见 -352",
+          "params": [
+            { "name": "type", "in": "form", "type": "number", "required": true, "desc": "评论区类型，视频稿件为 1" },
+            { "name": "oid", "in": "form", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "rpid", "in": "form", "type": "number", "required": true, "desc": "评论 id" },
+            { "name": "reason", "in": "form", "type": "number", "required": true, "desc": "0~17，见下表" },
+            { "name": "content", "in": "form", "type": "string", "required": false, "desc": "补充说明" }
+          ],
+          "returns": "code 0 举报成功",
+          "codes": [
+            { "code": "0", "desc": "举报成功" },
+            { "code": "12008", "desc": "已举报过" },
+            { "code": "12019", "desc": "举报过于频繁" },
+            { "code": "-352", "desc": "风控校验失败（静默调用常见）" }
+          ],
+          "notes": [
+            "reason：0 其他 · 1 垃圾广告 · 2 色情 · 3 刷屏 · 4 引战 · 5 剧透 · 6 政治 · 7 人身攻击 · 8 内容不相关 · 9 违法违规 · 10 低俗 · 11 非法网站 · 12 赌博诈骗 · 13 传播不实信息 · 14 怂恿教唆 · 15 侵犯隐私 · 16 抢楼 · 17 青少年不良",
+            "要报评论得先拿 oid/rpid：稿件 aid 用 /x/space/arc/search，评论 id 用 /x/v2/reply/wbi/main"
+          ],
+          "source": "README.md §举报 · AGENTS.md §5d"
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "name": "账号与登录态",
+      "icon": "🔑",
+      "desc": "确认 Cookie 死活、取 wbi 密钥、扫码登录、拿设备指纹。",
+      "items": [
+        {
+          "id": "account-nav",
+          "name": "登录态 / 导航栏信息",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/nav",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 code -101 账号未登录",
+          "params": [],
+          "returns": "isLogin、mid、uname、face、money、level_info、vipStatus、wbi_img{img_url,sub_url}",
+          "notes": [
+            "wbi 签名的 img_key / sub_key 就从这个接口的 data.wbi_img 取",
+            "bili_cookie {action:'whoami'} 用的就是它；-101 即 Cookie 已失效"
+          ],
+          "source": "AGENTS.md §5d"
+        },
+        {
+          "id": "account-nav-stat",
+          "name": "我的关注/粉丝数",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/nav/stat",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "following、follower、dynamic_count"
+        },
+        {
+          "id": "account-member",
+          "name": "我的账号资料",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/member/web/account",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "mid、name、sex、birthday、coins、face"
+        },
+        {
+          "id": "account-cookie-info",
+          "name": "Cookie 是否需要刷新",
+          "method": "GET",
+          "url": "https://passport.bilibili.com/x/passport-login/web/cookie/info",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "refresh（true 时要走 cookie/refresh）、timestamp",
+          "notes": ["refresh=true 时用下面那条 cookie/refresh（POST）配合 SESSDATA 里的 refresh_token 续期"]
+        },
+        {
+          "id": "account-cookie-refresh",
+          "name": "刷新 Cookie",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/passport-login/web/cookie/refresh",
+          "status": "need-cookie",
+          "probe": "GET 实测 HTTP 405 Method Not Allowed —— 必须 POST",
+          "csrf": true,
+          "form": true,
+          "params": [
+            { "name": "csrf", "in": "form", "type": "string", "required": true, "desc": "即 bili_jct" },
+            { "name": "refresh_token", "in": "form", "type": "string", "required": true, "desc": "从当前 SESSDATA 解析" },
+            { "name": "correspondPath", "in": "form", "type": "string", "required": true, "desc": "由 cookie/info 的 timestamp 做 RSA-OAEP 计算得到" }
+          ]
+        },
+        {
+          "id": "account-qrcode-generate",
+          "name": "扫码登录 · 生成二维码",
+          "method": "GET",
+          "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/generate",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 url + qrcode_key",
+          "params": [],
+          "returns": "url（二维码内容）、qrcode_key（轮询用）"
+        },
+        {
+          "id": "account-qrcode-poll",
+          "name": "扫码登录 · 轮询结果",
+          "method": "GET",
+          "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/poll",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，内层 data.code=86101（未扫码）",
+          "params": [
+            { "name": "qrcode_key", "in": "query", "type": "string", "required": true, "desc": "generate 返回的 key" }
+          ],
+          "codes": [
+            { "code": "0", "desc": "登录成功，Set-Cookie 里就是 SESSDATA / bili_jct" },
+            { "code": "86038", "desc": "二维码已失效" },
+            { "code": "86090", "desc": "已扫码未确认" },
+            { "code": "86101", "desc": "未扫码" }
+          ],
+          "notes": ["这条链是本地无凭据拿到完整 Cookie 的官方途径，不涉及任何私有接口"]
+        },
+        {
+          "id": "account-zone",
+          "name": "服务器时间 / 时区",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/zone",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [],
+          "returns": "addr、country、province、city、isp、tz"
+        },
+        {
+          "id": "account-online",
+          "name": "全站在线人数",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/online",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [],
+          "returns": "region_count、all_count、web_online、play_online"
+        }
+      ]
+    },
+    {
+      "id": "user",
+      "name": "用户与空间",
+      "icon": "👤",
+      "desc": "拿任意用户的公开资料、粉丝数、投稿计数、置顶视频、追番列表；以及「我和 TA 是什么关系」。",
+      "items": [
+        {
+          "id": "user-card",
+          "name": "用户名片",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/card",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（2.6 KB）",
+          "params": [
+            { "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "photo", "in": "query", "type": "boolean", "required": false, "desc": "是否带更多图片字段" }
+          ],
+          "returns": "card{ mid, name, face, sign, level_info, vip, fans, attentions, archive_count }、following、follower、space"
+        },
+        {
+          "id": "user-relation-stat",
+          "name": "关注 / 粉丝数（含我与 TA 的关系）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/relation/stat",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 mid / following / whisper / black / follower",
+          "params": [
+            { "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }
+          ],
+          "returns": "mid、following、follower、whisper、black",
+          "notes": ["带 Cookie 时 following 表示「对方是否关注我」的位；纯公开粉丝数看 follower"]
+        },
+        {
+          "id": "user-upstat",
+          "name": "UP 主累计数据",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/upstat",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }],
+          "returns": "archive{ view }、likes、article{ view }"
+        },
+        {
+          "id": "user-navnum",
+          "name": "空间计数（稿件 / 动态 / 合集）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/navnum",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }],
+          "returns": "video、audio、album、article、favourite、bangumi、dynamic、opus 等计数"
+        },
+        {
+          "id": "user-top-arc",
+          "name": "置顶稿件",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/top/arc",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }],
+          "returns": "aid、bvid、title、pic、stat、duration"
+        },
+        {
+          "id": "user-acc-info",
+          "name": "用户详细资料（旧路径）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/acc/info",
+          "status": "risk",
+          "probe": "无 Cookie 实测 -799 请求过于频繁，正式路径已迁到 /x/space/wbi/acc/info",
+          "params": [{ "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }],
+          "notes": ["已被风控重点照顾，改用下面那条 wbi 版本"]
+        },
+        {
+          "id": "user-wbi-acc-info",
+          "name": "用户详细资料（wbi）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/wbi/acc/info",
+          "status": "wbi",
+          "probe": "无 Cookie + 无签名实测 -352 风控校验失败；带 Cookie + w_rid 实测 code 0",
+          "params": [
+            { "name": "mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "w_rid", "in": "query", "type": "string", "required": true, "desc": "wbi 签名（bili_web_call 自动算）" },
+            { "name": "wts", "in": "query", "type": "number", "required": true, "desc": "参与签名的秒级时间戳" }
+          ],
+          "notes": [
+            "bili_web_call 看到 /wbi/ 自动加 w_rid + wts",
+            "实测：带签名 code 0，wbi:false 则 -403 访问权限不足"
+          ],
+          "source": "AGENTS.md §5d"
+        },
+        {
+          "id": "user-acc-relation",
+          "name": "我与 TA 的关系",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/acc/relation",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [{ "name": "mid", "in": "query", "type": "number", "required": true, "desc": "对方 mid" }],
+          "returns": "relation{ mid, attribute, mtime, tag, special }、be_relation"
+        },
+        {
+          "id": "user-bangumi-follow",
+          "name": "追番 / 追剧列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/bangumi/follow/list",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 list / pn / ps / total",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 番剧，2 影视" },
+            { "name": "follow_status", "in": "query", "type": "number", "required": true, "desc": "0 全部，1 想看，2 在看，3 看过" },
+            { "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码，从 1 起" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "video",
+      "name": "视频与播放",
+      "icon": "🎬",
+      "desc": "稿件详情、分 P、播放器信息、字幕、以及取播放地址。",
+      "items": [
+        {
+          "id": "video-view",
+          "name": "稿件详情",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/view",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（7.2 KB）",
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": false, "desc": "BV 号，与 aid 二选一" },
+            { "name": "aid", "in": "query", "type": "number", "required": false, "desc": "AV 号" }
+          ],
+          "returns": "aid、bvid、cid、title、desc、pic、duration、pubdate、owner、stat{view,danmaku,reply,favorite,coin,share,like}、pages[]"
+        },
+        {
+          "id": "video-view-detail",
+          "name": "稿件详情（含 UP 卡片与推荐）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/view/detail",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（66 KB）",
+          "params": [{ "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" }],
+          "returns": "View、Card（UP 主名片）、Tags、Related（相关推荐）、Reply（热评）",
+          "notes": ["一次拿齐详情页所需数据，比分头调省事"]
+        },
+        {
+          "id": "video-pagelist",
+          "name": "分 P 列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/player/pagelist",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" }],
+          "returns": "cid、page、from、part、duration、dimension"
+        },
+        {
+          "id": "video-player-v2",
+          "name": "播放器信息（字幕 / 观看进度）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/player/v2",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 aid/bvid/cid/max_limit 等",
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "cid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" }
+          ],
+          "returns": "subtitle（字幕列表）、view_points、interaction、last_play_time（需登录）"
+        },
+        {
+          "id": "video-player-wbi-v2",
+          "name": "播放器信息（wbi）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/player/wbi/v2",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "cid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" }
+          ],
+          "notes": ["与 /x/player/v2 同构，带 wbi 的版本返回字段更全"]
+        },
+        {
+          "id": "video-archive-desc",
+          "name": "稿件简短简介",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/archive/desc",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" }]
+        },
+        {
+          "id": "video-archive-relation",
+          "name": "我对该稿件的操作状态",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/archive/relation",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [{ "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" }],
+          "returns": "like、dislike、coin、favorite、season_fav",
+          "notes": ["判断「我点过赞没 / 投过币没」就是这个；写操作在下面「写操作」组"]
+        },
+        {
+          "id": "video-archive-coins",
+          "name": "该稿件投币数",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/archive/coins",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [{ "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" }]
+        },
+        {
+          "id": "video-playurl",
+          "name": "取播放地址（playurl）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/player/playurl",
+          "status": "wbi",
+          "probe": "裸 GET 实测 -404 啥都木有；需 wbi + Referer + 有效 cid",
+          "expectCodes": [0, -403, -404, -352],
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "cid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" },
+            { "name": "qn", "in": "query", "type": "number", "required": false, "desc": "清晰度，如 80" },
+            { "name": "fnval", "in": "query", "type": "number", "required": false, "desc": "16 = DASH" },
+            { "name": "fourk", "in": "query", "type": "number", "required": false, "desc": "1 允许 4K" }
+          ],
+          "notes": [
+            "必须带 Referer: https://www.bilibili.com/，否则直接 403",
+            "返回的 durl / dash 地址有时效，落地前先取"
+          ]
+        },
+        {
+          "id": "video-conclusion",
+          "name": "AI 视频总结",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/view/conclusion/get",
+          "status": "risk",
+          "probe": "无 Cookie 实测 -403 访问权限不足",
+          "params": [
+            { "name": "bvid", "in": "query", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "cid", "in": "query", "type": "number", "required": true, "desc": "分 P 的 cid" },
+            { "name": "up_mid", "in": "query", "type": "number", "required": true, "desc": "UP 主 mid" }
+          ],
+          "notes": ["需登录 + wbi；log 里常见 -403 —— 账号等级或风控不够"]
+        },
+        {
+          "id": "video-newlist",
+          "name": "分区最新投稿",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/newlist",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 archives + page",
+          "params": [
+            { "name": "rid", "in": "query", "type": "number", "required": true, "desc": "分区 id" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "write",
+      "name": "写操作（点赞 / 投币 / 收藏 / 关注 / 拉黑）",
+      "icon": "✍️",
+      "desc": "全部是 POST + csrf=bili_jct。缺 bili_jct 一律 -111 csrf 校验失败。这一组不会静默调用，标注为「未实测」的请自行在登录态下打一次。",
+      "items": [
+        {
+          "id": "write-archive-like",
+          "name": "点赞 / 取消点赞",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/web-interface/archive/like",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "bvid", "in": "form", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "like", "in": "form", "type": "number", "required": true, "desc": "1 点赞，2 取消" }
+          ],
+          "codes": [{ "code": "-111", "desc": "csrf 校验失败" }]
+        },
+        {
+          "id": "write-archive-coin",
+          "name": "投币",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/web-interface/coin/add",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "bvid", "in": "form", "type": "string", "required": true, "desc": "BV 号" },
+            { "name": "multiply", "in": "form", "type": "number", "required": true, "desc": "投币数 1 / 2" },
+            { "name": "select_like", "in": "form", "type": "number", "required": false, "desc": "1 顺便点赞" }
+          ]
+        },
+        {
+          "id": "write-fav-deal",
+          "name": "收藏 / 取消收藏",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v3/fav/resource/deal",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "rid", "in": "form", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "type", "in": "form", "type": "number", "required": true, "desc": "2 = 视频" },
+            { "name": "add_media_ids", "in": "form", "type": "string", "required": false, "desc": "要加入的收藏夹 id，逗号分隔" },
+            { "name": "del_media_ids", "in": "form", "type": "string", "required": false, "desc": "要移出的收藏夹 id，逗号分隔" }
+          ]
+        },
+        {
+          "id": "write-relation-modify",
+          "name": "关注 / 取关 / 拉黑 / 移除粉丝",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/relation/modify",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "fid", "in": "form", "type": "number", "required": true, "desc": "目标用户 mid" },
+            { "name": "act", "in": "form", "type": "number", "required": true, "desc": "1 关注 · 2 取关 · 5 拉黑 · 6 取消拉黑 · 7 移除粉丝 · 8 悄悄关注 · 9 取消悄悄关注" },
+            { "name": "re_src", "in": "form", "type": "number", "required": false, "desc": "来源位，网页端一般 11" }
+          ],
+          "notes": [
+            "拉黑（act=5）是举报之外最常用的处置动作；黑名单列表用 /x/relation/blacks 读",
+            "取关后再关注有频率限制，短时间连点会 -509"
+          ]
+        },
+        {
+          "id": "write-reply-add",
+          "name": "发表评论",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/reply/add",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "type", "in": "form", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "form", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "message", "in": "form", "type": "string", "required": true, "desc": "正文" },
+            { "name": "root", "in": "form", "type": "number", "required": false, "desc": "回复的根评论 rpid" },
+            { "name": "parent", "in": "form", "type": "number", "required": false, "desc": "回复的子评论 rpid" }
+          ],
+          "notes": ["新号/IP 冷启动常被 -412 拦截，需要正常浏览一阵子"]
+        },
+        {
+          "id": "write-reply-action",
+          "name": "评论点赞 / 点踩",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/v2/reply/action",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "oid", "in": "form", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "rpid", "in": "form", "type": "number", "required": true, "desc": "评论 id" },
+            { "name": "action", "in": "form", "type": "number", "required": true, "desc": "1 点赞，0 取消" }
+          ]
+        },
+        {
+          "id": "write-triple",
+          "name": "一键三连",
+          "method": "POST",
+          "url": "https://api.bilibili.com/x/web-interface/archive/like/triple",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [{ "name": "bvid", "in": "form", "type": "string", "required": true, "desc": "BV 号" }],
+          "notes": ["等价于点赞 + 投 2 币 + 收藏；币不足时只完成能做的部分"]
+        }
+      ]
+    },
+    {
+      "id": "reply",
+      "name": "评论",
+      "icon": "💬",
+      "desc": "读评论区、楼中楼、热评、表情面板。举报与发表在上面两组。",
+      "items": [
+        {
+          "id": "reply-list",
+          "name": "评论列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/reply",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（38 KB）",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "sort", "in": "query", "type": "number", "required": false, "desc": "0 时间，1 点赞，2 热度" }
+          ]
+        },
+        {
+          "id": "reply-main",
+          "name": "评论主楼（新接口）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/reply/main",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（233 KB）",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "mode", "in": "query", "type": "number", "required": false, "desc": "2 按时间，3 按热度" }
+          ],
+          "notes": ["现在网页评论区实际用的就是它，返回里 replies 是主楼、top_replies 是置顶"]
+        },
+        {
+          "id": "reply-reply",
+          "name": "楼中楼（子评论）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/reply/reply",
+          "status": "ok",
+          "probe": "无 Cookie + 最小参数实测 code 12006 没有该评论 —— 接口通，示例参数无效",
+          "expectCodes": [0, 12006],
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "root", "in": "query", "type": "number", "required": true, "desc": "根评论 rpid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" }
+          ]
+        },
+        {
+          "id": "reply-hot",
+          "name": "热评",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/reply/hot",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "稿件 aid" }
+          ]
+        },
+        {
+          "id": "reply-wbi-main",
+          "name": "评论主楼（wbi）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/reply/wbi/main",
+          "status": "wbi",
+          "probe": "无签名实测 -403 访问权限不足",
+          "params": [
+            { "name": "oid", "in": "query", "type": "number", "required": true, "desc": "稿件 aid" },
+            { "name": "type", "in": "query", "type": "number", "required": true, "desc": "1 = 视频" },
+            { "name": "mode", "in": "query", "type": "number", "required": false, "desc": "2 时间，3 热度" }
+          ],
+          "notes": ["bili_web_call 按路径 /v2/reply/wbi/ 自动加签名"]
+        },
+        {
+          "id": "reply-emote-panel",
+          "name": "表情包面板",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/emote/user/panel/web",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 setting + packages",
+          "params": [{ "name": "business", "in": "query", "type": "string", "required": true, "desc": "reply（评论区）/ dynamic（动态）" }],
+          "notes": ["发评论时把表情包文本（如 [tv_doge]）写进 message 即可"]
+        }
+      ]
+    },
+    {
+      "id": "dynamic",
+      "name": "动态",
+      "icon": "📰",
+      "desc": "动态是 wbi + 风控最重的一块，裸调基本吃 412，必须先拿 wbi 签名并带上完整浏览器头。",
+      "items": [
+        {
+          "id": "dynamic-space",
+          "name": "某人的动态列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space",
+          "status": "risk",
+          "probe": "裸 GET 实测 HTTP 412（风控页），需 wbi + 完整浏览器头",
+          "params": [
+            { "name": "host_mid", "in": "query", "type": "number", "required": true, "desc": "目标用户 mid" },
+            { "name": "offset", "in": "query", "type": "string", "required": false, "desc": "翻页游标，取自上次返回" }
+          ],
+          "returns": "items[]（每条含 id_str、modules、type）",
+          "notes": [
+            "id_str 就是动态 id，拿去 detail 读正文或作为举报 scene=4 的对象",
+            "实测要点：缺 wbi 或 Referer 时返回 412 HTML，不是 JSON"
+          ],
+          "source": "AGENTS.md §5d"
+        },
+        {
+          "id": "dynamic-all",
+          "name": "我关注的动态流",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "type", "in": "query", "type": "string", "required": false, "desc": "all / video / article" },
+            { "name": "page", "in": "query", "type": "number", "required": false, "desc": "页码" }
+          ]
+        },
+        {
+          "id": "dynamic-detail",
+          "name": "动态正文",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail",
+          "status": "ok",
+          "probe": "无 Cookie + id=1 实测 code 4101105/4101139 请求数据发生错误 —— 接口通，id 无效",
+          "expectCodes": [0, 4101105, 4101139],
+          "params": [{ "name": "id", "in": "query", "type": "string", "required": true, "desc": "id_str，来自 feed 接口" }]
+        }
+      ]
+    },
+    {
+      "id": "relation",
+      "name": "关系与消息",
+      "icon": "🔔",
+      "desc": "关注列表、粉丝列表、黑名单、关注分组，以及消息中心（回复我的 / @我的 / 收到的赞）。",
+      "items": [
+        {
+          "id": "relation-followings",
+          "name": "关注列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/relation/followings",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ],
+          "notes": ["别人是否公开关注列表取决于其隐私设置"]
+        },
+        {
+          "id": "relation-fans",
+          "name": "粉丝列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/relation/fans",
+          "status": "risk",
+          "probe": "无 Cookie 实测 -352 风控校验失败",
+          "params": [
+            { "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "relation-blacks",
+          "name": "黑名单",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/relation/blacks",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ],
+          "notes": ["配合 POST /x/relation/modify 的 act=5 / act=6 做拉黑与解除"]
+        },
+        {
+          "id": "relation-tags",
+          "name": "关注分组",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/relation/tags",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "name、tagid、count"
+        },
+        {
+          "id": "relation-tag-members",
+          "name": "分组内成员",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/relation/tag",
+          "status": "need-cookie",
+          "probe": "未实测（同族接口，均需登录）",
+          "params": [
+            { "name": "tagid", "in": "query", "type": "number", "required": true, "desc": "来自 /x/relation/tags" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "msg-unread",
+          "name": "消息未读数",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/msgfeed/unread",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "reply、at、like、sys_msg、recv_like 等未读计数"
+        },
+        {
+          "id": "msg-reply",
+          "name": "回复我的",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/msgfeed/reply",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "msg-at",
+          "name": "@我的",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/msgfeed/at",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "msg-like",
+          "name": "收到的赞",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/msgfeed/like",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fav",
+      "name": "收藏 / 历史 / 稍后再看",
+      "icon": "⭐",
+      "desc": "收藏夹、观看历史、稍后再看，以及「TA 投过币 / 点过赞」这类空间子页（受隐私开关影响）。",
+      "items": [
+        {
+          "id": "fav-created-list",
+          "name": "收藏夹列表",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v3/fav/folder/created/list-all",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，data 为 null（该 UP 未公开或没有收藏夹）",
+          "params": [{ "name": "up_mid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }],
+          "returns": "list[]{ id, title, media_count, attr }"
+        },
+        {
+          "id": "fav-resource-list",
+          "name": "收藏夹内容",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v3/fav/resource/list",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，data 为 null（需有效 media_id）",
+          "params": [
+            { "name": "media_id", "in": "query", "type": "number", "required": true, "desc": "收藏夹 id" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" },
+            { "name": "keyword", "in": "query", "type": "string", "required": false, "desc": "在收藏夹内搜索" }
+          ]
+        },
+        {
+          "id": "fav-toview",
+          "name": "稍后再看",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/v2/history/toview/web",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": []
+        },
+        {
+          "id": "history-cursor",
+          "name": "观看历史",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/history/cursor",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" },
+            { "name": "max", "in": "query", "type": "number", "required": false, "desc": "游标，取自上次返回" },
+            { "name": "view_at", "in": "query", "type": "number", "required": false, "desc": "游标时间戳" },
+            { "name": "business", "in": "query", "type": "string", "required": false, "desc": "分区筛选，如 archive" }
+          ]
+        },
+        {
+          "id": "space-coin-video",
+          "name": "TA 投币的视频",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/coin/video",
+          "status": "priv",
+          "probe": "无 Cookie 实测 code 53013 用户隐私设置未公开",
+          "params": [
+            { "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ],
+          "notes": ["53013 是「对方关了公开」而不是接口坏了 —— 别当成 bug"]
+        },
+        {
+          "id": "space-like-video",
+          "name": "TA 点赞的视频",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/space/like/video",
+          "status": "priv",
+          "probe": "无 Cookie 实测 code 53013 用户隐私设置未公开",
+          "params": [{ "name": "vmid", "in": "query", "type": "number", "required": true, "desc": "用户 mid" }]
+        }
+      ]
+    },
+    {
+      "id": "search",
+      "name": "搜索与热搜",
+      "icon": "🔎",
+      "desc": "全站搜索、分类搜索、热搜榜。搜索类接口对风控敏感，请求头要全，频率要低。",
+      "items": [
+        {
+          "id": "search-all-v2",
+          "name": "综合搜索",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/search/all/v2",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（32 KB）",
+          "params": [
+            { "name": "keyword", "in": "query", "type": "string", "required": true, "desc": "关键词，需 urlencode" },
+            { "name": "page", "in": "query", "type": "number", "required": false, "desc": "页码" }
+          ],
+          "returns": "result[]（按 search_type 分组：video / media_bangumi / bili_user / article …）"
+        },
+        {
+          "id": "search-type",
+          "name": "分类搜索",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/search/type",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0（27 KB）",
+          "params": [
+            { "name": "search_type", "in": "query", "type": "string", "required": true, "desc": "video / media_bangumi / media_ft / live / bili_user / article / topic" },
+            { "name": "keyword", "in": "query", "type": "string", "required": true, "desc": "关键词" },
+            { "name": "page", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "order", "in": "query", "type": "string", "required": false, "desc": "排序：totalrank / click / pubdate / dm / stow" }
+          ],
+          "notes": ["返回的 title 里有 <em class=\"keyword\"> 高亮标签，落地前要清掉"]
+        },
+        {
+          "id": "search-square",
+          "name": "热搜榜",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/search/square",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 trending",
+          "params": [{ "name": "limit", "in": "query", "type": "number", "required": false, "desc": "条数" }]
+        },
+        {
+          "id": "search-default",
+          "name": "默认搜索词 / 公告",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/web-interface/search/default",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [],
+          "returns": "seid、name（默认词）、show_name"
+        }
+      ]
+    },
+    {
+      "id": "live",
+      "name": "直播",
+      "icon": "📺",
+      "desc": "直播间信息、拉流地址、弹幕长连、高能榜、分区列表。api.live.bilibili.com 与主站共用同一套 Cookie。",
+      "items": [
+        {
+          "id": "live-room-getinfo",
+          "name": "直播间信息",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/room/v1/Room/get_info",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "room_id", "in": "query", "type": "number", "required": true, "desc": "房间号（短号也行）" }],
+          "returns": "room_id、short_id、uid、title、live_status、online、area_name、cover"
+        },
+        {
+          "id": "live-room-init",
+          "name": "短号 → 真实房间号",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/room/v1/Room/room_init",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "id", "in": "query", "type": "number", "required": true, "desc": "短号或长号" }],
+          "returns": "room_id、short_id、uid、live_status、encrypted"
+        },
+        {
+          "id": "live-room-baseinfo",
+          "name": "批量直播间基础信息",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 by_uids / by_room_ids",
+          "params": [
+            { "name": "room_ids", "in": "query", "type": "string", "required": false, "desc": "房间号，逗号分隔" },
+            { "name": "uids", "in": "query", "type": "string", "required": false, "desc": "主播 uid，逗号分隔" },
+            { "name": "req_biz", "in": "query", "type": "string", "required": false, "desc": "固定 web" }
+          ],
+          "notes": ["一次最多几十个，适合批量巡检开播状态"]
+        },
+        {
+          "id": "live-playinfo-v1",
+          "name": "直播拉流地址（v1）",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomPlayInfo",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [
+            { "name": "room_id", "in": "query", "type": "number", "required": true, "desc": "房间号" },
+            { "name": "protocol", "in": "query", "type": "string", "required": false, "desc": "0,1 = http_stream + http_hls" },
+            { "name": "format", "in": "query", "type": "string", "required": false, "desc": "0,1,2 = flv / ts / fmp4" },
+            { "name": "codec", "in": "query", "type": "string", "required": false, "desc": "0,1 = avc / hevc" },
+            { "name": "qn", "in": "query", "type": "number", "required": false, "desc": "清晰度，10000 = 原画" },
+            { "name": "platform", "in": "query", "type": "string", "required": false, "desc": "固定 web" },
+            { "name": "ptype", "in": "query", "type": "number", "required": false, "desc": "8 = web" }
+          ]
+        },
+        {
+          "id": "live-playinfo-v2",
+          "name": "直播拉流地址（v2）",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 room_id/uid/is_hidden/is_locked 等",
+          "params": [
+            { "name": "room_id", "in": "query", "type": "number", "required": true, "desc": "房间号" },
+            { "name": "protocol", "in": "query", "type": "string", "required": false, "desc": "0,1" },
+            { "name": "format", "in": "query", "type": "string", "required": false, "desc": "0,1,2" },
+            { "name": "codec", "in": "query", "type": "string", "required": false, "desc": "0,1" },
+            { "name": "qn", "in": "query", "type": "number", "required": false, "desc": "清晰度" },
+            { "name": "dolby", "in": "query", "type": "number", "required": false, "desc": "5 = 杜比" },
+            { "name": "panorama", "in": "query", "type": "number", "required": false, "desc": "1 = 全景" }
+          ],
+          "notes": ["返回里的 playurl_info.playurl.stream[].format[].codec[].base_url + url_info[].host 拼起来才是真实地址"]
+        },
+        {
+          "id": "live-danmuinfo",
+          "name": "弹幕长连服务器 + token",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo",
+          "status": "risk",
+          "probe": "无 Cookie 实测 -352 风控校验失败",
+          "params": [{ "name": "id", "in": "query", "type": "number", "required": true, "desc": "房间号" }],
+          "returns": "token、host_list[]{ host, wss_port, ws_port }",
+          "notes": [
+            "拿到的 token 是下面 wss 长连的鉴权参数",
+            "无 Cookie 时几乎必 -352 —— 带上 SESSDATA + buvid3 再试"
+          ]
+        },
+        {
+          "id": "live-danmu-history",
+          "name": "历史弹幕",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0",
+          "params": [{ "name": "roomid", "in": "query", "type": "number", "required": true, "desc": "房间号" }],
+          "returns": "room[]{ text, nickname, timeline }"
+        },
+        {
+          "id": "live-ws",
+          "name": "弹幕长连（WebSocket）",
+          "method": "WS",
+          "url": "wss://broadcastlv.chat.bilibili.com/sub",
+          "status": "wbi",
+          "probe": "非 HTTP；协议见 AGENTS.md §5d 与 examples/live_ws.py",
+          "params": [
+            { "name": "roomid", "in": "auth-body", "type": "number", "required": true, "desc": "真实房间号" },
+            { "name": "uid", "in": "auth-body", "type": "number", "required": false, "desc": "0 = 游客" },
+            { "name": "key", "in": "auth-body", "type": "string", "required": true, "desc": "getDanmuInfo 返回的 token" },
+            { "name": "protover", "in": "auth-body", "type": "number", "required": true, "desc": "3 = brotli 压缩的多包协议" }
+          ],
+          "notes": [
+            "16 字节包头：packet_len(4) + header_len(2) + ver(2) + op(4) + seq(4)",
+            "op 表：2 心跳、3 心跳回复（人气值）、5 普通包、7 认证、8 认证回复",
+            "ver 2 = zlib 多包，ver 3 = brotli 多包，拆包后才能解出 DANMU_MSG 等 CMD"
+          ],
+          "source": "AGENTS.md §10.3 · examples/live_ws.py"
+        },
+        {
+          "id": "live-gold-rank",
+          "name": "高能榜",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/general-interface/v1/rank/getOnlineGoldRank",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 OnlineRankItem / onlineNum",
+          "params": [
+            { "name": "ruid", "in": "query", "type": "number", "required": true, "desc": "主播 uid" },
+            { "name": "roomId", "in": "query", "type": "number", "required": true, "desc": "房间号" },
+            { "name": "page", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "pageSize", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ]
+        },
+        {
+          "id": "live-sign-info",
+          "name": "直播签到信息",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/WebGetSignInfo",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "text、specialText、allDays、hadSignDays、isSigned"
+        },
+        {
+          "id": "live-second-list",
+          "name": "分区直播列表",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-interface/v1/second/getList",
+          "status": "risk",
+          "probe": "无 Cookie 实测 -352 风控校验失败",
+          "params": [
+            { "name": "platform", "in": "query", "type": "string", "required": false, "desc": "web" },
+            { "name": "parent_area_id", "in": "query", "type": "number", "required": false, "desc": "一级分区" },
+            { "name": "area_id", "in": "query", "type": "number", "required": false, "desc": "二级分区，0 = 全部" },
+            { "name": "sort_type", "in": "query", "type": "string", "required": false, "desc": "online / live_time" },
+            { "name": "page", "in": "query", "type": "number", "required": false, "desc": "页码" }
+          ]
+        },
+        {
+          "id": "live-area-list",
+          "name": "直播分区列表",
+          "method": "GET",
+          "url": "https://api.live.bilibili.com/xlive/web-interface/v1/index/getWebAreaList",
+          "status": "risk",
+          "probe": "无 Cookie 实测 -400 请求错误（参数需按当前前端对齐）",
+          "expectCodes": [-400],
+          "params": [{ "name": "need_sys_area", "in": "query", "type": "number", "required": false, "desc": "1 带系统分区" }],
+          "notes": ["这个接口参数名随前端版本变，抓一次直播首页的 XHR 再对齐"]
+        },
+        {
+          "id": "live-send-danmu",
+          "name": "发送直播弹幕",
+          "method": "POST",
+          "url": "https://api.live.bilibili.com/msg/send",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "POST + csrf，未静默实测",
+          "params": [
+            { "name": "bubble", "in": "form", "type": "number", "required": true, "desc": "气泡 id，普通弹幕 0" },
+            { "name": "msg", "in": "form", "type": "string", "required": true, "desc": "弹幕内容" },
+            { "name": "color", "in": "form", "type": "number", "required": true, "desc": "颜色，白色 16777215" },
+            { "name": "mode", "in": "form", "type": "number", "required": true, "desc": "1 = 滚动" },
+            { "name": "fontsize", "in": "form", "type": "number", "required": true, "desc": "25" },
+            { "name": "rnd", "in": "form", "type": "number", "required": true, "desc": "秒级时间戳" },
+            { "name": "roomid", "in": "form", "type": "number", "required": true, "desc": "房间号" },
+            { "name": "csrf", "in": "form", "type": "string", "required": true, "desc": "bili_jct" },
+            { "name": "csrf_token", "in": "form", "type": "string", "required": true, "desc": "同 csrf" }
+          ],
+          "notes": ["uid + roomid + 内容全都要正确，否则 -400；未绑定手机号的号会直接 -403"]
+        },
+        {
+          "id": "live-entry-action",
+          "name": "进房上报",
+          "method": "POST",
+          "url": "https://api.live.bilibili.com/xlive/web-room/v1/roomEntryAction",
+          "status": "post",
+          "form": true,
+          "csrf": true,
+          "probe": "GET 实测 404 —— 只接受 POST",
+          "params": [
+            { "name": "room_id", "in": "form", "type": "number", "required": true, "desc": "房间号" },
+            { "name": "uid", "in": "form", "type": "number", "required": false, "desc": "自己的 uid" }
+          ],
+          "notes": ["进直播间时前端发的埋点，影响部分活动任务"]
+        }
+      ]
+    },
+    {
+      "id": "creative",
+      "name": "创作中心（member.bilibili.com）",
+      "icon": "🛠️",
+      "desc": "网页端投稿与稿件管理走 member.bilibili.com，和开放平台的 member.bilibili.com/x/open... 是两套路径，别混。",
+      "items": [
+        {
+          "id": "creative-archives",
+          "name": "我的稿件列表（管理用）",
+          "method": "GET",
+          "url": "https://member.bilibili.com/x/web/archives",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [
+            { "name": "status", "in": "query", "type": "string", "required": false, "desc": "is_pubing（制作中）/ pubed / not_pubed" },
+            { "name": "pn", "in": "query", "type": "number", "required": false, "desc": "页码" },
+            { "name": "ps", "in": "query", "type": "number", "required": false, "desc": "每页条数" }
+          ],
+          "notes": ["网页创作中心的稿件管理列表；开放平台的稿件接口是另一套（见接口总览）"]
+        },
+        {
+          "id": "creative-archive-pre",
+          "name": "投稿前置信息",
+          "method": "GET",
+          "url": "https://member.bilibili.com/x/vupre/web/archive/pre",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测 -101",
+          "params": [],
+          "returns": "分区列表、模板、活动、投稿限制",
+          "notes": ["网页投稿第一步就是这个：拿分区与模板"]
+        },
+        {
+          "id": "creative-upstat",
+          "name": "创作中心数据总览",
+          "method": "GET",
+          "url": "https://member.bilibili.com/x/web/data/upstat",
+          "status": "gone",
+          "probe": "无 Cookie 实测 HTTP 404 —— 路径已调整",
+          "params": [],
+          "notes": ["创作中心数据接口随前端改版频繁变动，用前先抓一次 member.bilibili.com 的实际 XHR 对齐"]
+        }
+      ]
+    },
+    {
+      "id": "sign",
+      "name": "签名与风控工具箱",
+      "icon": "🧰",
+      "desc": "主站体系要的三样东西：csrf（bili_jct）、wbi 签名（w_rid + wts）、设备指纹（buvid3/buvid4）。前两样 bili_web_call 自动处理。",
+      "items": [
+        {
+          "id": "sign-finger",
+          "name": "设备指纹（buvid3 / buvid4）",
+          "method": "GET",
+          "url": "https://api.bilibili.com/x/frontend/finger/spi",
+          "status": "ok",
+          "probe": "无 Cookie 实测 code 0，返回 b_3 / b_4",
+          "params": [],
+          "returns": "b_3（buvid3）、b_4（buvid4）",
+          "notes": [
+            "buvid3 是多数风控（-352）的关键；无 Cookie 的裸调带上它通过率明显上升",
+            "拿到后写进 Cookie 罐即可，bili_web_call 会自动带上"
+          ]
+        },
+        {
+          "id": "sign-wbi",
+          "name": "wbi 签名规则",
+          "method": "规则",
+          "url": "（客户端本地计算，无请求）",
+          "status": "wbi",
+          "probe": "实现见 src/wbi.mjs，已实测可用",
+          "params": [
+            { "name": "w_rid", "in": "query", "type": "string", "required": true, "desc": "md5(参数串 + mixin_key)" },
+            { "name": "wts", "in": "query", "type": "number", "required": true, "desc": "秒级时间戳，参与签名" }
+          ],
+          "notes": [
+            "适用路径：/x/space/wbi/*、/x/polymer/*、/x/v2/reply/wbi/*",
+            "步骤：nav 取 wbi_img → 文件名去后缀得 img_key/sub_key → 按固定重排表拼 32 位 mixin_key → 参数按字典序、去掉 !'()* → urlencode → 末尾接 mixin_key → md5",
+            "已知失效：/x/space/wbi/arc/search 恒 -403（补 dm_img_* 三件套也没用）→ 改用旧路径 /x/space/arc/search"
+          ],
+          "source": "AGENTS.md §5d · src/wbi.mjs"
+        },
+        {
+          "id": "sign-csrf",
+          "name": "csrf 规则（bili_jct）",
+          "method": "规则",
+          "url": "（客户端本地计算，无请求）",
+          "status": "post",
+          "probe": "缺 csrf 实测 -111 csrf校验失败",
+          "params": [{ "name": "csrf", "in": "form", "type": "string", "required": true, "desc": "就是 Cookie 里的 bili_jct 值" }],
+          "notes": [
+            "所有写操作（点赞、投币、收藏、关注、拉黑、发评论、发弹幕）都必须带",
+            "bili_web_call 传 form 时自动补 csrf=bili_jct"
+          ],
+          "source": "AGENTS.md §5d"
+        },
+        {
+          "id": "sign-ticket",
+          "name": "bili_ticket（约 3 天有效）",
+          "method": "规则",
+          "url": "（Cookie 项，部分接口要求）",
+          "status": "need-cookie",
+          "probe": "无 Cookie 实测相关接口 -101",
+          "params": [],
+          "notes": [
+            "默认不带，部分接口会要；bili_cookie {action:'status'} 会把它标出来",
+            "过期后表现为部分接口 -352 而另一些正常 —— 先查它"
+          ],
+          "source": "AGENTS.md §5d"
+        }
+      ]
+    }
+  ]
+}

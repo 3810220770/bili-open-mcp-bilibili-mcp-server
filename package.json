@@ -59,7 +59,8 @@
     "login": "node scripts/oauth-login.mjs",
     "site": "node scripts/build-site.mjs",
     "site:check": "node scripts/build-site.mjs && node scripts/check-site.mjs",
-    "site:serve": "node scripts/serve-docs.mjs"
+    "site:serve": "node scripts/serve-docs.mjs",
+    "web:probe": "node scripts/probe-web.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

@@ -66,6 +66,9 @@ await t("bili_docs_get", { ref: "044", maxChars: 600 }, (s) => s.includes("doc: 
 // ---------------- 新增工具 ----------------
 await t("bili_endpoints", { scope: "SHOP_ORDER_INFO", method: "POST" }, (s) => s.includes("命中") && s.includes("#78"));
 await t("bili_endpoints", { host: "openupos.bilivideo.com" }, (s) => s.includes("#9") && s.includes("#14"));
+await t("bili_endpoints", { source: "web" }, (s) => s.includes("主站隐藏能力") || s.includes("web:report-"));
+await t("bili_endpoints", { source: "web", pathContains: "举报", limit: 20 }, (s) => s.includes("web:report-user") && s.includes("web:report-comment"));
+await t("bili_endpoints", { source: "all", pathContains: "订单", limit: 10 }, (s) => s.includes("命中"));
 await t("bili_scopes", {}, (s) => s.includes("个 scope") && s.includes("ARC_BASE"));
 await t("bili_scopes", { scope: "ARC_BASE" }, (s) => s.includes("#12"));
 await t("bili_scopes", { ref: "12" }, (s) => s.includes("ARC_BASE"));
@@ -214,6 +217,11 @@ try {
   if (!cat.contents[0].text.includes("[#12]")) fail.push("bili://catalog 内容异常");
   const doc = await client.readResource({ uri: "bili://doc/12" });
   if (!doc.contents[0].text.includes("视频稿件提交")) fail.push("bili://doc/12 内容异常");
+  const webRes = await client.readResource({ uri: "bili://web" });
+  if (!webRes.contents[0].text.includes("主站 Web 隐藏能力") || !webRes.contents[0].text.includes("/x/space/report")) {
+    fail.push("bili://web 内容异常");
+  }
+  console.log("===== bili://web 资源 OK =====");
   const prompt = await client.getPrompt({ name: "integrate-bili-api", arguments: { ref: "12" } });
   if (!prompt.messages[0].content.text.includes("HMAC-SHA256")) fail.push("prompt 内容异常");
   console.log("===== catalog / doc 资源 + prompt OK =====");

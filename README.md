@@ -10,7 +10,7 @@
 
 | 你想要 | 看哪 |
 | --- | --- |
-| **在浏览器里搜着看** | [**在线文档站**](https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/) —— 182 个页面，接口 / 指南 / 事件 / 错误码全文搜索 |
+| **在浏览器里搜着看** | [**在线文档站**](https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/) —— 271 个页面，接口 / 隐藏能力 / 指南 / 事件 / 错误码全文搜索 |
 | **怎么装、怎么接、每个工具怎么用** | [**USAGE.md**](USAGE.md) —— 完整操作手册，含真实输出样例与排查表 |
 | **我这点凭据能用哪些功能** | [USAGE.md §0](USAGE.md#0-先确认你能用哪些功能) —— 一张表说清 |
 | 给 AI 读的使用契约 | [AGENTS.md](AGENTS.md) |
@@ -52,6 +52,9 @@ bili-open-mcp/
 │  └─ open-platform.json 开放平台凭据      ← BILI_CRED_FILE
 ├─ scripts/
 │  ├─ build-spec.mjs    Markdown → data/*.json / llms.txt
+│  ├─ build-site.mjs    data/*.json → docs/ 静态文档站（含隐藏能力 88 页）
+│  ├─ check-site.mjs    站点自检：死链 / 锚点 / 资源 / 模板残留 / 混合内容
+│  ├─ probe-web.mjs     主站隐藏能力可复现核验（逐条实打，核对实测状态）
 │  ├─ audit.mjs         数据与文档一致性检查
 │  ├─ selftest.mjs      工具 / 资源 / 提示 + 生成代码编译自检
 │  ├─ check-project-config.mjs  按 opencode 项目配置实际拉起服务验证
@@ -60,7 +63,8 @@ bili-open-mcp/
 │  ├─ index.json        170 篇文档的结构化规格（100 个端点）
 │  ├─ llms.txt          紧凑清单，给 AI 一次性读
 │  ├─ status-codes.json 118 个错误码
-│  └─ mock.json         43 个沙盒 mock 接口
+│  ├─ mock.json         43 个沙盒 mock 接口
+│  └─ web.json          88 个主站 Web 隐藏能力（举报 / 拉黑 / 动态 / 评论 / 直播 …）
 └─ examples/
    ├─ bili_open.py      零依赖 Python 客户端（签名/请求/OAuth2/上传）
    ├─ video_upload.py   视频投稿全流程
@@ -93,7 +97,7 @@ npm run check-config # 用 opencode 项目配置里的命令实际拉起服务
 | `bili_docs_search` | 170 篇全文检索 | `{"query":"投稿"}` |
 | `bili_docs_list` | 按目录或类型列文档 | `{"folder":"直播能力"}` |
 | `bili_docs_get` | 读某篇完整 Markdown | `{"ref":"44"}` |
-| `bili_endpoints` | 按 method/scope/host/关键词过滤端点 | `{"scope":"SHOP_ORDER_INFO","method":"POST"}` |
+| `bili_endpoints` | 按 method/scope/host/关键词过滤端点；`source:"web"` 列主站隐藏能力 | `{"scope":"SHOP_ORDER_INFO","method":"POST"}` |
 | `bili_scopes` | 权限点 ↔ 端点映射 | `{"scope":"ARC_BASE"}` |
 | `bili_api_spec` | 结构化接口规格（参数/必填/响应/子结构） | `{"ref":"12"}` |
 | `bili_api_prepare` | 参数类型转换 + 必填校验 + 多余字段检查 | `{"ref":"12","body":{...}}` |
@@ -130,6 +134,25 @@ npm run check-config # 用 opencode 项目配置里的命令实际拉起服务
 
 顺带一个坑：`/x/space/wbi/arc/search`（投稿列表）现在直接 `-403`，补 `dm_img_list`/`dm_img_str`/`dm_img_inter`
 三件套也没用；**旧路径 `/x/space/arc/search` 仍然 `code:0` 可用**。
+
+### 隐藏能力（开放平台文档里没有的那些）
+
+开放平台只放已商务合作的能力（文档自己写着「其它需求请发邮件咨询」，见 `170_文档中未列出的功能`）。
+剩下那一大片 —— **举报、拉黑、动态、评论、收藏、历史、消息、直播、创作中心** —— 都在主站
+`www/api.bilibili.com` 与 `api.live.bilibili.com` 上，走浏览器 Cookie，不走 2.0 签名。
+
+全部收进了 [`data/web.json`](data/web.json)：**88 条 / 13 组**，每条带方法、完整地址、参数、返回码、
+坑位与**无 Cookie 实测状态**。三种读法：
+
+| 想要 | 怎么做 |
+| --- | --- |
+| 在浏览器里翻 | [在线文档站的「隐藏能力」页](https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/web.html)（88 个详情页） |
+| 让 AI 过滤 | `bili_endpoints { "source": "web" }`、`{ "source": "web", "pathContains": "举报" }`、`{ "source": "all" }` |
+| 整块喂给 AI | resource `bili://web` |
+| 核对是否失效 | `npm run web:probe` —— 按声明的参数重新打一遍，逐条比对预期 |
+
+组一览：举报 3 · 账号与登录态 9 · 用户与空间 9 · 视频与播放 11 · 写操作 7 · 评论 6 · 动态 3 ·
+关系与消息 9 · 收藏/历史/稍后再看 6 · 搜索 4 · 直播 14 · 创作中心 3 · 签名与风控工具箱 4。
 
 ### 举报
 
@@ -250,6 +273,7 @@ https://account.bilibili.com/pc/account-pc/auth/oauth?client_id=<ClientID>&gourl
 | --- | --- | --- |
 | resource | `bili://catalog` | 170 篇压成的一页纸清单（llms.txt） |
 | resource | `bili://doc/{ref}` | 单篇文档原文 Markdown |
+| resource | `bili://web` | 88 个主站 Web 隐藏能力目录（举报 / 拉黑 / 动态 / 评论 / 收藏 / 直播 …），带无 Cookie 实测状态 |
 | prompt | `integrate-bili-api` | 按开放平台规范生成接入任务说明（参数 `ref`） |
 
 ## 凭据
@@ -290,6 +314,7 @@ npm run build
 ## 统计
 
 - 文档 170 篇：95 篇单接口 + 2 篇多接口（共 **100 个端点**）、41 个推送事件、30 篇指南、2 篇协议说明
+- 主站 Web 隐藏能力 **88 条 / 13 组**（`data/web.json`），72 条可由 `npm run web:probe` 复现核验
 - 1243 个参数对象，**100% 带类型**；359/364 个请求参数带「必传」标记
 - 20 个 scope、118 个错误码
 
