@@ -6,9 +6,10 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { resolveSecretPath } from "./paths.mjs";
 
 export function credPath(explicit) {
-  return explicit || process.env.BILI_CRED_FILE || path.join(process.cwd(), "secrets", "open-platform.json");
+  return resolveSecretPath(explicit, process.env.BILI_CRED_FILE, "open-platform.json");
 }
 
 export function loadCredFile(explicit) {

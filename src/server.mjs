@@ -141,6 +141,10 @@ const INSTRUCTIONS = `哔哩哔哩开放平台 (open.bilibili.com/doc/4) API 助
 - bili_web_call {path:"x/web-interface/nav"}  带 Cookie 调主站 Web 接口（POST 自动补 csrf）
 - Cookie 文件路径可用 BILI_COOKIE_FILE 覆盖；SESSDATA 是账号凭证，默认脱敏输出
 
+凭据文件在哪: secrets/cookies.json 与 secrets/open-platform.json 的查找顺序是
+显式参数 → 环境变量(BILI_COOKIE_FILE / BILI_CRED_FILE) → 包目录 → 启动方 cwd。
+放在包目录下 secrets/ 里最稳，不受客户端用什么 cwd 拉起服务的影响。
+
 硬性约定:
 - 主机: 业务 https://member.bilibili.com，OAuth https://api.bilibili.com，上传 https://openupos.bilivideo.com
 - 所有业务接口走 2.0 签名 (HMAC-SHA256)，签名串是 6 个 x-bili-* 头按字典序 k:v 用 \\n 连接，末尾无换行
@@ -1011,7 +1015,7 @@ server.registerTool(
       name: z.string().optional().describe("set 用"),
       value: z.string().optional().describe("set 用"),
       reveal: z.boolean().optional().describe("显示完整值（默认脱敏）"),
-      file: z.string().optional().describe("指定 jar 文件，默认 secrets/cookies.json"),
+      file: z.string().optional().describe("指定 jar 文件；默认按 参数 → BILI_COOKIE_FILE → 包目录 secrets/cookies.json → 启动方 cwd 的顺序解析"),
     },
   },
   async ({ action = "status", jar, name, value, reveal = false, file }) => {

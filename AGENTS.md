@@ -2,14 +2,24 @@
 
 本目录是哔哩哔哩开放平台的 MCP 服务 + 结构化接口库 + 可运行示例。
 
-**第一原则：不要凭记忆猜 B 站开放接口。** 一切以 `data/` 与 `D:\Documents\bilibili-open-docs\*.md` 为准。
+**第一原则：不要凭记忆猜 B 站开放接口。** 一切以本仓库的 `data/` 与仓库根目录的 `*.md` 为准。
 文档没写的字段不要编，不确定就在回答里标「文档未说明」。
+
+**文档地图**：`USAGE.md` 是给人看的操作手册（安装、接入各客户端、19 个工具的入参与真实输出、报错排查表）；
+本文件是给你（AI）的契约与决策树；`DISCLAIMER.md` 是接口来源、能力边界与免责条款。
+**用户问「怎么装 / 怎么接 / 这个工具怎么用 / 报错怎么办」→ 直接引 `USAGE.md` 的对应小节。**
 
 **接口来源与凭据**：本项目调用的接口全部是官方公开提供的（开放平台文档 / 开放平台域名 / 主站 Web
 接口 / 官方直播间长连），不含私有或绕过鉴权的实现。凭据由使用者自备：没有 `BILI_COOKIE_FILE`
 （`secrets/cookies.json`）→ `bili_cookie` / `bili_web_call` 不可用；没有 `BILI_CRED_FILE`
 （`secrets/open-platform.json`）→ 开放平台那套接口不可用；两者都没有时只剩文档检索、错误码、
 代码生成、沙盒 mock 与签名演示。详见 [DISCLAIMER.md](DISCLAIMER.md)。
+
+**凭据文件位置**：`secrets/` 的解析顺序是 显式参数 → 环境变量 → 包目录 → **启动方 cwd**，
+写入固定落在包目录。MCP 客户端是用它自己的项目目录当 cwd 拉起服务的 ——
+用户说「凭据文件不存在」时，让他把文件放到包目录的 `secrets/` 下，或给
+`BILI_COOKIE_FILE` / `BILI_CRED_FILE` 绝对路径（详见 `USAGE.md §3.4`）。
+**不要**因为读不到凭据就断定用户没配，先确认路径。
 
 ---
 
@@ -83,7 +93,7 @@
 
 ```jsonc
 {
-  "generatedAt": "…", "source": "https://open.bilibili.com/doc/4", "docRoot": "D:\\Documents\\bilibili-open-docs",
+  "generatedAt": "…", "source": "https://open.bilibili.com/doc/4", "docRoot": "<文档 Markdown 所在目录>",
   "totals": { "docs": 170, "api": 95, "withBodyParams": 71, "withResponseParams": 72 },
   "docs": [
     {

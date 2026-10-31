@@ -6,11 +6,10 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-
-const DEFAULT_JAR = process.env.BILI_COOKIE_FILE || "";
+import { resolveSecretPath } from "./paths.mjs";
 
 export function jarPath(explicit) {
-  return explicit || DEFAULT_JAR || path.join(process.cwd(), "secrets", "cookies.json");
+  return resolveSecretPath(explicit, process.env.BILI_COOKIE_FILE, "cookies.json");
 }
 
 function normalize(list) {

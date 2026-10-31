@@ -1,7 +1,22 @@
-# bili-open-mcp
+# bili-open-mcp — 哔哩哔哩 / B站 MCP Server
+
+> **关键词**：哔哩哔哩 MCP · B站 MCP · bilibili MCP · bilibili MCP server · 哔哩哔哩开放平台 ·
+> bilibili open platform API · Model Context Protocol · MCP 工具 · AI 调用 B 站接口
+>
+> 记这个就行：**`bili-open-mcp`** —— 一个让 AI 直接检索、直接调用哔哩哔哩开放平台的 MCP 服务。
 
 哔哩哔哩开放平台（<https://open.bilibili.com/doc/4>）的 **MCP 服务 + 结构化接口库 + 可运行示例**。
 把 170 篇文档变成 AI 能直接检索、直接调用、直接生成签名的东西。
+
+| 你想要 | 看哪 |
+| --- | --- |
+| **怎么装、怎么接、每个工具怎么用** | [**USAGE.md**](USAGE.md) —— 完整操作手册，含真实输出样例与排查表 |
+| **我这点凭据能用哪些功能** | [USAGE.md §0](USAGE.md#0-先确认你能用哪些功能) —— 一张表说清 |
+| 给 AI 读的使用契约 | [AGENTS.md](AGENTS.md) |
+| 接口来源 / 能力边界 / 免责声明 | [DISCLAIMER.md](DISCLAIMER.md) |
+
+常见搜法都能到这里：`哔哩哔哩 mcp`、`B站 mcp server`、`bilibili mcp`、
+`b站 开放平台 mcp`、`用 AI 调 B 站接口`、`bilibili open platform api mcp`。
 
 > [!IMPORTANT]
 > **本项目调用的所有接口均为哔哩哔哩官方公开提供的接口**（开放平台文档 / 开放平台域名 /
@@ -17,6 +32,10 @@
 
 ```
 bili-open-mcp/
+├─ USAGE.md            详细使用方法：19 个工具 + 端到端工作流 + 报错排查
+├─ AGENTS.md           给 AI 的使用契约（详细版）
+├─ DISCLAIMER.md       接口来源 / 凭据边界 / 使用者责任 / 责任限制
+├─ LICENSE             MIT
 ├─ src/
 │  ├─ server.mjs        MCP 服务（stdio，19 个工具 + 2 资源 + 1 提示）
 │  ├─ signer.mjs        2.0 签名（HMAC-SHA256）
@@ -24,6 +43,8 @@ bili-open-mcp/
 │  ├─ codegen.mjs       6 种语言的调用代码生成
 │  ├─ cookies.mjs       主站 Cookie 罐（EditThisCookie 导入 / 域匹配 / 脱敏）
 │  ├─ credentials.mjs   开放平台凭据（参数 → 环境变量 → 文件）
+│  ├─ paths.mjs         凭据文件路径解析（包目录优先，不受启动方 cwd 影响）
+│  ├─ wbi.mjs           wbi 签名（mixin_key / w_rid）
 │  └─ knowledge.mjs     速查 / OAuth / 长连协议 / Webhook 知识块
 ├─ secrets/             整个目录提交时排除（.gitignore）
 │  ├─ cookies.json      主站 Cookie        ← BILI_COOKIE_FILE
@@ -51,7 +72,7 @@ bili-open-mcp/
 ## 快速开始
 
 ```bash
-cd D:/Documents/bilibili-open-docs/bili-open-mcp
+cd C:/path/to/bili-open-mcp
 npm install
 npm run build        # 重新解析 170 篇文档
 npm run audit        # 11 类一致性检查 → AUDIT PASSED
@@ -202,7 +223,7 @@ Cookie 存在 `secrets/cookies.json`（已在 `.gitignore` 里），路径可用
 # 1. 去 open.bilibili.com 登录 → 实名认证 → 开发者入驻 → 应用管理 → 创建「网页应用」
 #    授权回调域 填 http://127.0.0.1:8848/callback
 # 2. 一键跑完授权回环（自动抓 code、换 token、写入 secrets/open-platform.json）
-cd D:/Documents/bilibili-open-docs/bili-open-mcp
+cd C:/path/to/bili-open-mcp
 npm run login -- --client-id <ClientID> --secret <Secret>
 ```
 
@@ -234,15 +255,25 @@ https://account.bilibili.com/pc/account-pc/auth/oauth?client_id=<ClientID>&gourl
 
 | 环境变量 | 说明 |
 | --- | --- |
-| `BILI_CLIENT_ID` | client_id（= `x-bili-accesskeyid`） |
-| `BILI_APP_SECRET` | app_secret |
-| `BILI_ACCESS_TOKEN` | OAuth2 access_token |
+| `BILI_CLIENT_ID` | client_id（= `x-bili-accesskeyid`），别名 `BILI_ACCESS_KEY_ID` |
+| `BILI_APP_SECRET` | app_secret，别名 `BILI_SECRET` |
+| `BILI_ACCESS_TOKEN` | OAuth2 access_token，别名 `BILI_TOKEN` |
+| `BILI_COOKIE_FILE` | 主站 Cookie jar 路径（覆盖默认解析） |
+| `BILI_CRED_FILE` | 开放平台凭据文件路径（覆盖默认解析） |
+| `BILI_COOKIE` | 直接给 Cookie 字符串，不落盘 |
 
-无凭据时文档类工具照常工作，`bili_api_sign` 会用占位值演示签名结构。
+**凭据文件放在哪**：`secrets/cookies.json` 与 `secrets/open-platform.json` 按
+**显式参数 → 环境变量 → 包目录 → 启动方 cwd** 的顺序解析，写入固定落在包目录。
+放包目录下的 `secrets/` 最稳 —— MCP 客户端是用它自己的项目目录当 cwd 拉起服务的，
+只按 cwd 找会一直显示「文件不存在」。要放别处就给 `BILI_COOKIE_FILE` / `BILI_CRED_FILE` 绝对路径。
+
+无凭据时文档类工具照常工作，`bili_api_sign` 会用占位值演示签名结构，
+`bili_api_call {dryRun:true}` 能看完整请求。**完整的能力对照表见
+[USAGE.md §0](USAGE.md#0-先确认你能用哪些功能)。**
 
 ## 数据从哪来
 
-`data/` 由 `scripts/build-spec.mjs` 从同级目录（`D:\Documents\bilibili-open-docs`）的 Markdown 生成。
+`data/` 由 `scripts/build-spec.mjs` 从同级目录（文档 Markdown 所在目录）的 Markdown 生成。
 文档本身来自开放平台的目录接口：
 
 ```
@@ -268,3 +299,31 @@ npm run build
 - 所有业务接口在 `https://member.bilibili.com`，OAuth 在 `https://api.bilibili.com`。
 - 上传分片走 `https://openupos.bilivideo.com`，**裸二进制、不带签名头**，凭 url 上的 `upload_token` 鉴权。
 - 稿件删除不可逆。
+
+---
+
+## 免责声明（摘要）
+
+**使用前请读全文：[DISCLAIMER.md](DISCLAIMER.md)。** 共 15 条，要点：
+
+1. **接口来源**：本项目调用的所有接口**均为哔哩哔哩官方提供并公开的接口**
+   （开放平台文档 / 官方业务域名 / 官方 OAuth2 / 官方上传域名 / 官方直播间长连协议 / 官方 Webhook 规范），
+   **不含私有接口、破解接口或绕过鉴权的实现。**
+2. **无隶属关系**：第三方项目，与哔哩哔哩（上海幻电信息科技有限公司 / 上海宽娱数码科技有限公司）
+   没有隶属、赞助、合作或背书关系；相关名称与商标归其权利人所有。
+3. **凭据自备，缺失即功能受限**：本项目**不内置、不收集、不上传任何凭据**。
+   没有 `BILI_COOKIE_FILE`（`secrets/cookies.json`）和 `BILI_CRED_FILE`（`secrets/open-platform.json`），
+   则开放平台接口与主站 Web 接口**全部不可用**，只剩纯本地的文档检索、错误码查询、代码生成、
+   沙盒 mock、签名演示。`secrets/` 已在 `.gitignore` 中排除。
+4. **账号安全**：`SESSDATA` 等同于账号登录凭证，泄露即交出账号；勿在日志、截图、Issue、对话中暴露。
+5. **使用者责任**：遵守用户协议、社区公约、开放平台开发者协议与当地法律；**本项目不做自动限速，
+   节流责任在调用方**，滥用会导致**你自己的账号**被限流或封停。
+6. **无担保**：按「现状」提供，官方接口随时可能变更，不承担因使用本项目造成的任何损失。
+7. **数据为快照**：`data/` 是某一时点抓取的结构化快照，**一切以官方文档与实际返回为准**；
+   生成的代码是骨架，边界条件与错误处理需自行补齐测试。
+8. **隐私**：本地服务，**无遥测、无上报、不向未指定的第三方发送数据**；
+   但通过 AI 客户端使用时，你发送的内容与工具返回值会经过该客户端与模型提供方。
+9. **不构成法律/合规建议**；**第三方依赖**（`@modelcontextprotocol/sdk`、`zod`）自行评估。
+10. **下架通道**：权利人如认为本仓库内容侵犯权益，开 Issue 或联系仓库所有者，会尽快处理。
+
+<div align="right"><sub>操作手册：<a href="USAGE.md">USAGE.md</a> · AI 契约：<a href="AGENTS.md">AGENTS.md</a> · 免责：<a href="DISCLAIMER.md">DISCLAIMER.md</a></sub></div>

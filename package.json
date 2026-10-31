@@ -1,12 +1,55 @@
 {
   "name": "bili-open-mcp",
-  "version": "2.0.0",
-  "description": "MCP server for the bilibili Open Platform API (open.bilibili.com/doc/4): doc search, structured endpoint specs, request signing and live calls.",
+  "version": "2.1.0",
+  "description": "哔哩哔哩 / B站 MCP Server — bilibili Open Platform API MCP server: doc search, structured endpoint specs, 2.0 HMAC-SHA256 signing, OAuth2, live-room WebSocket protocol, webhooks, and main-site cookie calls.",
   "type": "module",
   "license": "MIT",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "bilibili-mcp",
+    "bilibili",
+    "bili",
+    "哔哩哔哩",
+    "b站",
+    "bilibili-api",
+    "bilibili-open-platform",
+    "open-platform",
+    "api",
+    "wbi",
+    "oauth2",
+    "webhook",
+    "websocket",
+    "claude",
+    "claude-desktop",
+    "cursor",
+    "opencode",
+    "ai-agent",
+    "llm"
+  ],
+  "homepage": "https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/issues"
+  },
   "bin": {
     "bili-open-mcp": "src/server.mjs"
   },
+  "files": [
+    "src/",
+    "data/",
+    "scripts/",
+    "examples/",
+    "USAGE.md",
+    "AGENTS.md",
+    "DISCLAIMER.md",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "node scripts/build-spec.mjs",
     "start": "node src/server.mjs",
