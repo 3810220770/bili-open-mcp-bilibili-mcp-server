@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 使用契约 · bili-open-mcp</title>
+<meta name="description" content="给 AI 的详细契约：数据结构、工具决策树、请求总则、接口索引、交付前自检清单。">
+<meta name="keywords" content="哔哩哔哩 MCP,B站 MCP,bilibili MCP,bilibili mcp server,哔哩哔哩开放平台,MCP Server,Model Context Protocol,开放平台 API,B站接口">
+<link rel="canonical" href="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/agents.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI 使用契约 · bili-open-mcp">
+<meta property="og:description" content="给 AI 的详细契约：数据结构、工具决策树、请求总则、接口索引、交付前自检清单。">
+<meta property="og:url" content="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/agents.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23fb7299%22%2F%3E%3Cpath%20d%3D%22M9%2012h14v9a2%202%200%200%201-2%202H11a2%202%200%200%201-2-2z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M12%207l2.5%203M20%207l-2.5%203%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E">
+<script>try{var t=localStorage.getItem('bili-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>window.__ROOT__="";</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="topbar">
+<button class="icon-btn menu-btn" type="button" aria-label="打开目录">☰</button>
+<a class="brand" href=""><span class="brand-mark">B</span>bili-open-mcp<small>MCP</small></a>
+<nav class="topnav"><a href="">首页</a><a href="tools.html">工具</a><a href="endpoints.html">接口</a><a href="guides.html">指南</a><a href="webhooks.html">推送</a><a href="errors.html">错误码</a><a href="mock.html">沙盒</a><a href="usage.html">使用</a></nav>
+<div class="topbar-spacer"></div>
+<div class="topbar-actions">
+<button class="search-trigger" type="button"><span>🔍</span><span class="label">搜索文档 / 接口 / 工具</span><kbd>Ctrl K</kbd></button>
+<button class="icon-btn theme-toggle" type="button" aria-label="切换主题">☾</button>
+<a class="icon-btn" href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub">★</a>
+</div></header>
+
+<div class="layout"><aside class="sidebar"><div class="sidebar-group"><div class="sidebar-title">文档站</div><a href="">首页</a><a href="tools.html">19 个工具</a><a href="endpoints.html">接口总览</a><a href="guides.html">指南与协议</a><a href="webhooks.html">推送事件</a><a href="errors.html">错误码</a><a href="mock.html">沙盒环境</a><a href="usage.html">使用方法</a><a href="readme.html">README</a><a href="agents.html" class="is-active">AI 契约</a><a href="disclaimer.html">免责声明</a></div><div class="sidebar-group"><div class="sidebar-title">开放能力 · 97 个接口</div><a href="endpoints.html#%E5%BC%80%E6%94%BE%E8%83%BD%E5%8A%9B">开放能力<span class="count">1</span></a><a href="endpoints.html#%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86">用户管理<span class="count">3</span></a><a href="endpoints.html#%E8%A7%86%E9%A2%91%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">视频稿件管理<span class="count">12</span></a><a href="endpoints.html#%E4%B8%93%E6%A0%8F%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">专栏稿件管理<span class="count">14</span></a><a href="endpoints.html#%E6%95%B0%E6%8D%AE%E5%BC%80%E6%94%BE%E6%9C%8D%E5%8A%A1">数据开放服务<span class="count">5</span></a><a href="endpoints.html#%E7%9B%B4%E6%92%AD%E8%83%BD%E5%8A%9B">直播能力<span class="count">9</span></a><a href="endpoints.html#%E7%BB%8F%E8%90%A5%E5%8F%B7%E5%AE%A2%E6%9C%8D">经营号客服<span class="count">7</span></a><a href="endpoints.html#%E4%BA%A4%E6%98%93%E7%94%B5%E5%95%86">交易电商<span class="count">39</span></a><a href="endpoints.html#%E5%85%85%E7%94%B5%E4%B8%9A%E5%8A%A1">充电业务<span class="count">1</span></a><a href="endpoints.html#%E8%AF%BE%E5%A0%82%E4%B8%9A%E5%8A%A1">课堂业务<span class="count">3</span></a><a href="endpoints.html#%E7%AB%99%E5%86%85%E7%89%88%E6%9D%83%E6%8E%88%E6%9D%83%E6%9B%B2%E5%BA%93">站内版权授权曲库<span class="count">3</span></a></div><div class="sidebar-group"><div class="sidebar-title">指南与协议 · 32 篇</div><a href="guide/002.html">接口签名和状态码</a><a href="guide/003.html">接口权限白名单</a><a href="guide/007.html">接口概览</a><a href="guide/015.html">业务说明</a><a href="guide/040.html">接入指引</a><a href="guide/044.html">直播间消息websocket协议</a><a href="guide/047.html">长连CMD说明</a><a href="guide/048.html">一键开播能力说明</a><a href="guide/049.html">业务流程说明</a><a href="guide/051.html">授权回调</a><a href="guide/055.html">发送弹幕</a><a href="guide/056.html">接入指引</a><a href="guide/057.html">通用奖励接口</a><a href="guide/058.html">服务说明</a><a href="guide/066.html">服务说明</a><a href="guide/085.html">抽卡机抽卡结果回调</a><a href="guide/096.html">上传文件</a><a href="guide/106.html">服务说明</a><a href="guide/109.html">服务说明</a><a href="guide/111.html">服务说明</a><a href="guide/115.html">接入指引</a><a href="guide/116.html">三方通用资源接口</a><a href="guide/117.html">用前须知</a><a href="guide/121.html">概述</a><a href="guide/122.html">用户授权</a><a href="guide/123.html">解除授权</a><a href="guide/132.html">买家修改地址通知</a><a href="guide/133.html">发货物流信息变更</a><a href="guide/163.html">用户进入对话</a><a href="guide/166.html">留资结果</a><a href="guide/169.html">沙盒</a><a href="guide/170.html">文档中未列出的功能</a></div></aside><main class="main"><article class="prose"><h1 id="agentsmd-给-ai-的使用契约详细版">AGENTS.md — 给 AI 的使用契约（详细版）<a class="anchor" href="#agentsmd-给-ai-的使用契约详细版" aria-label="永久链接">#</a></h1>
+<p>本目录是哔哩哔哩开放平台的 MCP 服务 + 结构化接口库 + 可运行示例。</p>
+<p><strong>第一原则：不要凭记忆猜 B 站开放接口。</strong> 一切以本仓库的 <code>data/</code> 与仓库根目录的 <code>*.md</code> 为准。
+文档没写的字段不要编，不确定就在回答里标「文档未说明」。</p>
+<p><strong>文档地图</strong>：<code>USAGE.md</code> 是给人看的操作手册（安装、接入各客户端、19 个工具的入参与真实输出、报错排查表）；
+本文件是给你（AI）的契约与决策树；<code>DISCLAIMER.md</code> 是接口来源、能力边界与免责条款。
+<strong>用户问「怎么装 / 怎么接 / 这个工具怎么用 / 报错怎么办」→ 直接引 <code>USAGE.md</code> 的对应小节。</strong></p>
+<p><strong>接口来源与凭据</strong>：本项目调用的接口全部是官方公开提供的（开放平台文档 / 开放平台域名 / 主站 Web
+接口 / 官方直播间长连），不含私有或绕过鉴权的实现。凭据由使用者自备：没有 <code>BILI_COOKIE_FILE</code>
+（<code>secrets/cookies.json</code>）→ <code>bili_cookie</code> / <code>bili_web_call</code> 不可用；没有 <code>BILI_CRED_FILE</code>
+（<code>secrets/open-platform.json</code>）→ 开放平台那套接口不可用；两者都没有时只剩文档检索、错误码、
+代码生成、沙盒 mock 与签名演示。详见 <a href="disclaimer.html">DISCLAIMER.md</a>。</p>
+<p><strong>凭据文件位置</strong>：<code>secrets/</code> 的解析顺序是 显式参数 → 环境变量 → 包目录 → <strong>启动方 cwd</strong>，
+写入固定落在包目录。MCP 客户端是用它自己的项目目录当 cwd 拉起服务的 ——
+用户说「凭据文件不存在」时，让他把文件放到包目录的 <code>secrets/</code> 下，或给
+<code>BILI_COOKIE_FILE</code> / <code>BILI_CRED_FILE</code> 绝对路径（详见 <code>USAGE.md §3.4</code>）。
+<strong>不要</strong>因为读不到凭据就断定用户没配，先确认路径。</p>
+<hr>
+<h2 id="1-这份数据是什么">1. 这份数据是什么<a class="anchor" href="#1-这份数据是什么" aria-label="永久链接">#</a></h2>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">项</th><th style="text-align:left">值</th></tr></thead><tbody><tr><td>来源</td><td><code>https://open.bilibili.com/doc/4</code>（开放平台「开放能力」目录）</td></tr><tr><td>抓取入口</td><td><code>GET https://open.bilibili.com/arcopen/user/open-doc/view?id=4</code> → <code>data.online_doc</code></td></tr><tr><td>文档数</td><td>170 篇（<code>001_…md</code> ~ <code>170_…md</code>，同级目录）</td></tr><tr><td>HTTP 接口</td><td>95 篇单接口文档 + 2 篇多接口文档（#1 含 2 个、#84 含 3 个端点）→ <strong>合计 100 个端点</strong></td></tr><tr><td>推送事件</td><td>41 个（Webhook）</td></tr><tr><td>错误码</td><td>118 条</td></tr><tr><td>文档类型</td><td><code>api</code> 95 · <code>event</code> 41 · <code>guide</code> 30 · <code>protocol</code> 2 · <code>multi-api</code> 2</td></tr><tr><td>参数对象</td><td>1243 个，<strong>全部带 <code>type</code></strong>；359/364 个请求参数带 <code>required</code></td></tr><tr><td>生成时间</td><td>见 <code>data/index.json.generatedAt</code></td></tr></tbody></table></div>
+<p><code>ref</code> 的规则：<code>#num</code> 就是文件名前缀。<code>#12</code> ⇔ <code>012_视频稿件提交.md</code> ⇔ <code>data/index.json</code> 里 <code>num=12</code> 的那条。</p>
+<hr>
+<h2 id="2-核心概念">2. 核心概念<a class="anchor" href="#2-核心概念" aria-label="永久链接">#</a></h2>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">名称</th><th style="text-align:left">含义</th><th style="text-align:left">出处</th></tr></thead><tbody><tr><td><code>client_id</code></td><td>应用标识，即签名头 <code>x-bili-accesskeyid</code></td><td>申请应用时分配</td></tr><tr><td><code>app_secret</code></td><td>应用密钥，HMAC 的 key；<strong>只用于签名，不随请求发送</strong></td><td>同上</td></tr><tr><td><code>access_token</code></td><td>用户授权的访问凭证，放 <code>access-token</code> 头，有有效期</td><td>OAuth2 换取</td></tr><tr><td><code>refresh_token</code></td><td>续期令牌，<strong>一次性的</strong>，用过即废</td><td>OAuth2 换取</td></tr><tr><td><code>scope</code></td><td>接口权限点，如 <code>ARC_BASE</code>；应用要申请、用户要勾选</td><td>每篇接口文档首行</td></tr><tr><td><code>open_id</code></td><td>「开发者 × 应用」维度唯一的用户 ID，替代 uid 外显（合规）</td><td>用户接口返回</td></tr><tr><td><code>union_id</code></td><td>同一开发者下<strong>多应用通用</strong>的用户 ID</td><td><code>POST /user/account/union_id</code></td></tr><tr><td><code>mid</code></td><td>B 站用户 uid，部分接口用它，注意 127003「缺少 mid 或 mid 不匹配」</td><td>—</td></tr><tr><td><code>biz_code</code></td><td>业务线标识，部分投稿接口的权限按 biz_code 配置</td><td>#15</td></tr><tr><td><code>upload_token</code></td><td>文件上传预处理拿到的凭证，后续分片/合片/提交都靠它</td><td>#8</td></tr></tbody></table></div>
+<h3 id="全部-scope20-个按出现次数">全部 scope（20 个，按出现次数）<a class="anchor" href="#全部-scope20-个按出现次数" aria-label="永久链接">#</a></h3>
+<p><code>SHOP_COMMODITY_INFO</code>(22) · <code>SHOP_AFTERSALES_INFO</code>(19) · <code>SHOP_ORDER_INFO</code>(18) ·
+<code>ATC_BASE</code>(14) · <code>ARC_BASE</code>(12) · <code>SHOP_BA_CHAT</code>(10) · <code>SHOP_LOGISTICS_INFO</code>(10) ·
+<code>USER_INFO</code>(7) · <code>LIVE_ROOM_DATA</code>(6) · <code>SHOP_TICKET_ORDER_DATA</code>(5) · <code>COURSE_ORDER_DATA</code>(3) ·
+<code>COPYRIGHT_MUSIC_DATA</code>(3) · <code>ARC_DATA</code>(2) · <code>ATC_DATA</code>(2) · <code>SHOP_STOCK_INFO</code>(2) ·
+<code>USER_DATA</code>(1) · <code>LIVE_STREAM_DATA</code>(1) · <code>SHOP_STORE_INFO</code>(1) · <code>SHOP_LIVE_COMMERC_DATA</code>(1) ·
+<code>UPOWER_ORDER_DATA</code>(1)</p>
+<p>140 篇文档带 scope 标注。<code>scripts/audit.mjs</code> 会把这份白名单与数据比对，出现新 scope 会报错。</p>
+<p>新增 scope 后，<strong>已授权的老用户不会自动获得</strong>，必须引导其重新授权并勾选，否则报 127011。</p>
+<hr>
+<h2 id="3-主机与路径约定">3. 主机与路径约定<a class="anchor" href="#3-主机与路径约定" aria-label="永久链接">#</a></h2>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">主机</th><th style="text-align:left">用途</th><th style="text-align:left">数量</th></tr></thead><tbody><tr><td><code>https://member.bilibili.com</code></td><td>几乎所有业务接口</td><td>87</td></tr><tr><td><code>https://openupos.bilivideo.com</code></td><td>视频分片上传 / 单文件上传（<strong>裸二进制，无签名</strong>）</td><td>2</td></tr><tr><td><code>https://api.bilibili.com</code></td><td>OAuth2 换 token / 刷新</td><td>1</td></tr></tbody></table></div>
+<p>路径前缀：</p>
+<ul><li><code>/arcopen/fn/...</code> — 主要业务前缀</li><li><code>/liveopen/fn/live/thirdPartyLive/...</code> — 一键开播（#50/#52/#53），注意不是 <code>/arcopen</code></li><li><code>/mock/...</code> — 沙盒环境，见 §11</li></ul>
+<hr>
+<h2 id="4-数据文件-schema">4. 数据文件 schema<a class="anchor" href="#4-数据文件-schema" aria-label="永久链接">#</a></h2>
+<h3 id="dataindexjson"><code>data/index.json</code><a class="anchor" href="#dataindexjson" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">jsonc</span><button class="code-copy" type="button">复制</button></div><pre><code>{
+  "generatedAt": "…", "source": "https://open.bilibili.com/doc/4", "docRoot": "&lt;文档 Markdown 所在目录&gt;",
+  "totals": { "docs": 170, "api": 95, "withBodyParams": 71, "withResponseParams": 72 },
+  "docs": [
+    {
+      "num": 12,                    // ref
+      "id": "f7fc57dd-…",           // 平台 uuid
+      "title": "视频稿件提交",       // 取自目录名（官方接口名）
+      "h1": "…",                    // 仅当文档内 H1 与目录名不同时才有
+      "file": "012_视频稿件提交.md",
+      "folder": "开放能力 / 视频稿件管理 / 服务端视频稿件投递",
+      "path": "开放能力 / 视频稿件管理 / 服务端视频稿件投递 / 视频稿件提交",
+      "type": "api",                // api | guide | event | protocol | multi-api | missing
+      "scopes": ["ARC_BASE"],
+      "signVersion": "1.0",         // 仅有：文档标注非 2.0 的接口（目前只有 #16）
+      "url": "https://member.bilibili.com/arcopen/fn/archive/add-by-utoken",
+      "method": "POST",
+      "endpoints": [ … ],           // 仅 multi-api
+      "hints": [ … ],               // 解析时发现的坑，见下
+      "summary": "调用该接口完成稿件投递 …",
+      "urlParams":  [ { "name": "upload_token", "type": "string", "required": true, "desc": "…" } ],
+      "bodyParams": [ { "name": "title", "type": "string", "required": true, "desc": "…" },
+                      { "name": "episode_id", "type": "int64", "required": true, "desc": "…", "depth": 2 } ],
+      "responseParams": [ { "name": "resource_id", "type": "string", "desc": "稿件唯一ID" } ],
+      "subSchemas": [ { "title": "common_msg参考字段", "params": [ … ] } ],
+      "requestExample": "curl --location …",
+      "responseExample": "{ \"code\": 0, … }",
+      "bytes": 2965, "lines": 93
+    }
+  ]
+}</code></pre></div>
+<p>字段约定：</p>
+<ul><li><code>type</code>：<code>api</code> 单接口 / <code>multi-api</code> 一篇多接口 / <code>event</code> 推送事件 / <code>protocol</code> 协议说明 / <code>guide</code> 文档。</li><li><code>title</code> 用<strong>目录名</strong>（官方接口名）；文档内 H1 有时只是「简介」「长连说明」，不同才写进 <code>h1</code>。</li><li>参数对象：<code>{ name, type, required?, desc?, depth? }</code>。<ul><li><strong>每个参数都有 <code>type</code></strong>（1243/1243），值按原文，可能是 <code>string</code> / <code>int64</code> / <code>struct</code> / <code>[]string</code> / <code>array&lt;struct&gt;</code>。</li><li><code>required</code> <strong>可能缺失</strong>（359/364 有）：文档没写「必传」列时就没有这个字段，<strong>不代表可选</strong>，不要臆测。</li><li><code>depth</code> 仅嵌套表出现（用 <code>├─</code> / <code>│</code> 画层级时），1 = 顶层字段。</li></ul></li><li><code>subSchemas</code>：请求/响应里单独展开的子结构（如 <code>common_msg参考字段</code>、<code>shop_order_list结构体</code>），
+<strong>不要把它们和主参数混在一起</strong>；<code>bili_api_spec</code> 会用 <code>## 子结构：&lt;title&gt;</code> 单独列出。</li><li><code>hints</code>：解析阶段发现的使用陷阱，例如「GET 请求但参数列在 body 参数下」「签名版本 1.0」。</li><li><code>responseParams</code> 嵌套字段按原文写法（<code>area.area_id_name</code>）或 <code>depth</code> 表达，两种都出现过。</li><li>样例文本截断到 4000 字符。</li></ul>
+<h3 id="datallmstxt"><code>data/llms.txt</code><a class="anchor" href="#datallmstxt" aria-label="永久链接">#</a></h3>
+<p>一页纸清单，适合整段喂模型。格式：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>[#12] api 视频稿件提交 | POST https://member.bilibili.com/arcopen/fn/archive/add-by-utoken | scope=ARC_BASE | …
+  desc: 调用该接口完成稿件投递 …
+  url: upload_token:string*  ;  body: title:string*, cover:string, tid:int*  ;  resp: resource_id:string
+  sub(common_msg参考字段): source:string*, cover:string, title:string, …
+  signVersion=1.0</code></pre></div>
+<p><code>名字:类型*</code> 里的 <code>*</code> 表示必填；<code>sub(...)</code> 是子结构；<code>signVersion=</code> 只在非 2.0 时出现。</p>
+<h3 id="datastatus-codesjson"><code>data/status-codes.json</code><a class="anchor" href="#datastatus-codesjson" aria-label="永久链接">#</a></h3>
+<p><code>{ "4002": "签名异常", "127007": "应用无该接口权限", … }</code>，118 条。</p>
+<h3 id="datamockjson"><code>data/mock.json</code><a class="anchor" href="#datamockjson" aria-label="永久链接">#</a></h3>
+<p>沙盒环境（#169）的「功能 → mock 地址」表，43 条：</p>
+<div class="code"><div class="code-head"><span class="code-lang">jsonc</span><button class="code-copy" type="button">复制</button></div><pre><code>{ "source": "#169 沙盒环境", "host": "https://member.bilibili.com/mock",
+  "entries": [ { "group": "视频稿件管理", "feature": "文件上传预处理", "url": "https://member.bilibili.com/mock/video/part/init" } ] }</code></pre></div>
+<p><code>group</code> 是 #169 里的小节名，<code>feature</code> 是「功能」列原文。注意 <strong>mock 路径与正式路径不总一致</strong>
+（正式 <code>/arcopen/fn/archive/video/init</code> ↔ mock <code>/mock/video/part/init</code>），用 <code>bili_mock {action:"map"}</code> 换算。</p>
+<hr>
+<h2 id="5-mcp-工具决策树与参数">5. MCP 工具：决策树与参数<a class="anchor" href="#5-mcp-工具决策树与参数" aria-label="永久链接">#</a></h2>
+<p>19 个工具（17 个开放平台 + 2 个主站 Cookie/Web）。先看决策树，再看下面的逐条说明（<code>ref</code> 一律接受 <code>#12</code> / <code>12</code> / <code>012</code> / uuid / 标题片段 / 接口 URL）。</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>第一次接触        → bili_quickstart {}
+不知道接口叫什么  → bili_docs_search {query} / bili_endpoints {pathContains}
+想按模块浏览      → bili_docs_list {folder|type}
+要确认申请哪些权限 → bili_scopes {}
+已知 ref 看参数   → bili_api_spec {ref}
+看非接口文档      → bili_docs_get {ref}
+要写代码          → bili_codegen {ref, lang}      ← 自己拼签名容易错
+参数不确定/要校验 → bili_api_prepare {ref, query, body}
+要发请求          → bili_api_sign（出 curl） / bili_api_call（dryRun → 真调）
+投稿上传怎么切    → bili_upload_plan {fileSizeMB}
+拿 token / 续期   → bili_oauth {action}
+接消息推送        → bili_webhook {action}
+做直播消息        → bili_ws_protocol {}
+沙盒联调          → bili_mock {action}
+主站登录态        → bili_cookie {action:"whoami"}
+调主站 Web 接口   → bili_web_call {path}
+报错码            → bili_error_lookup {code}</code></pre></div>
+<p>对应关系速记：<strong><code>bili_docs_search</code> 找 → <code>bili_api_spec</code> 看 → <code>bili_codegen</code> 写 → <code>bili_api_prepare</code> 校验 → <code>bili_api_call</code> 发</strong>。</p>
+<h3 id="biliquickstart"><code>bili_quickstart</code><a class="anchor" href="#biliquickstart" aria-label="永久链接">#</a></h3>
+<p>无参数。返回主机 / OAuth2 流程 / 签名规则 / 返回结构 / 错误码分段 / 投稿技术限制。
+<strong>在写任何对接代码前先调它。</strong></p>
+<h3 id="bilidocslist"><code>bili_docs_list</code><a class="anchor" href="#bilidocslist" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">类型</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>folder</code></td><td>string?</td><td>目录包含匹配，如 <code>视频稿件管理</code>、<code>直播能力</code>、<code>消息推送</code>、<code>电商</code></td></tr><tr><td><code>type</code></td><td>enum?</td><td><code>api</code> / <code>guide</code> / <code>event</code> / <code>protocol</code> / <code>multi-api</code></td></tr><tr><td><code>limit</code></td><td>int?</td><td>默认 60，最大 200</td></tr></tbody></table></div>
+<p>返回：<code>共 N 条</code> + 每行 <code>#num [type] 标题</code> / 缩进行 <code>METHOD /path · 目录</code>。</p>
+<h3 id="bilidocssearch"><code>bili_docs_search</code><a class="anchor" href="#bilidocssearch" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>query</code></td><td>必填。支持中文、字段名、错误信息，如 <code>投稿</code>、<code>upload_token</code>、<code>弹幕</code>、<code>refresh_token</code></td></tr><tr><td><code>limit</code></td><td>默认 8，最大 30</td></tr></tbody></table></div>
+<p>打分：标题 100 / url 40 / 目录 30 / scope 25 / 摘要 20 / 正文 5。返回命中原因与正文片段，末尾给出下一步提示。</p>
+<p><strong>技巧</strong>：找「哪个接口能传某字段」直接搜字段名；找「报错什么意思」用 <code>bili_error_lookup</code>。</p>
+<h3 id="bilidocsget"><code>bili_docs_get</code><a class="anchor" href="#bilidocsget" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>ref</code></td><td><code>#12</code> / <code>12</code> / <code>012</code> / uuid / 标题片段 / 文件名</td></tr><tr><td><code>maxChars</code></td><td>默认 40000。超长会截断并明确标注</td></tr></tbody></table></div>
+<h3 id="biliapispec"><code>bili_api_spec</code><a class="anchor" href="#biliapispec" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>ref</code> | <code>url</code></td><td>二选一</td></tr></tbody></table></div>
+<p>返回 Markdown：标题、ref/id/file、目录、scope、<code>METHOD url</code>、摘要、<code>## url 参数</code>、<code>## body 参数</code>、<code>## 响应</code>、请求/响应样例、<code>## 调用方式</code>。
+<strong>写代码前必须看这个，不要凭摘要猜字段。</strong></p>
+<h3 id="biliapisign"><code>bili_api_sign</code><a class="anchor" href="#biliapisign" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>url</code></td><td>必填，完整 URL</td></tr><tr><td><code>method</code></td><td>默认 <code>GET</code></td></tr><tr><td><code>query</code></td><td>对象，会 urlencode 进 URL</td></tr><tr><td><code>body</code></td><td>对象（自动 JSON 序列化）或字符串</td></tr><tr><td><code>clientId</code> / <code>appSecret</code> / <code>accessToken</code></td><td>覆盖环境变量</td></tr></tbody></table></div>
+<p>返回：待签名串、全部请求头、可粘贴 curl、<code>content_md5</code>。
+无凭据时用 <code>YOUR_CLIENT_ID</code> / <code>YOUR_APP_SECRET</code> 占位并告警 —— <strong>这是给人看的示意，不要当真去调</strong>。</p>
+<h3 id="biliapicall"><code>bili_api_call</code><a class="anchor" href="#biliapicall" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>ref</code> | <code>url</code></td><td>二选一；<code>ref</code> 会自动带上 METHOD 和 URL</td></tr><tr><td><code>method</code> / <code>query</code> / <code>body</code></td><td>同上</td></tr><tr><td><code>dryRun</code></td><td><code>true</code> 只生成请求与 curl，不发送</td></tr></tbody></table></div>
+<p>无凭据时只有 <code>dryRun:true</code> 可用，否则报错 —— 这是预期行为，不要重试。</p>
+<p>返回：<code>httpStatus</code>、<code>code</code>、<code>message</code>、<code>requestId</code>、<code>data</code>、<code>raw</code>、<code>request</code>。</p>
+<h3 id="bilierrorlookup"><code>bili_error_lookup</code><a class="anchor" href="#bilierrorlookup" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>code</code></td><td><code>4002</code> 精确查</td></tr><tr><td><code>fuzzy</code></td><td><code>true</code> 时按前缀列出，如 <code>1270</code> 列出全部鉴权/限频码</td></tr></tbody></table></div>
+<hr>
+<h2 id="5b-新增工具9-个">5b. 新增工具（9 个）<a class="anchor" href="#5b-新增工具9-个" aria-label="永久链接">#</a></h2>
+<h3 id="biliendpoints"><code>bili_endpoints</code><a class="anchor" href="#biliendpoints" aria-label="永久链接">#</a></h3>
+<p>按条件过滤全部端点，比全文搜索精确。</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>method</code></td><td><code>GET</code>/<code>POST</code>/…</td></tr><tr><td><code>scope</code></td><td>权限点，如 <code>SHOP_ORDER_INFO</code></td></tr><tr><td><code>host</code></td><td><code>member.bilibili.com</code> / <code>openupos.bilivideo.com</code> / <code>api.bilibili.com</code></td></tr><tr><td><code>pathContains</code></td><td>路径或标题关键词</td></tr><tr><td><code>limit</code></td><td>默认 40</td></tr></tbody></table></div>
+<p>典型问法：「所有需要 <code>SHOP_ORDER_INFO</code> 的 POST 接口」「上传类接口有哪些」→ <code>{host:"openupos.bilivideo.com"}</code>。</p>
+<h3 id="biliscopes"><code>bili_scopes</code><a class="anchor" href="#biliscopes" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td>无</td><td>列出全部 scope 及覆盖端点数</td></tr><tr><td><code>scope</code></td><td>该 scope 下所有端点</td></tr><tr><td><code>ref</code></td><td>该接口的 scope，以及每个 scope 下的其它接口</td></tr></tbody></table></div>
+<p><strong>申请权限前先问它</strong>，避免 127007 / 127011。</p>
+<h3 id="biliapiprepare"><code>bili_api_prepare</code><a class="anchor" href="#biliapiprepare" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>ref</code></td><td>必填</td></tr><tr><td><code>query</code> / <code>body</code></td><td>待校验的参数对象</td></tr></tbody></table></div>
+<p>做的四件事：① 按文档类型转换（<code>"21"</code>→<code>21</code>、<code>"true"</code>→<code>true</code>、<code>"a,b"</code>→<code>["a","b"]</code>）
+② 列缺必填 ③ 列多传的字段（文档未列出）④ 把 GET 文档里写在 body 下的参数归到 query。
+<strong>注意：它不猜测可选参数的默认值。</strong></p>
+<h3 id="bilicodegen"><code>bili_codegen</code><a class="anchor" href="#bilicodegen" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>ref</code></td><td>必填</td></tr><tr><td><code>lang</code></td><td><code>python</code> / <code>node</code> / <code>curl</code> / <code>java</code> / <code>php</code> / <code>go</code>，默认 python</td></tr></tbody></table></div>
+<p>生成的是<strong>可编译</strong>的骨架：完整签名实现 + 该接口全部参数（必填直接写入、可选注释掉）+ <code>code != 0</code> 处理。
+参数值留 <code>TODO</code>。生成结果在 <code>npm run selftest</code> 里会被 <code>py_compile</code> / <code>node --check</code> 真实编译一遍。</p>
+<h3 id="biliuploadplan"><code>bili_upload_plan</code><a class="anchor" href="#biliuploadplan" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>fileSizeBytes</code> | <code>fileSizeMB</code></td><td>二选一</td></tr><tr><td><code>chunkMB</code></td><td>默认 10</td></tr><tr><td><code>filename</code></td><td>默认 <code>video.mp4</code></td></tr></tbody></table></div>
+<p>输出：单文件还是分片、片数、每片 offset 区间、part_number 起止、完整调用顺序、注意事项。
+<strong>回答「这个大文件怎么传」直接用它，别自己算。</strong></p>
+<h3 id="bilioauth"><code>bili_oauth</code><a class="anchor" href="#bilioauth" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>help</code></td><td>字段、注意事项、以及「授权页 URL 文档未给出」的说明</td></tr><tr><td><code>exchange</code></td><td>传 <code>code</code> 真实换取 token</td></tr><tr><td><code>refresh</code></td><td>传 <code>refreshToken</code> 真实续期（老 refresh_token 立即失效）</td></tr></tbody></table></div>
+<p>凭据取自参数或 <code>BILI_CLIENT_ID</code> / <code>BILI_APP_SECRET</code>。返回里会把 <code>expires_in</code> 换算成 UTC 时间。</p>
+<h3 id="biliwebhook"><code>bili_webhook</code><a class="anchor" href="#biliwebhook" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>list</code></td><td>41 个事件按模块分组 + 配置/验签/重试要点</td></tr><tr><td><code>detail</code></td><td>单个事件的内容字段（<code>ref</code> 传 <code>#164</code> 或事件名）</td></tr><tr><td><code>verify-code</code></td><td>生成验签 + <code>verify_webhooks</code> 应答代码（<code>lang</code> = python/node）</td></tr><tr><td><code>notes</code></td><td>只要文字说明</td></tr></tbody></table></div>
+<p>验签三条铁律都写进生成代码里了：<strong>原始字节</strong>算 SHA1、<code>verify_webhooks</code> 原样回 <code>data</code>、重复消息幂等。</p>
+<h3 id="biliwsprotocol"><code>bili_ws_protocol</code><a class="anchor" href="#biliwsprotocol" aria-label="永久链接">#</a></h3>
+<p><code>{code:"python"}</code> 会在协议说明后附一份内联客户端（含 <code>pack</code>/<code>unpack</code>/zlib 递归/心跳任务）。</p>
+<h3 id="bilimock"><code>bili_mock</code><a class="anchor" href="#bilimock" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>list</code></td><td>43 个 mock 接口按模块分组</td></tr><tr><td><code>map</code></td><td>正式 <code>ref</code> → mock 地址（两者路径不总一致）</td></tr><tr><td><code>call</code></td><td>真调 mock，只允许 <code>member.bilibili.com/mock/</code> 下的地址</td></tr></tbody></table></div>
+<hr>
+<h2 id="5c-凭据两套体系别混">5c. 凭据：两套体系，别混<a class="anchor" href="#5c-凭据两套体系别混" aria-label="永久链接">#</a></h2>
+<div class="prose-table"><table><thead><tr><th style="text-align:left"></th><th style="text-align:left">开放平台</th><th style="text-align:left">主站 Web</th></tr></thead><tbody><tr><td>凭据</td><td><code>client_id</code> + <code>app_secret</code> + <code>access_token</code></td><td>浏览器 Cookie（<code>SESSDATA</code> / <code>bili_jct</code>）</td></tr><tr><td>来源</td><td>open.bilibili.com 控制台 → 应用管理（需实名 + 开发者入驻）</td><td>登录 bilibili.com 后导出 cookie</td></tr><tr><td>认证</td><td>HMAC-SHA256（<code>x-bili-*</code> 6 个头）</td><td>直接带 <code>Cookie</code> 头</td></tr><tr><td>文件</td><td><code>secrets/open-platform.json</code></td><td><code>secrets/cookies.json</code></td></tr><tr><td>覆盖变量</td><td><code>BILI_CRED_FILE</code></td><td><code>BILI_COOKIE_FILE</code></td></tr><tr><td>工具</td><td><code>bili_api_*</code> / <code>bili_oauth</code> / <code>bili_upload_plan</code></td><td><code>bili_cookie</code> / <code>bili_web_call</code></td></tr></tbody></table></div>
+<p><strong><code>client_id</code> / <code>app_secret</code> / <code>access_token</code> 不在任何 cookie 里</strong>，导出多少次 cookie 也拿不到；
+<code>SESSDATA</code> 同样换不来开放平台的 token。</p>
+<p>凭据解析顺序：<strong>显式参数 → 环境变量（<code>BILI_CLIENT_ID</code> / <code>BILI_APP_SECRET</code> / <code>BILI_ACCESS_TOKEN</code>）→ 凭据文件</strong>。
+<code>bili_oauth {action:"status"}</code> 逐格显示「有没有 / 从哪来」。</p>
+<h3 id="补齐开放平台凭据">补齐开放平台凭据<a class="anchor" href="#补齐开放平台凭据" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-com"># 控制台建应用（类型选「网页应用」），回调域填 http://127.0.0.1:8848/callback</span>
+npm run login -- --client-id &lt;ClientID&gt; --secret &lt;Secret&gt;</code></pre></div>
+<p>脚本起本地回调服务 → 打印授权链接并自动打开浏览器 → 抓 <code>code</code> → POST 换 token →
+写入 <code>secrets/open-platform.json</code>（<code>accessToken</code> / <code>refreshToken</code> / <code>expires_in</code> / <code>scopes</code>）。</p>
+<p>授权页 URL（2025-03 新版，旧的 <code>passport.bilibili.com/register/pc_oauth2.html</code> 已停维护）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>https://account.bilibili.com/pc/account-pc/auth/oauth?client_id=&lt;ClientID&gt;&amp;gourl=&lt;urlencoded&gt;&amp;state=&lt;随机串&gt;</code></pre></div>
+<ul><li><code>gourl</code> 必须与应用「授权回调域」一致，<strong>拼接前 URL encode</strong>；不一致 → 「不合法的授权请求」</li><li>回调：<code>&lt;return_url&gt;?code=&lt;code&gt;&amp;state=&lt;state&gt;</code></li><li><code>code</code> 一次性、短时效；<code>refresh_token</code> 一次性</li><li><code>bili_oauth {action:"authorize-url", gourl:"…"}</code> 自动组链接</li></ul>
+<hr>
+<h2 id="5d-主站-webcookie非开放平台">5d. 主站 Web（Cookie，非开放平台）<a class="anchor" href="#5d-主站-webcookie非开放平台" aria-label="永久链接">#</a></h2>
+<p><strong>与开放平台是两套体系</strong>：开放平台用 <code>client_id</code> + <code>secret</code> + HMAC 签名 + <code>access_token</code>；
+主站 <code>www.bilibili.com</code> / <code>api.bilibili.com</code> 的 Web 接口用浏览器 Cookie（<code>SESSDATA</code> 等）。
+两边的凭证不能互换 —— 把 SESSDATA 填进 <code>BILI_ACCESS_TOKEN</code> 只会拿到 401/<code>-101</code> ——
+反过来，<code>client_id</code>/<code>app_secret</code> 也不在 cookie 里（获取方式见 5c）。</p>
+<h3 id="cookie-从哪来">Cookie 从哪来<a class="anchor" href="#cookie-从哪来" aria-label="永久链接">#</a></h3>
+<p>优先级：<code>bili_cookie {jar:...}</code> 显式导入 → <code>BILI_COOKIE_FILE</code> 指向的文件 → <code>BILI_COOKIE</code> 环境变量 → <code>secrets/cookies.json</code>。</p>
+<p>支持三种格式：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">格式</th><th style="text-align:left">例子</th></tr></thead><tbody><tr><td>EditThisCookie 导出的数组</td><td><code>[{"name":"SESSDATA","value":"…","domain":".bilibili.com"}, …]</code></td></tr><tr><td>对象</td><td><code>{"SESSDATA":"…","bili_jct":"…"}</code></td></tr><tr><td>字符串</td><td><code>"SESSDATA=…; bili_jct=…"</code></td></tr></tbody></table></div>
+<h3 id="bilicookie"><code>bili_cookie</code><a class="anchor" href="#bilicookie" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>status</code>（默认）</td><td>9 个关键 cookie 的存在性 + 过期时间 + 剩余天数；无关 cookie 只列名字</td></tr><tr><td><code>whoami</code></td><td>真调 <code>/x/web-interface/nav</code>，返回 uid / uname / 等级 / 硬币 / 大会员；<code>-101</code> 即 cookie 已失效</td></tr><tr><td><code>import</code></td><td>传 <code>jar</code>，同名覆盖、其余保留</td></tr><tr><td><code>set</code></td><td>传 <code>name</code>（<code>value</code> 省略即删除该条）</td></tr><tr><td><code>export</code></td><td>导出整个罐子</td></tr><tr><td><code>clear</code></td><td>清空</td></tr></tbody></table></div>
+<p><strong>默认脱敏</strong>（<code>SESSDATA</code> 显示成 <code>b50af9…IIEC [len=222]</code>），<code>reveal:true</code> 才出原值。
+报告登录态时用 <code>whoami</code>，不要靠字符串长度猜。</p>
+<h3 id="biliwebcall"><code>bili_web_call</code><a class="anchor" href="#biliwebcall" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>path</code> | <code>url</code></td><td><code>path</code> 拼到 <code>https://www.bilibili.com</code>；<code>url</code> 优先</td></tr><tr><td><code>method</code></td><td><code>GET</code> / <code>POST</code>，给 <code>form</code> 时默认 POST</td></tr><tr><td><code>query</code> / <code>form</code> / <code>body</code></td><td><code>form</code> → <code>x-www-form-urlencoded</code> 且<strong>自动补 <code>csrf=bili_jct</code></strong>；<code>body</code> → JSON</td></tr><tr><td><code>headers</code></td><td>额外头（<code>Cookie</code>、<code>UA</code>、<code>Referer</code> 已自动带）</td></tr><tr><td><code>wbi</code></td><td>强制开关 wbi 签名；留空按路径自动判断（<code>/wbi/</code>、<code>/polymer/</code>、<code>/v2/reply/wbi/</code>）</td></tr><tr><td><code>dryRun</code></td><td>只打印请求</td></tr><tr><td><code>maxBytes</code></td><td>响应截断，默认 60000</td></tr></tbody></table></div>
+<p><strong>域名白名单</strong>：只允许 <code>*.bilibili.com</code> / <code>*.hdslb.com</code>，其它直接拒绝（这是硬编码的，别试着绕）。</p>
+<p><strong>wbi 签名</strong>（<code>src/wbi.mjs</code>）：<code>/x/space/wbi/*</code>、<code>/x/polymer/*</code> 要 <code>w_rid</code> + <code>wts</code>。
+流程：nav 取 <code>wbi_img</code> → 重排表出 <code>mixin_key</code> → 参数字典序、去掉 <code>!'()*</code> → urlencode →
+末尾接 <code>mixin_key</code> → md5。
+实测 <code>/x/space/wbi/acc/info?mid=&lt;uid&gt;</code> 带签名 <code>code:0</code>，<code>wbi:false</code> 得 <code>-403 访问权限不足</code>。</p>
+<p>已知失效：<code>/x/space/wbi/arc/search</code> 恒 <code>-403</code>（补 <code>dm_img_list</code>/<code>dm_img_str</code>/<code>dm_img_inter</code>
+也无效）→ 改用旧路径 <code>/x/space/arc/search</code>（<code>code:0</code>）。</p>
+<p><strong>举报</strong>：两个入口。</p>
+<p>① 报<strong>用户</strong>：<code>POST /x/space/report</code>，body <code>mid</code> / <code>reason</code> / <code>scene</code> / <code>tag_version</code>（csrf 自动带）。
+合法组合由 <code>GET /x/space/report/options</code> 决定，<strong>先拉它再用，别写死</strong>：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">reason</th><th style="text-align:left">含义</th><th style="text-align:left">可用 scene</th></tr></thead><tbody><tr><td>5</td><td>传播色情/赌博/垃圾广告资源、诱导交易</td><td>1~7</td></tr><tr><td>1</td><td>色情低俗</td><td>1~7</td></tr><tr><td>4</td><td>引战、人身攻击</td><td>1~7</td></tr><tr><td>3</td><td>违法违禁行为</td><td>1</td></tr><tr><td>2</td><td>虚假不实信息</td><td>1</td></tr></tbody></table></div>
+<p>scene：1 用户资料（头像/签名/昵称）· 2 稿件 · 3 评论 · 4 动态 · 5 私信 · 6 专栏 · 7 其他。</p>
+<p>② 报<strong>单条评论</strong>：<code>POST /x/v2/reply/report</code>，参数 <code>type</code> / <code>oid</code> / <code>rpid</code> / <code>reason</code> / <code>content</code>。
+<code>reason</code>：0其他 1垃圾广告 2色情 3刷屏 4引战 5剧透 6政治 7人身攻击 8内容不相关 9违法违规
+10低俗 11非法网站 12赌博诈骗 13传播不实信息 14怂恿教唆 15侵犯隐私 16抢楼 17青少年不良。
+返回 <code>12008</code> 已举报过 / <code>12019</code> 举报过于频繁 / <code>-509</code> 请求过于频繁 / <code>-111</code> csrf 失败；
+这个接口风控更紧，静默调用常见 <code>-352</code>。</p>
+<p>要报评论就得先拿到 <code>oid</code>/<code>rpid</code>：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">要什么</th><th style="text-align:left">调用</th></tr></thead><tbody><tr><td>动态列表</td><td><code>/x/polymer/web-dynamic/v1/feed/space?host_mid=&lt;uid&gt;</code>（wbi）→ <code>id_str</code></td></tr><tr><td>动态正文</td><td><code>/x/polymer/web-dynamic/v1/detail?id=&lt;id_str&gt;</code>（wbi）</td></tr><tr><td>投稿列表</td><td><code>/x/space/arc/search?mid=&lt;uid&gt;&amp;ps=20&amp;pn=1</code> → <code>aid</code> / <code>bvid</code></td></tr><tr><td>稿件评论</td><td><code>/x/v2/reply/wbi/main?oid=&lt;aid&gt;&amp;type=1&amp;mode=3</code>（wbi）→ <code>rpid</code></td></tr></tbody></table></div>
+<p>常见坑：</p>
+<ul><li>写操作（点赞、投币、发评论）缺 <code>csrf</code> 会返回 <code>-111  csrf校验失败</code> —— <code>bili_jct</code> 必须在罐里</li><li><code>SESSDATA</code> 是 <code>httpOnly</code> + <code>Secure</code> 的，浏览器里只能通过导出插件拿到</li><li>同一 <code>SESSDATA</code> 多设备并发容易触发风控（<code>-352</code>），换设备指纹（<code>buvid3</code>/<code>buvid4</code>）或降频</li><li><code>bili_ticket</code> 只活 3 天左右，部分接口要它；<code>status</code> 里会标出来</li></ul>
+<hr>
+<h2 id="5c-资源与提示">5c. 资源与提示<a class="anchor" href="#5c-资源与提示" aria-label="永久链接">#</a></h2>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">类型</th><th style="text-align:left">名称</th><th style="text-align:left">用途</th></tr></thead><tbody><tr><td>resource</td><td><code>bili://catalog</code></td><td><code>llms.txt</code> 全文，客户端可直接挂成上下文</td></tr><tr><td>resource</td><td><code>bili://doc/{ref}</code></td><td>单篇文档原文 Markdown</td></tr><tr><td>prompt</td><td><code>integrate-bili-api</code></td><td>参数 <code>ref</code>，产出「把该接口接入现有项目」的完整任务说明（含 5 条硬性要求）</td></tr></tbody></table></div>
+<hr>
+<h2 id="6-请求总则">6. 请求总则<a class="anchor" href="#6-请求总则" aria-label="永久链接">#</a></h2>
+<h3 id="61-20-签名hmac-sha256">6.1 2.0 签名（HMAC-SHA256）<a class="anchor" href="#61-20-签名hmac-sha256" aria-label="永久链接">#</a></h3>
+<blockquote><p><strong>版本例外</strong>：<code>#16 唤起粉端投稿接口说明</code> 在文档里明确写「该接口使用的签名为 <code>1.0</code>」，
+但其 C# Demo 只是把 <code>SignatureVersion</code> 填成 <code>"1.0"</code>，文档<strong>没有给出 1.0 的算法差异</strong>。
+本仓库的签名实现只做 2.0；接 #16 前需向平台确认 1.0 的规则。<code>data/index.json</code> 里这条带
+<code>signVersion: "1.0"</code>，<code>bili_api_spec</code> 会打上 ⚠ 标记。</p></blockquote>
+<p>参与签名的<strong>只有这 6 个头</strong>，按 key 字典序排列：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>x-bili-accesskeyid
+x-bili-content-md5
+x-bili-signature-method
+x-bili-signature-nonce
+x-bili-signature-version
+x-bili-timestamp</code></pre></div>
+<p>拼成 <code>k:v</code>，行间用 <code>\n</code>，<strong>末尾不留换行</strong>；<code>Authorization</code> = <code>HMAC-SHA256(app_secret, 待签串)</code> 的 hex 小写。</p>
+<p><strong>可复现的例子</strong>（secret = <code>test_secret</code>）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>x-bili-accesskeyid:93a0f774fae84e6c
+x-bili-content-md5:d41d8cd98f00b204e9800998ecf8427e
+x-bili-signature-method:HMAC-SHA256
+x-bili-signature-nonce:1730185575446751000
+x-bili-signature-version:2.0
+x-bili-timestamp:1730185575</code></pre></div>
+<p>→ <code>Authorization: 93daf316cf499f313e6e7c487857fe3b1c8e9b6a262123e36ddf867bd97e5e1f</code>
+（待签串 223 字节；<code>md5("") = d41d8cd98f00b204e9800998ecf8427e</code>；<code>md5('{"title":"demo"}') = 0644a83ba42a8257fe418164beb5509a</code>）</p>
+<p>用这两个值可以自检任何实现的正确性。</p>
+<h3 id="62-实际发出的请求头">6.2 实际发出的请求头<a class="anchor" href="#62-实际发出的请求头" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">头</th><th style="text-align:left">值</th></tr></thead><tbody><tr><td><code>Accept</code></td><td><code>application/json</code></td></tr><tr><td><code>Content-Type</code></td><td><code>application/json</code>（上传文件时 <code>application/octet-stream</code> 或 <code>multipart/form-data</code>）</td></tr><tr><td><code>Authorization</code></td><td>上一步的签名</td></tr><tr><td><code>X-Bili-Accesskeyid</code></td><td>= client_id</td></tr><tr><td><code>X-Bili-Content-Md5</code></td><td><code>md5(body)</code> 小写</td></tr><tr><td><code>X-Bili-Signature-Method</code></td><td><code>HMAC-SHA256</code></td></tr><tr><td><code>X-Bili-Signature-Nonce</code></td><td>随机 GUID，每次不同（防重放）</td></tr><tr><td><code>X-Bili-Signature-Version</code></td><td><code>2.0</code></td></tr><tr><td><code>X-Bili-Timestamp</code></td><td>秒级 unix 时间，偏差 &gt; 10 分钟直接丢弃</td></tr><tr><td><code>access-token</code></td><td>OAuth2 的 access_token（v2.0 必填）</td></tr></tbody></table></div>
+<h3 id="63-三个最常见的签名错误">6.3 三个最常见的签名错误<a class="anchor" href="#63-三个最常见的签名错误" aria-label="永久链接">#</a></h3>
+<ol><li><strong>md5 算错对象</strong>：必须是实际发出的字节。Python 里 <code>md5(str(dict))</code> ≠ <code>md5(json.dumps(dict))</code>。</li><li><strong>末尾多一个 <code>\n</code></strong>，或少了某一行 → <code>4002 签名异常</code>。</li><li><strong>GET 用了非空 body 的 md5</strong>：GET 没 body，<code>x-bili-content-md5</code> 必须是 <code>md5("")</code>。</li></ol>
+<h3 id="64-无需签名的接口唯一例外">6.4 无需签名的接口（唯一例外）<a class="anchor" href="#64-无需签名的接口唯一例外" aria-label="永久链接">#</a></h3>
+<p>分片上传 / 单文件上传（#9 / #14）走 <code>openupos.bilivideo.com</code>，<strong>裸二进制、不带任何 <code>X-Bili-*</code></strong>，
+凭 URL 上的 <code>upload_token</code> 鉴权，<code>Content-Type: application/octet-stream</code>。</p>
+<h3 id="65-文档里已知的坑已写进-hints">6.5 文档里已知的坑（已写进 <code>hints</code>）<a class="anchor" href="#65-文档里已知的坑已写进-hints" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">现象</th><th style="text-align:left">涉及</th><th style="text-align:left">处理</th></tr></thead><tbody><tr><td>方法是 <code>GET</code>，参数却列在「body 参数」下</td><td>#24 #25 #27 #33 #38</td><td>按 <strong>query</strong> 传（看 curl 样例：GET 无 body）</td></tr><tr><td>文档标注签名版本 1.0</td><td>#16</td><td>见 6.1，先向平台确认算法</td></tr><tr><td>分片上传用 API 签名头</td><td>#9 #14</td><td>不要带，会失败</td></tr><tr><td>篇内多张表靠 <code>├─</code> / <code>│</code> 画层级</td><td>#114 等</td><td>用 <code>depth</code> 字段还原嵌套</td></tr></tbody></table></div>
+<hr>
+<h2 id="7-oauth2-完整流程">7. OAuth2 完整流程<a class="anchor" href="#7-oauth2-完整流程" aria-label="永久链接">#</a></h2>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>① 用户在授权页同意 → 回调地址收到 code
+② POST https://api.bilibili.com/x/account-oauth2/v1/token
+   Content-Type: application/x-www-form-urlencoded
+   client_id / client_secret / grant_type=authorization_code / code
+   → { access_token, refresh_token, expires_in, scopes[] }
+③ 业务请求带 access-token: &lt;access_token&gt;
+④ 过期前用 refresh_token 续期（一次一份）
+   POST https://api.bilibili.com/x/account-oauth2/v1/refresh_token
+   grant_type=refresh_token / refresh_token</code></pre></div>
+<p>要点：</p>
+<ul><li><code>expires_in</code> 是 <strong>UTC 时间戳</strong>（不是剩余秒数），文档样例 <code>1630220614</code>。</li><li>每个 <code>refresh_token</code> <strong>只能用一次</strong>，续期后要用返回的新 token。</li><li>access_token 过期后不能再刷新，必须让用户重新授权。</li><li>用户主动解除授权时，平台会推 <code>解除授权</code> 事件（#123），要接。</li><li>客户端应用走 SDK 拿 code，网站应用走重定向，两者拿到的 code 等价。</li></ul>
+<hr>
+<h2 id="8-返回结构与错误码">8. 返回结构与错误码<a class="anchor" href="#8-返回结构与错误码" aria-label="永久链接">#</a></h2>
+<h3 id="通用返回">通用返回<a class="anchor" href="#通用返回" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">json</span><button class="code-copy" type="button">复制</button></div><pre><code>{ <span class="tok-str">"code"</span>: <span class="tok-num">0</span>, <span class="tok-str">"message"</span>: <span class="tok-str">"0"</span>, <span class="tok-str">"ttl"</span>: <span class="tok-num">1</span>, <span class="tok-str">"data"</span>: {}, <span class="tok-str">"request_id"</span>: <span class="tok-str">"…"</span> }</code></pre></div>
+<ul><li><code>code == 0</code> 才算成功。<strong>HTTP 200 也可能是业务失败</strong>，必须看 <code>code</code>。</li><li><code>request_id</code> 是唯一请求 id，报障时给运营。</li><li>三方回传结构（电商等）同样要求 <code>code/message/data/request_id</code>。</li></ul>
+<h3 id="错误码分段">错误码分段<a class="anchor" href="#错误码分段" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">段</th><th style="text-align:left">含义</th><th style="text-align:left">代表</th></tr></thead><tbody><tr><td><code>4000–4012</code></td><td>通用 / 签名</td><td><code>4002 签名异常</code>、<code>4003 请求过期</code>、<code>4008 MD5 校验失败</code>、<code>4007/4009 Content-Type/Accept 不对</code></td></tr><tr><td><code>1220xx</code></td><td>OAuth2</td><td><code>122000 client_id 错</code>、<code>122001 secret 错</code>、<code>122002 code 未找到</code>、<code>122007 refreshToken 非法</code></td></tr><tr><td><code>1270xx</code></td><td>鉴权 / 限频</td><td><code>127001 token 错</code>、<code>127002 sign 错</code>、<code>127007 应用无该接口权限</code>、<code>127009 超限</code>、<code>127011 用户未授权</code>、<code>127304/127305/127306 权限/白名单/频率</code></td></tr><tr><td><code>1230xx</code></td><td>视频稿件</td><td><code>123004 不存在该稿件</code>、<code>123009 该分区不存在</code>、<code>123026 频率过快</code>、<code>123035 已开放不能定时发布</code></td></tr><tr><td><code>1290xx</code></td><td>专栏</td><td><code>129005 标题不合法</code>、<code>129006 正文要超 200 字或 3 张图</code>、<code>129018 当日投稿上限</code></td></tr><tr><td><code>1410xx</code></td><td>直播长连</td><td><code>141002 心跳超时</code>、<code>141005 获取长连失败</code></td></tr><tr><td><code>1300xx</code></td><td>服务市场 / 电商</td><td><code>130001 未授权店铺</code>、<code>130004 订单服务异常</code></td></tr><tr><td><code>1310xx</code></td><td>创作中心</td><td><code>131001 系统繁忙</code></td></tr></tbody></table></div>
+<p>逐条查：<code>bili_error_lookup</code>。</p>
+<hr>
+<h2 id="9-接口索引95-篇单接口-2-篇多接口-100-个端点">9. 接口索引（95 篇单接口 + 2 篇多接口 = 100 个端点）<a class="anchor" href="#9-接口索引95-篇单接口-2-篇多接口-100-个端点" aria-label="永久链接">#</a></h2>
+<p><code>ref</code> 列直接用于 <code>bili_api_spec {ref}</code> / <code>bili_api_call {ref}</code>。PATH 不含主机时默认 <code>https://member.bilibili.com</code>。</p>
+<h3 id="用户管理3">用户管理（3）<a class="anchor" href="#用户管理3" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#4</td><td>GET</td><td><code>/arcopen/fn/user/account/scopes</code></td><td>USER_INFO</td></tr><tr><td>#5</td><td>GET</td><td><code>/arcopen/fn/user/account/info</code></td><td>USER_INFO</td></tr><tr><td>#6</td><td>POST</td><td><code>/arcopen/fn/user/account/union_id</code></td><td>USER_INFO</td></tr></tbody></table></div>
+<h3 id="视频稿件管理12">视频稿件管理（12）<a class="anchor" href="#视频稿件管理12" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#8</td><td>POST</td><td><code>/arcopen/fn/archive/video/init</code></td><td>ARC_BASE</td></tr><tr><td>#9</td><td>POST</td><td><code>/video/v2/part/upload</code> ⟨openupos.bilivideo.com⟩</td><td>ARC_BASE</td></tr><tr><td>#10</td><td>POST</td><td><code>/arcopen/fn/archive/video/complete</code></td><td>ARC_BASE</td></tr><tr><td>#11</td><td>POST</td><td><code>/arcopen/fn/archive/cover/upload</code></td><td>ARC_BASE</td></tr><tr><td>#12</td><td>POST</td><td><code>/arcopen/fn/archive/add-by-utoken</code></td><td>ARC_BASE</td></tr><tr><td>#13</td><td>GET</td><td><code>/arcopen/fn/archive/type/list</code></td><td>ARC_BASE</td></tr><tr><td>#14</td><td>POST</td><td><code>/video/v2/upload</code> ⟨openupos.bilivideo.com⟩</td><td>ARC_BASE</td></tr><tr><td>#16</td><td>POST</td><td><code>/arcopen/fn/resource/add_share</code></td><td>ARC_BASE</td></tr><tr><td>#17</td><td>GET</td><td><code>/arcopen/fn/archive/view</code></td><td>ARC_BASE</td></tr><tr><td>#18</td><td>GET</td><td><code>/arcopen/fn/archive/viewlist</code></td><td>ARC_BASE</td></tr><tr><td>#19</td><td>POST</td><td><code>/arcopen/fn/archive/edit</code></td><td>ARC_BASE</td></tr><tr><td>#20</td><td>POST</td><td><code>/arcopen/fn/archive/delete</code></td><td>ARC_BASE</td></tr></tbody></table></div>
+<h3 id="专栏稿件管理14">专栏稿件管理（14）<a class="anchor" href="#专栏稿件管理14" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#21</td><td>POST</td><td><code>/arcopen/fn/article/add</code></td><td>ATC_BASE</td></tr><tr><td>#22</td><td>POST</td><td><code>/arcopen/fn/article/edit</code></td><td>ATC_BASE</td></tr><tr><td>#23</td><td>POST</td><td><code>/arcopen/fn/article/delete</code></td><td>ATC_BASE</td></tr><tr><td>#24</td><td>GET</td><td><code>/arcopen/fn/article/detail</code></td><td>ATC_BASE</td></tr><tr><td>#25</td><td>GET</td><td><code>/arcopen/fn/article/list</code></td><td>ATC_BASE</td></tr><tr><td>#26</td><td>GET</td><td><code>/arcopen/fn/article/categories</code></td><td>ATC_BASE</td></tr><tr><td>#27</td><td>GET</td><td><code>/arcopen/fn/article/card</code></td><td>ATC_BASE</td></tr><tr><td>#28</td><td>POST</td><td><code>/arcopen/fn/article/anthology/add</code></td><td>ATC_BASE</td></tr><tr><td>#29</td><td>POST</td><td><code>/arcopen/fn/article/anthology/edit</code></td><td>ATC_BASE</td></tr><tr><td>#30</td><td>POST</td><td><code>/arcopen/fn/article/belong</code></td><td>ATC_BASE</td></tr><tr><td>#31</td><td>POST</td><td><code>/arcopen/fn/article/anthology/delete</code></td><td>ATC_BASE</td></tr><tr><td>#32</td><td>GET</td><td><code>/arcopen/fn/article/anthology/list</code></td><td>ATC_BASE</td></tr><tr><td>#33</td><td>GET</td><td><code>/arcopen/fn/article/anthology/detail</code></td><td>ATC_BASE</td></tr><tr><td>#34</td><td>POST</td><td><code>/arcopen/fn/article/upload/image</code></td><td>ATC_BASE</td></tr></tbody></table></div>
+<h3 id="数据开放服务5">数据开放服务（5）<a class="anchor" href="#数据开放服务5" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#35</td><td>GET</td><td><code>/arcopen/fn/data/user/stat</code></td><td>USER_DATA</td></tr><tr><td>#36</td><td>GET</td><td><code>/arcopen/fn/data/arc/stat</code></td><td>ARC_DATA</td></tr><tr><td>#37</td><td>GET</td><td><code>/arcopen/fn/data/arc/inc-stats</code></td><td>ARC_DATA</td></tr><tr><td>#38</td><td>GET</td><td><code>/arcopen/fn/data/art/stat</code></td><td>ATC_DATA</td></tr><tr><td>#39</td><td>GET</td><td><code>/arcopen/fn/data/art/inc-stats</code></td><td>ATC_DATA</td></tr></tbody></table></div>
+<h3 id="直播能力9">直播能力（9）<a class="anchor" href="#直播能力9" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#41</td><td>GET</td><td><code>/arcopen/fn/live/room/info</code></td><td>LIVE_ROOM_DATA</td></tr><tr><td>#42</td><td>POST</td><td><code>/arcopen/fn/live/room/detail</code></td><td>LIVE_ROOM_DATA</td></tr><tr><td>#43</td><td>POST</td><td><code>/arcopen/fn/live/room/ws-start</code></td><td>LIVE_ROOM_DATA</td></tr><tr><td>#45</td><td>POST</td><td><code>/arcopen/fn/live/room/ws-heartbeat</code></td><td>—</td></tr><tr><td>#46</td><td>POST</td><td><code>/arcopen/fn/live/room/ws-batch-heartbeat</code></td><td>—</td></tr><tr><td>#50</td><td>GET</td><td><code>/liveopen/fn/live/thirdPartyLive/grantUrl</code></td><td>LIVE_ROOM_DATA</td></tr><tr><td>#52</td><td>POST</td><td><code>/liveopen/fn/live/thirdPartyLive/startLive</code></td><td>LIVE_ROOM_DATA</td></tr><tr><td>#53</td><td>POST</td><td><code>/liveopen/fn/live/thirdPartyLive/endLive</code></td><td>LIVE_ROOM_DATA</td></tr><tr><td>#54</td><td>POST</td><td><code>/arcopen/fn/live/room/stream</code></td><td>LIVE_STREAM_DATA</td></tr></tbody></table></div>
+<h3 id="经营号客服7">经营号客服（7）<a class="anchor" href="#经营号客服7" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#59</td><td>POST</td><td><code>/arcopen/fn/market/customer/conversation/send_msg</code></td><td>SHOP_BA_CHAT</td></tr><tr><td>#60</td><td>POST</td><td><code>/arcopen/fn/market/customer/conversation/user_from</code></td><td>SHOP_BA_CHAT</td></tr><tr><td>#61</td><td>POST</td><td><code>/arcopen/fn/market/customer/conversation/staff_status_update</code></td><td>SHOP_BA_CHAT</td></tr><tr><td>#62</td><td>POST</td><td><code>/arcopen/fn/market/customer/conversation/close</code></td><td>SHOP_BA_CHAT</td></tr><tr><td>#63</td><td>POST</td><td><code>/arcopen/fn/market/customer/image_upload</code></td><td>SHOP_BA_CHAT</td></tr><tr><td>#64</td><td>POST</td><td><code>/arcopen/fn/market/customer/conversation/acquisition_tool_list</code></td><td>SHOP_BA_CHAT</td></tr><tr><td>#65</td><td>POST</td><td><code>/arcopen/fn/market/customer/conversation/cus_info_update</code></td><td>SHOP_BA_CHAT</td></tr></tbody></table></div>
+<h3 id="交易电商38">交易电商（38）<a class="anchor" href="#交易电商38" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#67</td><td>GET</td><td><code>/arcopen/fn/v2/market/shop/info/get</code></td><td>SHOP_STORE_INFO</td></tr><tr><td>#68</td><td>POST</td><td><code>/arcopen/fn/market/common/product_add</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#69</td><td>GET</td><td><code>/arcopen/fn/v2/market/commodity/item/list</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#70</td><td>POST</td><td><code>/arcopen/fn/market/common/product_get_product_publish_rule</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#71</td><td>POST</td><td><code>/arcopen/fn/market/common/product_detail</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#72</td><td>POST</td><td><code>/arcopen/fn/market/common/product_edit</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#73</td><td>POST</td><td><code>/arcopen/fn/market/common/product_del</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#74</td><td>POST</td><td><code>/arcopen/fn/v2/market/commodity/image/upload</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#75</td><td>POST</td><td><code>/arcopen/fn/market/common/product_get_cate_property</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#76</td><td>GET</td><td><code>/arcopen/fn/market/commodity/category/qualified/list</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#77</td><td>POST</td><td><code>/arcopen/fn/common/market_add_customization_product</code></td><td>SHOP_COMMODITY_INFO</td></tr><tr><td>#78</td><td>POST</td><td><code>/arcopen/fn/market/common/order_searchList</code></td><td>SHOP_ORDER_INFO</td></tr><tr><td>#79</td><td>POST</td><td><code>/arcopen/fn/market/common/order_detail</code></td><td>SHOP_ORDER_INFO</td></tr><tr><td>#80</td><td>POST</td><td><code>/arcopen/fn/market/common/order_remark</code></td><td>SHOP_ORDER_INFO</td></tr><tr><td>#81</td><td>POST</td><td><code>/arcopen/fn/market/common/order_review</code></td><td>SHOP_ORDER_INFO</td></tr><tr><td>#82</td><td>POST</td><td><code>/arcopen/fn/market/common/order_batch_decrypt</code></td><td>SHOP_ORDER_INFO</td></tr><tr><td>#83</td><td>POST</td><td><code>/arcopen/fn/market/common/page</code></td><td>SHOP_ORDER_INFO</td></tr><tr><td>#86</td><td>POST</td><td><code>/arcopen/fn/market/common/logistics_add</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#87</td><td>POST</td><td><code>/arcopen/fn/common/market_add_virtual_logistics</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#88</td><td>POST</td><td><code>/arcopen/fn/market/common/logistics_edit</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#89</td><td>POST</td><td><code>/arcopen/fn/market/common/logistics_company_list</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#90</td><td>POST</td><td><code>/arcopen/fn/market/common/address_create</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#91</td><td>POST</td><td><code>/arcopen/fn/market/common/address_list</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#92</td><td>POST</td><td><code>/arcopen/fn/market/common/address_get_province</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#93</td><td>POST</td><td><code>/arcopen/fn/market/common/address_get_areas_by_province</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#94</td><td>POST</td><td><code>/arcopen/fn/market/common/logistics_freight_template_list</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#95</td><td>POST</td><td><code>/arcopen/fn/common/market_get_upload_url</code></td><td>SHOP_LOGISTICS_INFO</td></tr><tr><td>#97</td><td>POST</td><td><code>/arcopen/fn/market/common/after_sale_query_list</code></td><td>SHOP_AFTERSALES_INFO</td></tr><tr><td>#98</td><td>POST</td><td><code>/arcopen/fn/market/common/after_sale_query_detail</code></td><td>SHOP_AFTERSALES_INFO</td></tr><tr><td>#99</td><td>POST</td><td><code>/arcopen/fn/market/common/after_sale_check_after_sale</code></td><td>SHOP_AFTERSALES_INFO</td></tr><tr><td>#100</td><td>POST</td><td><code>/arcopen/fn/market/common/after_sale_confirm_receipt</code></td><td>SHOP_AFTERSALES_INFO</td></tr><tr><td>#101</td><td>POST</td><td><code>/arcopen/fn/market/common/after_sale_barter_ship</code></td><td>SHOP_AFTERSALES_INFO</td></tr><tr><td>#102</td><td>POST</td><td><code>/arcopen/fn/market/common/after_sale_stop</code></td><td>SHOP_AFTERSALES_INFO</td></tr><tr><td>#103</td><td>GET</td><td><code>/arcopen/fn/v2/market/stock/query</code></td><td>SHOP_STOCK_INFO</td></tr><tr><td>#104</td><td>POST</td><td><code>/arcopen/fn/v2/market/stock/update</code></td><td>SHOP_STOCK_INFO</td></tr><tr><td>#105</td><td>POST</td><td><code>/arcopen/fn/market/live/commerce/generate/promotion/url</code></td><td>SHOP_LIVE_COMMERC_DATA</td></tr><tr><td>#107</td><td>POST</td><td><code>/arcopen/fn/common/market_create_early_purchase</code></td><td>SHOP_TICKET_ORDER_DATA</td></tr><tr><td>#108</td><td>POST</td><td><code>/arcopen/fn/common/market_ticket_decrypt</code></td><td>SHOP_TICKET_ORDER_DATA</td></tr></tbody></table></div>
+<h3 id="充电业务1">充电业务（1）<a class="anchor" href="#充电业务1" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#110</td><td>POST</td><td><code>/arcopen/fn/common/charge_order_search_list</code></td><td>UPOWER_ORDER_DATA</td></tr></tbody></table></div>
+<h3 id="课堂业务3">课堂业务（3）<a class="anchor" href="#课堂业务3" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#112</td><td>POST</td><td><code>/arcopen/fn/common/by_orderno_for_course_order</code></td><td>COURSE_ORDER_DATA</td></tr><tr><td>#113</td><td>POST</td><td><code>/arcopen/fn/common/student_study_progress_list</code></td><td>COURSE_ORDER_DATA</td></tr><tr><td>#114</td><td>POST</td><td><code>/arcopen/fn/common/student_study_progress_detail</code></td><td>COURSE_ORDER_DATA</td></tr></tbody></table></div>
+<h3 id="站内版权授权曲库3">站内版权授权曲库（3）<a class="anchor" href="#站内版权授权曲库3" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">ref</th><th style="text-align:left">METHOD</th><th style="text-align:left">PATH</th><th style="text-align:left">scope</th></tr></thead><tbody><tr><td>#118</td><td>POST</td><td><code>/arcopen/fn/music/meta/list</code></td><td>COPYRIGHT_MUSIC_DATA</td></tr><tr><td>#119</td><td>POST</td><td><code>/arcopen/fn/music/list</code></td><td>COPYRIGHT_MUSIC_DATA</td></tr><tr><td>#120</td><td>POST</td><td><code>/arcopen/fn/music/search</code></td><td>COPYRIGHT_MUSIC_DATA</td></tr></tbody></table></div>
+<h3 id="多接口文档同一篇文档里有多个端点">多接口文档（同一篇文档里有多个端点）<a class="anchor" href="#多接口文档同一篇文档里有多个端点" aria-label="永久链接">#</a></h3>
+<p><strong>#1 账号授权</strong></p>
+<ul><li><code>POST https://api.bilibili.com/x/account-oauth2/v1/token</code></li><li><code>POST https://api.bilibili.com/x/account-oauth2/v1/refresh_token</code></li></ul>
+<p><strong>#84 修改订单地址</strong></p>
+<ul><li><code>POST https://member.bilibili.com/arcopen/fn/market/common/address_apply</code></li><li><code>POST https://member.bilibili.com/arcopen/fn/market/common/address_modify</code></li><li><code>POST https://member.bilibili.com/arcopen/fn/market/common/address_apply_status</code></li></ul>
+<p>不在上表里的 ref 是文档/事件/协议类，用 <code>bili_docs_get {ref}</code> 读正文。</p>
+<h2 id="10-分模块要点">10. 分模块要点<a class="anchor" href="#10-分模块要点" aria-label="永久链接">#</a></h2>
+<h3 id="101-视频投稿最常用">10.1 视频投稿（最常用）<a class="anchor" href="#101-视频投稿最常用" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>init(utype=0) → part upload ×N → complete → add-by-utoken
+init(utype=1) → upload(单文件 &lt;100M)      → add-by-utoken
+唤起粉端投稿：add_share → 拿 link_url → 用系统浏览器打开 → 客户端唤起投稿页</code></pre></div>
+<ul><li>分片 <code>part_number</code> <strong>从 1 开始连续递增</strong>，除最后一片外必须等大（建议 10MB）。</li><li>body 是<strong>裸字节</strong>，不要 <code>multipart/form-data</code>，否则转码失败。</li><li>推荐虚拟分片：按 offset/length 从原文件读，不落地切片。</li><li><code>cover</code> 必须是封面上传接口返回的 url。</li><li><strong>删除稿件不可逆</strong>（123005 / #20）。</li><li>技术限制：≤4GB、时长 &lt;5h、推荐 mp4/flv、峰值码率 ≤60Mbps、分辨率 ≤4096×4096、帧率 ≤120fps、
+关键帧 ≥10s、yuv420、SDR 8bit / HDR 10bit、音频 ≤320Kbps / 2ch / 48kHz。</li><li>分区会不定期调整，建议定时查 #13。</li><li>非正式会员单日限投 5 个（123036）。</li><li><strong>#16 唤起粉端投稿</strong>：<code>scene_code</code> 固定 <code>ARC_APP_SHARE</code>，需要预先和运营约定 <code>biz_code</code> 与
+<code>common_msg</code> 的 JSON 结构（子结构见 <code>#16 subSchemas</code>）；返回的 <code>link_url</code> 交给移动端系统浏览器打开。
+这个接口文档标注签名版本 <code>1.0</code>，见 6.1。</li></ul>
+<h3 id="102-专栏">10.2 专栏<a class="anchor" href="#102-专栏" aria-label="永久链接">#</a></h3>
+<ul><li>正文要 &gt;200 字或 ≥3 图（129006）；标题 ≤40；文集/文章有数量上限（129009/129012）。</li><li>图片先走 #34 上传拿地址，再放进正文。</li></ul>
+<h3 id="103-直播长连43444546">10.3 直播长连（#43/#44/#45/#46）<a class="anchor" href="#103-直播长连43444546" aria-label="永久链接">#</a></h3>
+<p><code>ws-start</code> → <code>conn_id</code> + <code>websocket_info{ wss_link[], auth_body }</code>。</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>包头 16 字节，全部大端:
+  Packet Length uint32 | Header Length uint16(=16) | Version uint16 |
+  Operation uint32 | Sequence ID uint32 | Body</code></pre></div>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">Operation</th><th style="text-align:left">值</th><th style="text-align:left">方向</th></tr></thead><tbody><tr><td>OP_HEARTBEAT</td><td>2</td><td>客户端发，30s 一次，body 空</td></tr><tr><td>OP_HEARTBEAT_REPLY</td><td>3</td><td>服务端回</td></tr><tr><td>OP_SEND_SMS_REPLY</td><td>5</td><td>服务端推消息</td></tr><tr><td>OP_AUTH</td><td>7</td><td>客户端发的第一个包，body = auth_body</td></tr><tr><td>OP_AUTH_REPLY</td><td>8</td><td>服务端回</td></tr></tbody></table></div>
+<p><code>Version=2</code> → body 是 zlib 压缩，解压后<strong>可能包含多个完整包</strong>（递归解析）。
+HTTP 心跳 #45（<code>client_id</code> + <code>conn_id</code>）/ 批量 #46 是替代方案。示例见 <code>examples/live_ws.py</code>。</p>
+<h3 id="104-一键开播4853">10.4 一键开播（#48–#53）<a class="anchor" href="#104-一键开播4853" aria-label="永久链接">#</a></h3>
+<p>走 <code>/liveopen/</code> 前缀，流程：<code>grantUrl</code> 拿授权 → 用户授权 → 回调 → <code>startLive</code> → <code>endLive</code>。</p>
+<h3 id="105-消息推送-webhook12116841-个事件">10.5 消息推送 / Webhook（#121–#168，41 个事件）<a class="anchor" href="#105-消息推送-webhook12116841-个事件" aria-label="永久链接">#</a></h3>
+<ul><li>在管理中心配置回调地址，保存时平台会发一次校验请求：
+``<code>json
+{ "event": "verify_webhooks", "content": { "data": 1371848576 }, "timestamp": "2021-01-01 12:01:01" }
+</code>`<code>
+必须原样回 </code>{"data": 1371848576}`。</li><li>统一结构：<code>{ "event": "", "content": {}, "timestamp": "" }</code>。</li><li><strong>来源验证</strong>：<code>x-bilibili-signature</code> 头 = <code>SHA1(app_secret + request body)</code>。
+校验时<strong>收到消息的字段顺序必须与文档发送格式一致</strong>，否则签名对不上 —— 建议用原始 body 字节而不是重新序列化。</li><li>送达判定：返回 2xx 即视为成功；5s 超时、最多重试 3 次 → 业务侧必须<strong>幂等去重</strong>。</li></ul>
+<p>事件清单（部分）：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">分组</th><th style="text-align:left">event</th></tr></thead><tbody><tr><td>基础授权</td><td><code>用户授权</code>(#122) · <code>解除授权</code>(#123)</td></tr><tr><td>订单</td><td><code>CREATE_ORDER</code> <code>PAY_ORDER</code> <code>CANCEL_ORDER</code> <code>CONFIRM_ORDER</code> <code>MODIFY_FEE_ORDER</code> <code>REMARK_ORDER</code> <code>CONFIRM_DELIVERED</code> <code>APPLY_MODIFY_ADDR_ORDER</code> <code>STAGE_RECEIVED_ORDER</code></td></tr><tr><td>售后</td><td><code>AFTER_SALE-CREATED</code> <code>AFTER_SALE-CANCEL</code> <code>REFUND-SUCCESS</code> <code>RETURN-APPLY-REFUSED</code> <code>REFUND-REFUSED</code> <code>ARBITRATE-CREATED</code> <code>ARBITRATE-AUDITED</code> <code>ARBITRATE-CANCELED</code> <code>BUYER_RETURNED</code> <code>AFTER_SALE_AGREE</code> <code>MERCHANT_SHIPPED</code> <code>ARBITRATE_MERCHANT_COMMIT_EVIDENCE</code> <code>ARBITRATE_PLATFORM_INTERVENTION</code></td></tr><tr><td>商品</td><td><code>create_items</code> <code>update_items</code> <code>delete_items</code> <code>onsale_items</code> <code>offsale_items</code> <code>ban_items</code> <code>unban_items</code> <code>undelete_items</code> <code>submit_items_audit</code> <code>approve_items_audit</code> <code>reject_items_audit</code> <code>revoke_items_audit</code></td></tr><tr><td>票务</td><td><code>TICKET_CREATE_DONE</code> <code>TICKET_REFUND_DONE</code> <code>TICKET_CHECK_DONE</code></td></tr><tr><td>客服</td><td><code>用户进入对话</code>(#163) <code>SEND_MSG</code>(#164) <code>CLOSE_MSG</code>(#165) <code>留资结果</code>(#166)</td></tr><tr><td>视频稿件</td><td><code>video_open</code>(#167) <code>video_fail</code>(#168)</td></tr></tbody></table></div>
+<h3 id="106-电商订单敏感信息">10.6 电商订单敏感信息<a class="anchor" href="#106-电商订单敏感信息" aria-label="永久链接">#</a></h3>
+<p><code>#82 order_batch_decrypt</code> / <code>#108 market_ticket_decrypt</code> 专门解密收件人等敏感字段，
+拿到的是密文 id，必须调解密接口换明文，<strong>不要尝试本地解密</strong>。</p>
+<hr>
+<h2 id="11-沙盒-白名单-未列出的能力">11. 沙盒 / 白名单 / 未列出的能力<a class="anchor" href="#11-沙盒-白名单-未列出的能力" aria-label="永久链接">#</a></h2>
+<ul><li><strong>沙盒（#169）</strong>：<code>member.bilibili.com/mock/...</code>，返回 MOCK 数据，不影响正式环境。
+用同一套 OAuth2 流程拿到的 access_token 即可调；但<strong>应用仍须已申请对应 scope</strong>，否则返回权限错误。
+注意 mock 路径与正式路径<strong>不总是一致</strong>（例：正式 <code>/arcopen/fn/archive/video/init</code>，mock <code>/mock/video/part/init</code>），以 #169 表格为准。</li><li><strong>白名单（#3）</strong>：某接口配置白名单后只有列表内 uid 能调，报 <code>127305 白名单限制</code>；默认关闭。</li><li><strong>未列出的功能（#170）</strong>：文档只放已有商务合作的能力；有别的需求走邮件 <code>openplatform-feedback@bilibili.com</code>，需写明合作内容、量化收益、公司信息、对接人。</li></ul>
+<hr>
+<h2 id="12-分页与字段约定">12. 分页与字段约定<a class="anchor" href="#12-分页与字段约定" aria-label="永久链接">#</a></h2>
+<p>文档里的分页字段<strong>不统一</strong>，按接口看，别套用：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">字段</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td><code>pn</code> / <code>page_no</code> / <code>page</code></td><td>页码（<code>page</code> 从 0 开始，<code>pn</code> 默认 1）</td></tr><tr><td><code>ps</code> / <code>page_size</code> / <code>pageSize</code> / <code>size</code></td><td>每页数量（上限 50 / 100 / 200 不等）</td></tr><tr><td><code>nextPageIndex</code></td><td>下一页索引，第一页传 0</td></tr></tbody></table></div>
+<p>其他约定：</p>
+<ul><li>所有 URL 参数需 <strong>URL encode</strong>，中文用 UTF-8。</li><li>时间字段多为 <strong>秒级 unix 时间戳</strong>（<code>expires_in</code> 例外，是绝对时间戳但同样是秒）。</li><li>金额字段注意单位（分 / 元）与 <code>spec_prices</code> 这类 sku 数组结构，必须与规格组合数一致。</li></ul>
+<hr>
+<h2 id="13-代码生成模板">13. 代码生成模板<a class="anchor" href="#13-代码生成模板" aria-label="永久链接">#</a></h2>
+<p><strong>Python（用 <code>examples/bili_open.py</code>，不要另写一套）</strong></p>
+<div class="code"><div class="code-head"><span class="code-lang">python</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-key">import</span> sys; sys.path.<span class="tok-fn">insert</span>(<span class="tok-num">0</span>, <span class="tok-str">"examples"</span>)
+<span class="tok-key">from</span> bili_open <span class="tok-key">import</span> call, MEMBER_HOST
+
+r = <span class="tok-fn">call</span>(<span class="tok-str">"GET"</span>, MEMBER_HOST + <span class="tok-str">"/arcopen/fn/user/account/info"</span>)
+<span class="tok-key">if</span> r.<span class="tok-fn">get</span>(<span class="tok-str">"code"</span>) != <span class="tok-num">0</span>:
+    <span class="tok-key">raise</span> <span class="tok-fn">RuntimeError</span>(r)          <span class="tok-com"># 注意: HTTP 200 也可能是业务错误</span>
+<span class="tok-fn">print</span>(r[<span class="tok-str">"data"</span>][<span class="tok-str">"openid"</span>])</code></pre></div>
+<p><strong>Node（用 <code>examples/node_client.mjs</code>）</strong></p>
+<div class="code"><div class="code-head"><span class="code-lang">js</span><button class="code-copy" type="button">复制</button></div><pre><code>import { callApi } from "./examples/node_client.mjs";
+const r = await callApi({ method: "GET", url: "https://member.bilibili.com/arcopen/fn/user/account/info" });
+if (r.json.code !== 0) throw new Error(JSON.stringify(r));</code></pre></div>
+<p><strong>生成代码时必须覆盖的点</strong></p>
+<ol><li>先取 scope，确认应用已申请（否则 127007）。</li><li><code>code != 0</code> 要处理，别只看 HTTP 状态。</li><li>分页字段按该接口文档取，不要统一写成 <code>page/page_size</code>。</li><li>token 刷新用返回的新 <code>refresh_token</code>（一次性的）。</li><li>上传类接口不加签名头。</li><li>参数在 <code>bodyParams</code> 但方法是 GET 时，按 query 拼到 URL（见 6.5）。</li><li><code>subSchemas</code> 里的字段是嵌套结构的字段，别平铺成顶层参数。</li></ol>
+<hr>
+<h2 id="14-交付前自检清单">14. 交付前自检清单<a class="anchor" href="#14-交付前自检清单" aria-label="永久链接">#</a></h2>
+<p>数据侧（改过 <code>scripts/</code> 或文档后必跑）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>npm run build     <span class="tok-com"># 重新解析 170 篇文档</span>
+npm run audit     <span class="tok-com"># 11 类一致性检查，必须 AUDIT PASSED</span>
+npm run selftest  <span class="tok-com"># 起 MCP 服务逐个调工具，必须 ALL SELFTEST PASSED</span></code></pre></div>
+<p>代码侧（写对接代码时）：</p>
+<ul><li>[ ] 用 <code>bili_api_spec</code> 核对过字段名（不是从摘要里猜的）</li><li>[ ] 签名自检：secret=<code>test_secret</code>、nonce=<code>1730185575446751000</code>、ts=<code>1730185575</code>、空 body
+→ 期望 <code>93daf316cf499f313e6e7c487857fe3b1c8e9b6a262123e36ddf867bd97e5e1f</code></li><li>[ ] 空 body 用 <code>d41d8cd98f00b204e9800998ecf8427e</code>，非空 body 用实际发送字节的 md5</li><li>[ ] <code>code != 0</code> 分支有处理（错误信息取自 <code>message</code>，必要时 <code>bili_error_lookup</code>）</li><li>[ ] GET + <code>bodyParams</code> 的接口按 query 传</li><li>[ ] 上传：<code>part_number</code> 从 1 连续、除末片等大、裸二进制、不加签名头</li><li>[ ] Webhook：<code>verify_webhooks</code> 回 <code>{"data": &lt;原值&gt;}</code>，来源用 SHA1(secret + 原始 body) 校验，做幂等</li><li>[ ] 没有编造文档里不存在的接口或字段</li></ul>
+<hr>
+<h2 id="15-不要做的事">15. 不要做的事<a class="anchor" href="#15-不要做的事" aria-label="永久链接">#</a></h2>
+<ul><li>❌ 不要凭记忆写 <code>/x/v2/...</code> 这种主站接口 —— 本目录只覆盖开放平台 <code>/arcopen/fn/</code>、<code>/liveopen/fn/</code> 系。</li><li>❌ 没有凭据时不要编造 access_token，也不要把占位签名当作可用请求。</li><li>❌ 不要把 <code>app_secret</code> 写进请求体或 URL，它只用于本地计算的 HMAC。</li><li>❌ 不要在 GET 请求上带 body 并据此算 md5。</li><li>❌ 不要假设 mock 路径与正式路径一致。</li><li>❌ 不要把 <code>responseParams</code> 当成完整 schema —— 省略号、嵌套对象都以原文为准，必要时 <code>bili_docs_get</code> 读全文。</li><li>❌ 不要忽略 <code>hints</code> / <code>signVersion</code> / <code>subSchemas</code> —— 它们是从原文里挖出来的差异点。</li><li>❌ 不要为了「补齐」而给缺失的 <code>required</code> 编一个值：文档没写就是没写。</li></ul>
+<hr>
+<h2 id="16-维护">16. 维护<a class="anchor" href="#16-维护" aria-label="永久链接">#</a></h2>
+<p>文档更新后：</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>npm run build      <span class="tok-com"># 重跑 scripts/build-spec.mjs，刷新 data/{index.json,llms.txt,status-codes.json}</span>
+npm run audit      <span class="tok-com"># 11 类一致性检查（清单/类型分布/URL/参数卫生/scope/漏解析/错误码/AGENTS/llms/工具清单）</span>
+npm run selftest   <span class="tok-com"># 工具 + 资源 + 提示，含生成代码的真实编译检查</span></code></pre></div>
+<p><code>build-spec.mjs</code> 以父目录的 <code>_INDEX.md</code> 作为层级与 id 来源，目录结构调整后会自动跟上。
+<code>audit.mjs</code> 会在数据与 <code>AGENTS.md</code> 的索引表不一致时报错 —— 改完索引表记得重跑。</p>
+<p>调试单篇解析：</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-key">set</span> BILI_DEBUG_DOC=<span class="tok-num">78</span> &amp;&amp; node scripts/build-spec.mjs ..     <span class="tok-com"># 打印该篇的块划分与表头</span></code></pre></div>
+<p>数据源可复现：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>GET https://open.bilibili.com/arcopen/user/open-doc/view?id=4</code></pre></div>
+<p><code>data.online_doc</code> 是整棵目录树 JSON，每个 Article 节点带 <code>md_url</code>（原始 Markdown）与 <code>html_url</code>（渲染后 HTML）。</p></article><div class="callout callout-note" style="margin-top:40px"><span class="callout-ico">📄</span><div>这是 <code>AGENTS.md</code> 的站点渲染版，原文在仓库根目录；<a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/blob/main/AGENTS.md" target="_blank" rel="noopener">在 GitHub 上查看 Markdown 源码</a>。</div></div></main><aside class="toc"><div class="toc-title">本页目录</div><a class="lvl-2" href="#1-这份数据是什么">1. 这份数据是什么</a><a class="lvl-2" href="#2-核心概念">2. 核心概念</a><a class="lvl-3" href="#全部-scope20-个按出现次数">全部 scope（20 个，按出现次数）</a><a class="lvl-2" href="#3-主机与路径约定">3. 主机与路径约定</a><a class="lvl-2" href="#4-数据文件-schema">4. 数据文件 schema</a><a class="lvl-3" href="#dataindexjson">data/index.json</a><a class="lvl-3" href="#datallmstxt">data/llms.txt</a><a class="lvl-3" href="#datastatus-codesjson">data/status-codes.json</a><a class="lvl-3" href="#datamockjson">data/mock.json</a><a class="lvl-2" href="#5-mcp-工具决策树与参数">5. MCP 工具：决策树与参数</a><a class="lvl-3" href="#biliquickstart">biliquickstart</a><a class="lvl-3" href="#bilidocslist">bilidocslist</a><a class="lvl-3" href="#bilidocssearch">bilidocssearch</a><a class="lvl-3" href="#bilidocsget">bilidocsget</a><a class="lvl-3" href="#biliapispec">biliapispec</a><a class="lvl-3" href="#biliapisign">biliapisign</a><a class="lvl-3" href="#biliapicall">biliapicall</a><a class="lvl-3" href="#bilierrorlookup">bilierrorlookup</a><a class="lvl-2" href="#5b-新增工具9-个">5b. 新增工具（9 个）</a><a class="lvl-3" href="#biliendpoints">biliendpoints</a><a class="lvl-3" href="#biliscopes">biliscopes</a><a class="lvl-3" href="#biliapiprepare">biliapiprepare</a><a class="lvl-3" href="#bilicodegen">bilicodegen</a><a class="lvl-3" href="#biliuploadplan">biliuploadplan</a><a class="lvl-3" href="#bilioauth">bilioauth</a><a class="lvl-3" href="#biliwebhook">biliwebhook</a><a class="lvl-3" href="#biliwsprotocol">biliwsprotocol</a><a class="lvl-3" href="#bilimock">bilimock</a><a class="lvl-2" href="#5c-凭据两套体系别混">5c. 凭据：两套体系，别混</a><a class="lvl-3" href="#补齐开放平台凭据">补齐开放平台凭据</a><a class="lvl-2" href="#5d-主站-webcookie非开放平台">5d. 主站 Web（Cookie，非开放平台）</a><a class="lvl-3" href="#cookie-从哪来">Cookie 从哪来</a><a class="lvl-3" href="#bilicookie">bilicookie</a><a class="lvl-3" href="#biliwebcall">biliwebcall</a><a class="lvl-2" href="#5c-资源与提示">5c. 资源与提示</a><a class="lvl-2" href="#6-请求总则">6. 请求总则</a><a class="lvl-3" href="#61-20-签名hmac-sha256">6.1 2.0 签名（HMAC-SHA256）</a><a class="lvl-3" href="#62-实际发出的请求头">6.2 实际发出的请求头</a><a class="lvl-3" href="#63-三个最常见的签名错误">6.3 三个最常见的签名错误</a><a class="lvl-3" href="#64-无需签名的接口唯一例外">6.4 无需签名的接口（唯一例外）</a><a class="lvl-3" href="#65-文档里已知的坑已写进-hints">6.5 文档里已知的坑（已写进 hints）</a><a class="lvl-2" href="#7-oauth2-完整流程">7. OAuth2 完整流程</a><a class="lvl-2" href="#8-返回结构与错误码">8. 返回结构与错误码</a><a class="lvl-3" href="#通用返回">通用返回</a><a class="lvl-3" href="#错误码分段">错误码分段</a><a class="lvl-2" href="#9-接口索引95-篇单接口-2-篇多接口-100-个端点">9. 接口索引（95 篇单接口 + 2 篇多接口 = 100 个端点）</a><a class="lvl-3" href="#用户管理3">用户管理（3）</a><a class="lvl-3" href="#视频稿件管理12">视频稿件管理（12）</a><a class="lvl-3" href="#专栏稿件管理14">专栏稿件管理（14）</a><a class="lvl-3" href="#数据开放服务5">数据开放服务（5）</a><a class="lvl-3" href="#直播能力9">直播能力（9）</a><a class="lvl-3" href="#经营号客服7">经营号客服（7）</a><a class="lvl-3" href="#交易电商38">交易电商（38）</a><a class="lvl-3" href="#充电业务1">充电业务（1）</a><a class="lvl-3" href="#课堂业务3">课堂业务（3）</a><a class="lvl-3" href="#站内版权授权曲库3">站内版权授权曲库（3）</a><a class="lvl-3" href="#多接口文档同一篇文档里有多个端点">多接口文档（同一篇文档里有多个端点）</a><a class="lvl-2" href="#10-分模块要点">10. 分模块要点</a><a class="lvl-3" href="#101-视频投稿最常用">10.1 视频投稿（最常用）</a><a class="lvl-3" href="#102-专栏">10.2 专栏</a><a class="lvl-3" href="#103-直播长连43444546">10.3 直播长连（#43/#44/#45/#46）</a><a class="lvl-3" href="#104-一键开播4853">10.4 一键开播（#48–#53）</a><a class="lvl-3" href="#105-消息推送-webhook12116841-个事件">10.5 消息推送 / Webhook（#121–#168，41 个事件）</a><a class="lvl-3" href="#106-电商订单敏感信息">10.6 电商订单敏感信息</a><a class="lvl-2" href="#11-沙盒-白名单-未列出的能力">11. 沙盒 / 白名单 / 未列出的能力</a><a class="lvl-2" href="#12-分页与字段约定">12. 分页与字段约定</a><a class="lvl-2" href="#13-代码生成模板">13. 代码生成模板</a><a class="lvl-2" href="#14-交付前自检清单">14. 交付前自检清单</a><a class="lvl-2" href="#15-不要做的事">15. 不要做的事</a><a class="lvl-2" href="#16-维护">16. 维护</a></aside></div>
+<footer class="footer"><div class="wrap"><div class="footer-grid"><div><h4>bili-open-mcp</h4><p style="margin:0 0 10px;max-width:38ch">哔哩哔哩 / B站 MCP Server。把开放平台的 170 篇文档变成 AI 能直接检索、直接调用、直接生成签名的东西。</p><span class="badge badge-warn">第三方 · 与哔哩哔哩无隶属关系</span></div><div><h4>文档</h4><a href="usage.html">使用方法</a><a href="readme.html">README</a><a href="agents.html">AI 契约</a><a href="disclaimer.html">免责声明</a></div><div><h4>参考</h4><a href="tools.html">19 个工具</a><a href="endpoints.html">100 个端点</a><a href="guides.html">指南与协议</a><a href="webhooks.html">41 个推送事件</a><a href="errors.html">118 个错误码</a><a href="mock.html">43 个沙盒接口</a></div><div><h4>相关</h4><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener">GitHub 仓库</a><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/issues" target="_blank" rel="noopener">问题反馈</a><a href="https://open.bilibili.com/doc/4" target="_blank" rel="noopener">开放平台文档</a><a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP 规范</a></div></div><div class="footer-note">本页所有接口均为哔哩哔哩官方提供并公开的接口，不含私有接口、破解接口或绕过鉴权的实现。本站为静态文档站，不含任何凭据，也不会发起任何接口请求。哔哩哔哩、bilibili、小电视是相应权利人的商标；本项目与哔哩哔哩无隶属、赞助或背书关系。内容按「现状」提供，不构成任何担保 —— 详见 <a href="disclaimer.html">免责声明</a>。<span style="display:block;margin-top:8px">© 2026 bili-open-mcp contributors · MIT License · 构建于 2026-10-31</span></div></div></footer>
+<button class="to-top" type="button" aria-label="回到顶部">↑</button>
+<div class="modal" hidden><div class="modal-box"><input class="modal-input" type="search" placeholder="搜索文档、接口、工具、错误码…" aria-label="站内搜索"><div class="modal-results"></div><div class="modal-foot"><span>↑↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span><span>Ctrl/⌘ + K 唤起</span></div></div></div>
+<script src="assets/app.js" defer></script>
+</body>
+</html>

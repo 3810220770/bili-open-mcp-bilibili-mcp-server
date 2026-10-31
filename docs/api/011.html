@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>封面上传 · bili-open-mcp</title>
+<meta name="description" content="封面上传 — https://member.bilibili.com/arcopen/fn/archive/cover/upload — 格式jpeg、png，文件大小≤5MB，建议尺寸≥1146x717，最低尺寸≥960x600">
+<meta name="keywords" content="哔哩哔哩 MCP,B站 MCP,bilibili MCP,bilibili mcp server,哔哩哔哩开放平台,MCP Server,Model Context Protocol,开放平台 API,B站接口">
+<link rel="canonical" href="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/api/011.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="封面上传 · bili-open-mcp">
+<meta property="og:description" content="封面上传 — https://member.bilibili.com/arcopen/fn/archive/cover/upload — 格式jpeg、png，文件大小≤5MB，建议尺寸≥1146x717，最低尺寸≥960x600">
+<meta property="og:url" content="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/api/011.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23fb7299%22%2F%3E%3Cpath%20d%3D%22M9%2012h14v9a2%202%200%200%201-2%202H11a2%202%200%200%201-2-2z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M12%207l2.5%203M20%207l-2.5%203%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E">
+<script>try{var t=localStorage.getItem('bili-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>window.__ROOT__="../";</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="topbar">
+<button class="icon-btn menu-btn" type="button" aria-label="打开目录">☰</button>
+<a class="brand" href="../"><span class="brand-mark">B</span>bili-open-mcp<small>MCP</small></a>
+<nav class="topnav"><a href="../">首页</a><a href="../tools.html">工具</a><a href="../endpoints.html">接口</a><a href="../guides.html">指南</a><a href="../webhooks.html">推送</a><a href="../errors.html">错误码</a><a href="../mock.html">沙盒</a><a href="../usage.html">使用</a></nav>
+<div class="topbar-spacer"></div>
+<div class="topbar-actions">
+<button class="search-trigger" type="button"><span>🔍</span><span class="label">搜索文档 / 接口 / 工具</span><kbd>Ctrl K</kbd></button>
+<button class="icon-btn theme-toggle" type="button" aria-label="切换主题">☾</button>
+<a class="icon-btn" href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub">★</a>
+</div></header>
+
+<div class="layout"><aside class="sidebar"><div class="sidebar-group"><div class="sidebar-title">文档站</div><a href="../" class="is-active">首页</a><a href="../tools.html">19 个工具</a><a href="../endpoints.html">接口总览</a><a href="../guides.html">指南与协议</a><a href="../webhooks.html">推送事件</a><a href="../errors.html">错误码</a><a href="../mock.html">沙盒环境</a><a href="../usage.html">使用方法</a><a href="../readme.html">README</a><a href="../agents.html">AI 契约</a><a href="../disclaimer.html">免责声明</a></div><div class="sidebar-group"><div class="sidebar-title">开放能力 · 97 个接口</div><a href="../endpoints.html#%E5%BC%80%E6%94%BE%E8%83%BD%E5%8A%9B">开放能力<span class="count">1</span></a><a href="../endpoints.html#%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86">用户管理<span class="count">3</span></a><a href="../endpoints.html#%E8%A7%86%E9%A2%91%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">视频稿件管理<span class="count">12</span></a><a href="../endpoints.html#%E4%B8%93%E6%A0%8F%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">专栏稿件管理<span class="count">14</span></a><a href="../endpoints.html#%E6%95%B0%E6%8D%AE%E5%BC%80%E6%94%BE%E6%9C%8D%E5%8A%A1">数据开放服务<span class="count">5</span></a><a href="../endpoints.html#%E7%9B%B4%E6%92%AD%E8%83%BD%E5%8A%9B">直播能力<span class="count">9</span></a><a href="../endpoints.html#%E7%BB%8F%E8%90%A5%E5%8F%B7%E5%AE%A2%E6%9C%8D">经营号客服<span class="count">7</span></a><a href="../endpoints.html#%E4%BA%A4%E6%98%93%E7%94%B5%E5%95%86">交易电商<span class="count">39</span></a><a href="../endpoints.html#%E5%85%85%E7%94%B5%E4%B8%9A%E5%8A%A1">充电业务<span class="count">1</span></a><a href="../endpoints.html#%E8%AF%BE%E5%A0%82%E4%B8%9A%E5%8A%A1">课堂业务<span class="count">3</span></a><a href="../endpoints.html#%E7%AB%99%E5%86%85%E7%89%88%E6%9D%83%E6%8E%88%E6%9D%83%E6%9B%B2%E5%BA%93">站内版权授权曲库<span class="count">3</span></a></div><div class="sidebar-group"><div class="sidebar-title">指南与协议 · 32 篇</div><a href="../guide/002.html">接口签名和状态码</a><a href="../guide/003.html">接口权限白名单</a><a href="../guide/007.html">接口概览</a><a href="../guide/015.html">业务说明</a><a href="../guide/040.html">接入指引</a><a href="../guide/044.html">直播间消息websocket协议</a><a href="../guide/047.html">长连CMD说明</a><a href="../guide/048.html">一键开播能力说明</a><a href="../guide/049.html">业务流程说明</a><a href="../guide/051.html">授权回调</a><a href="../guide/055.html">发送弹幕</a><a href="../guide/056.html">接入指引</a><a href="../guide/057.html">通用奖励接口</a><a href="../guide/058.html">服务说明</a><a href="../guide/066.html">服务说明</a><a href="../guide/085.html">抽卡机抽卡结果回调</a><a href="../guide/096.html">上传文件</a><a href="../guide/106.html">服务说明</a><a href="../guide/109.html">服务说明</a><a href="../guide/111.html">服务说明</a><a href="../guide/115.html">接入指引</a><a href="../guide/116.html">三方通用资源接口</a><a href="../guide/117.html">用前须知</a><a href="../guide/121.html">概述</a><a href="../guide/122.html">用户授权</a><a href="../guide/123.html">解除授权</a><a href="../guide/132.html">买家修改地址通知</a><a href="../guide/133.html">发货物流信息变更</a><a href="../guide/163.html">用户进入对话</a><a href="../guide/166.html">留资结果</a><a href="../guide/169.html">沙盒</a><a href="../guide/170.html">文档中未列出的功能</a></div></aside><main class="main"><nav class="breadcrumb"><a href="../endpoints.html">接口总览</a><span class="sep">/</span>视频稿件管理<span class="sep">/</span><span>封面上传</span></nav><h1 class="page-title">封面上传</h1><div class="api-head"><div class="api-meta"><span class="badge badge-method badge-POST">POST</span><span class="badge badge-muted">#11</span><span class="badge badge-info">api</span> <span class="badge badge-scope">ARC_BASE</span></div><div class="api-url"><span class="u">https://member.bilibili.com/arcopen/fn/archive/cover/upload</span><button class="code-copy" type="button" data-copy="https://member.bilibili.com/arcopen/fn/archive/cover/upload">复制</button></div><p style="margin:14px 0 0;color:var(--muted);font-size:14px">开放能力 / 视频稿件管理 / 服务端视频稿件投递</p></div><p>格式jpeg、png，文件大小≤5MB，建议尺寸≥1146x717，最低尺寸≥960x600</p><h3 id="body-参数">body 参数</h3><div class="prose-table"><table><thead><tr><th>名称</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody><tr><td>file</td><td>file</td><td><span class="req">是</span></td><td>图片文件（multipart/form-data）</td></tr></tbody></table></div><h3 id="响应字段">响应字段</h3><div class="prose-table"><table><thead><tr><th>名称</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody><tr><td>url</td><td>string</td><td><span style="color:var(--muted-2)">否</span></td><td>封面地址</td></tr></tbody></table></div><h3 id="调用方式">调用方式</h3><div class="code"><div class="code-head"><span class="code-lang">javascript</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-com">// 让 AI 直接调（需要开放平台凭据）</span>
+bili_api_call { <span class="tok-str">"ref"</span>: <span class="tok-str">"11"</span>, <span class="tok-str">"query"</span>: {…}, <span class="tok-str">"body"</span>: {…} }
+
+<span class="tok-com">// 只看将要发出的请求（不需要凭据）</span>
+bili_api_call { <span class="tok-str">"ref"</span>: <span class="tok-str">"11"</span>, <span class="tok-str">"dryRun"</span>: <span class="tok-key">true</span> }
+
+<span class="tok-com">// 生成完整调用代码</span>
+bili_codegen { <span class="tok-str">"ref"</span>: <span class="tok-str">"11"</span>, <span class="tok-str">"lang"</span>: <span class="tok-str">"python"</span> }</code></pre></div><h3>官方请求示例</h3><div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>curl --location --request POST <span class="tok-str">'https://member.bilibili.com/arcopen/fn/archive/cover/upload'</span> \
+--header <span class="tok-str">'Accept: application/json'</span> \
+--header <span class="tok-str">'x-bili-timestamp: 1712473117'</span> \
+--header <span class="tok-str">'x-bili-signature-method: HMAC-SHA256'</span> \
+--header <span class="tok-str">'x-bili-signature-version: 2.0'</span> \
+--header <span class="tok-str">'Authorization: d41d8cd98f00b204e9800998ecf8427e'</span> \
+--header <span class="tok-str">'x-bili-signature-nonce: 1712473117993237000'</span> \
+--header <span class="tok-str">'x-bili-accesskeyid: 8ca079bc20ce433d'</span> \
+--header <span class="tok-str">'x-bili-content-md5: 795a2d7e13f989cee460801379fe543c'</span> \
+--header <span class="tok-str">'Connection: keep-alive'</span> \
+--header <span class="tok-str">'Host: member.bilibili.com'</span> \
+--header <span class="tok-str">'Content-Type: multipart/form-data; boundary=--------------------------044892437502502901765117'</span> \
+--form <span class="tok-str">'file=@"/Users/shenyue/Downloads/test.jpg"'</span> \</code></pre></div><hr><p style="color:var(--muted);font-size:14px">原始文档：<code>011_封面上传.md</code>（1903 字节）。用 <code>bili_docs_get { "ref": "11" }</code> 读全文，或用 <code>bili_api_spec { "ref": "11" }</code> 取结构化规格。</p></main><aside class="toc"><div class="toc-title">本页目录</div><a class="lvl-3" href="#body-参数">body 参数</a><a class="lvl-3" href="#响应字段">响应字段</a><a class="lvl-3" href="#调用方式">调用方式</a></aside></div>
+<footer class="footer"><div class="wrap"><div class="footer-grid"><div><h4>bili-open-mcp</h4><p style="margin:0 0 10px;max-width:38ch">哔哩哔哩 / B站 MCP Server。把开放平台的 170 篇文档变成 AI 能直接检索、直接调用、直接生成签名的东西。</p><span class="badge badge-warn">第三方 · 与哔哩哔哩无隶属关系</span></div><div><h4>文档</h4><a href="../usage.html">使用方法</a><a href="../readme.html">README</a><a href="../agents.html">AI 契约</a><a href="../disclaimer.html">免责声明</a></div><div><h4>参考</h4><a href="../tools.html">19 个工具</a><a href="../endpoints.html">100 个端点</a><a href="../guides.html">指南与协议</a><a href="../webhooks.html">41 个推送事件</a><a href="../errors.html">118 个错误码</a><a href="../mock.html">43 个沙盒接口</a></div><div><h4>相关</h4><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener">GitHub 仓库</a><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/issues" target="_blank" rel="noopener">问题反馈</a><a href="https://open.bilibili.com/doc/4" target="_blank" rel="noopener">开放平台文档</a><a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP 规范</a></div></div><div class="footer-note">本页所有接口均为哔哩哔哩官方提供并公开的接口，不含私有接口、破解接口或绕过鉴权的实现。本站为静态文档站，不含任何凭据，也不会发起任何接口请求。哔哩哔哩、bilibili、小电视是相应权利人的商标；本项目与哔哩哔哩无隶属、赞助或背书关系。内容按「现状」提供，不构成任何担保 —— 详见 <a href="../disclaimer.html">免责声明</a>。<span style="display:block;margin-top:8px">© 2026 bili-open-mcp contributors · MIT License · 构建于 2026-10-31</span></div></div></footer>
+<button class="to-top" type="button" aria-label="回到顶部">↑</button>
+<div class="modal" hidden><div class="modal-box"><input class="modal-input" type="search" placeholder="搜索文档、接口、工具、错误码…" aria-label="站内搜索"><div class="modal-results"></div><div class="modal-foot"><span>↑↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span><span>Ctrl/⌘ + K 唤起</span></div></div></div>
+<script src="../assets/app.js" defer></script>
+</body>
+</html>

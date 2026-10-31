@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使用方法 · bili-open-mcp</title>
+<meta name="description" content="安装、接入 6 类客户端、获取两套凭据、19 个工具详解、端到端工作流、报错排查。">
+<meta name="keywords" content="哔哩哔哩 MCP,B站 MCP,bilibili MCP,bilibili mcp server,哔哩哔哩开放平台,MCP Server,Model Context Protocol,开放平台 API,B站接口">
+<link rel="canonical" href="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/usage.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="使用方法 · bili-open-mcp">
+<meta property="og:description" content="安装、接入 6 类客户端、获取两套凭据、19 个工具详解、端到端工作流、报错排查。">
+<meta property="og:url" content="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/usage.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23fb7299%22%2F%3E%3Cpath%20d%3D%22M9%2012h14v9a2%202%200%200%201-2%202H11a2%202%200%200%201-2-2z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M12%207l2.5%203M20%207l-2.5%203%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E">
+<script>try{var t=localStorage.getItem('bili-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>window.__ROOT__="";</script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="topbar">
+<button class="icon-btn menu-btn" type="button" aria-label="打开目录">☰</button>
+<a class="brand" href=""><span class="brand-mark">B</span>bili-open-mcp<small>MCP</small></a>
+<nav class="topnav"><a href="">首页</a><a href="tools.html">工具</a><a href="endpoints.html">接口</a><a href="guides.html">指南</a><a href="webhooks.html">推送</a><a href="errors.html">错误码</a><a href="mock.html">沙盒</a><a href="usage.html" aria-current="page">使用</a></nav>
+<div class="topbar-spacer"></div>
+<div class="topbar-actions">
+<button class="search-trigger" type="button"><span>🔍</span><span class="label">搜索文档 / 接口 / 工具</span><kbd>Ctrl K</kbd></button>
+<button class="icon-btn theme-toggle" type="button" aria-label="切换主题">☾</button>
+<a class="icon-btn" href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub">★</a>
+</div></header>
+
+<div class="layout"><aside class="sidebar"><div class="sidebar-group"><div class="sidebar-title">文档站</div><a href="">首页</a><a href="tools.html">19 个工具</a><a href="endpoints.html">接口总览</a><a href="guides.html">指南与协议</a><a href="webhooks.html">推送事件</a><a href="errors.html">错误码</a><a href="mock.html">沙盒环境</a><a href="usage.html" class="is-active">使用方法</a><a href="readme.html">README</a><a href="agents.html">AI 契约</a><a href="disclaimer.html">免责声明</a></div><div class="sidebar-group"><div class="sidebar-title">开放能力 · 97 个接口</div><a href="endpoints.html#%E5%BC%80%E6%94%BE%E8%83%BD%E5%8A%9B">开放能力<span class="count">1</span></a><a href="endpoints.html#%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86">用户管理<span class="count">3</span></a><a href="endpoints.html#%E8%A7%86%E9%A2%91%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">视频稿件管理<span class="count">12</span></a><a href="endpoints.html#%E4%B8%93%E6%A0%8F%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">专栏稿件管理<span class="count">14</span></a><a href="endpoints.html#%E6%95%B0%E6%8D%AE%E5%BC%80%E6%94%BE%E6%9C%8D%E5%8A%A1">数据开放服务<span class="count">5</span></a><a href="endpoints.html#%E7%9B%B4%E6%92%AD%E8%83%BD%E5%8A%9B">直播能力<span class="count">9</span></a><a href="endpoints.html#%E7%BB%8F%E8%90%A5%E5%8F%B7%E5%AE%A2%E6%9C%8D">经营号客服<span class="count">7</span></a><a href="endpoints.html#%E4%BA%A4%E6%98%93%E7%94%B5%E5%95%86">交易电商<span class="count">39</span></a><a href="endpoints.html#%E5%85%85%E7%94%B5%E4%B8%9A%E5%8A%A1">充电业务<span class="count">1</span></a><a href="endpoints.html#%E8%AF%BE%E5%A0%82%E4%B8%9A%E5%8A%A1">课堂业务<span class="count">3</span></a><a href="endpoints.html#%E7%AB%99%E5%86%85%E7%89%88%E6%9D%83%E6%8E%88%E6%9D%83%E6%9B%B2%E5%BA%93">站内版权授权曲库<span class="count">3</span></a></div><div class="sidebar-group"><div class="sidebar-title">指南与协议 · 32 篇</div><a href="guide/002.html">接口签名和状态码</a><a href="guide/003.html">接口权限白名单</a><a href="guide/007.html">接口概览</a><a href="guide/015.html">业务说明</a><a href="guide/040.html">接入指引</a><a href="guide/044.html">直播间消息websocket协议</a><a href="guide/047.html">长连CMD说明</a><a href="guide/048.html">一键开播能力说明</a><a href="guide/049.html">业务流程说明</a><a href="guide/051.html">授权回调</a><a href="guide/055.html">发送弹幕</a><a href="guide/056.html">接入指引</a><a href="guide/057.html">通用奖励接口</a><a href="guide/058.html">服务说明</a><a href="guide/066.html">服务说明</a><a href="guide/085.html">抽卡机抽卡结果回调</a><a href="guide/096.html">上传文件</a><a href="guide/106.html">服务说明</a><a href="guide/109.html">服务说明</a><a href="guide/111.html">服务说明</a><a href="guide/115.html">接入指引</a><a href="guide/116.html">三方通用资源接口</a><a href="guide/117.html">用前须知</a><a href="guide/121.html">概述</a><a href="guide/122.html">用户授权</a><a href="guide/123.html">解除授权</a><a href="guide/132.html">买家修改地址通知</a><a href="guide/133.html">发货物流信息变更</a><a href="guide/163.html">用户进入对话</a><a href="guide/166.html">留资结果</a><a href="guide/169.html">沙盒</a><a href="guide/170.html">文档中未列出的功能</a></div></aside><main class="main"><article class="prose"><h1 id="使用方法详细版">使用方法（详细版）<a class="anchor" href="#使用方法详细版" aria-label="永久链接">#</a></h1>
+<blockquote><p>哔哩哔哩 MCP / B站 MCP / bilibili MCP server / 开放平台 API 助手。
+关键词：<code>哔哩哔哩 MCP</code>、<code>B站 MCP</code>、<code>bilibili MCP</code>、<code>B站 MCP server</code>、<code>哔哩哔哩开放平台</code>、<code>bilibili open platform api</code>、<code>Model Context Protocol</code>。</p>
+<p>本文是<strong>操作手册</strong>：从装到用、每个工具的入参、真实输出长什么样、卡住了怎么查。
+契约类说明（给 AI 读的）在 <a href="agents.html"><code>AGENTS.md</code></a>；能力边界与免责在 <a href="disclaimer.html"><code>DISCLAIMER.md</code></a>。</p></blockquote>
+<hr>
+<h2 id="目录">目录<a class="anchor" href="#目录" aria-label="永久链接">#</a></h2>
+<ul><li><a href="#0-先确认你能用哪些功能">0. 先确认你能用哪些功能</a></li><li><a href="#1-安装">1. 安装</a></li><li><a href="#2-接入-mcp-客户端">2. 接入 MCP 客户端</a></li><li><a href="#3-凭据两套体系别混">3. 凭据：两套体系，别混</a></li><li><a href="#4-工具详解19-个">4. 工具详解（19 个）</a></li><li><a href="#5-端到端工作流">5. 端到端工作流</a></li><li><a href="#6-报错与排查">6. 报错与排查</a></li><li><a href="#7-数据从哪来--怎么更新">7. 数据从哪来 / 怎么更新</a></li><li><a href="#8-免责声明">8. 免责声明</a></li></ul>
+<hr>
+<h2 id="0-先确认你能用哪些功能">0. 先确认你能用哪些功能<a class="anchor" href="#0-先确认你能用哪些功能" aria-label="永久链接">#</a></h2>
+<p><strong>凭据决定能力边界。</strong> 装完先看这张表，别对着一个用不了的工具调半天：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">你想做的事</th><th style="text-align:left">需要什么</th><th style="text-align:left">用哪些工具</th></tr></thead><tbody><tr><td>查文档、看接口参数、生成调用代码</td><td><strong>不需要凭据</strong></td><td><code>bili_docs_*</code>、<code>bili_api_spec</code>、<code>bili_api_prepare</code>、<code>bili_codegen</code>、<code>bili_endpoints</code>、<code>bili_scopes</code></td></tr><tr><td>查错误码、看长连/推送协议、看签名串</td><td><strong>不需要凭据</strong></td><td><code>bili_error_lookup</code>、<code>bili_ws_protocol</code>、<code>bili_webhook</code>、<code>bili_api_sign</code>、<code>bili_api_call {dryRun:true}</code></td></tr><tr><td>打官方沙盒</td><td><strong>不需要凭据</strong></td><td><code>bili_mock {action:"call"}</code></td></tr><tr><td>真调开放平台业务接口、投稿、上传</td><td><code>BILI_CRED_FILE</code> → <code>secrets/open-platform.json</code></td><td><code>bili_api_call</code>、<code>bili_upload_plan</code>、<code>bili_oauth</code>（除 <code>help</code>/<code>status</code>）</td></tr><tr><td>以你自己的登录身份调主站 Web 接口</td><td><code>BILI_COOKIE_FILE</code> → <code>secrets/cookies.json</code></td><td><code>bili_cookie</code>、<code>bili_web_call</code></td></tr></tbody></table></div>
+<p><strong>两个凭据都没有时</strong>，上表前 3 行照常可用，后 2 行全部不可用。这是设计如此，不是 bug。</p>
+<p>任何时候想知道"现在到底缺哪一格"，调这两个：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_oauth  { "action": "status" }
+bili_cookie { "action": "status" }</code></pre></div>
+<p>真实输出（未配置时）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code># 开放平台凭据状态
+- ❌ clientId       未配置
+- ❌ appSecret      未配置
+- ❌ accessToken    未配置
+- ❌ refreshToken   未配置
+凭据文件: C:\path\to\bili-open-mcp\secrets\open-platform.json（不存在）
+→ 先去 https://open.bilibili.com 控制台创建应用，拿到 Client ID 与 Secret（或 npm run login 按提示填）</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code># Cookie 罐  C:\path\to\bili-open-mcp\secrets\cookies.json（文件不存在，jar 为空）
+
+- ❌ SESSDATA           缺失    登录凭证（必需）
+- ❌ bili_jct           缺失    CSRF token，POST 必带
+- ❌ DedeUserID         缺失    登录用户 uid
+- ❌ DedeUserID__ckMd5  缺失    uid 校验
+- ❌ buvid3             缺失    设备指纹（风控）
+- ❌ buvid4             缺失    设备指纹（风控）
+- ❌ b_nut              缺失    设备指纹时间戳
+- ❌ sid                缺失    会话 id
+- ❌ bili_ticket        缺失    风控票据（部分接口）
+
+共 0 个 cookie，其中 0 个与登录无关（播放器偏好、埋点等）：
+
+下一步:
+- 验证登录态: bili_cookie {action:"whoami"}
+- 导入: bili_cookie {action:"import", jar:[{name:"SESSDATA", value:"…"}, …]}
+- 调用主站接口: bili_web_call {path:"x/web-interface/nav"}</code></pre></div>
+<hr>
+<h2 id="1-安装">1. 安装<a class="anchor" href="#1-安装" aria-label="永久链接">#</a></h2>
+<p>要求 <strong>Node.js ≥ 18</strong>（服务本体只依赖 <code>@modelcontextprotocol/sdk</code> 和 <code>zod</code>）。</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>git clone https:<span class="tok-com">//github.com/3810220770/bili-open-mcp-bilibili-mcp-server.git</span>
+<span class="tok-key">cd</span> bili-open-mcp-bilibili-mcp-server
+npm ci</code></pre></div>
+<p>跑一遍自检，四条命令各有分工：</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>npm run selftest      <span class="tok-com"># 起服务 → 逐个调 19 个工具 / 资源 / 提示 → 生成代码还要过编译</span>
+npm run audit         <span class="tok-com"># 11 类数据一致性检查（文档 ↔ 结构化数据是否对得上）</span>
+npm run check-config  <span class="tok-com"># 用一份真实的 opencode 项目配置拉起服务，验证客户端侧能连上</span>
+npm run build         <span class="tok-com"># 从 Markdown 重新生成 data/*.json 与 llms.txt</span></code></pre></div>
+<p>期望结尾：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>tools(19):
+  bili_quickstart
+  …
+===== resources OK: bili://catalog | templates: bili://doc/{ref} | prompts: integrate-bili-api =====
+===== catalog / doc 资源 + prompt OK =====
+ALL SELFTEST PASSED</code></pre></div>
+<p><code>npm run audit</code> 期望：<code>AUDIT PASSED — 11 类检查全部通过</code>。</p>
+<p>自检是<strong>只读</strong>的：主站写操作全部指向临时 jar，跑完会校验 <code>secrets/cookies.json</code> 没被动过。</p>
+<p>不想 clone 也可以只要那个单文件：服务本体是 <code>src/server.mjs</code> + 同目录 7 个模块，<code>data/</code> 是数据。</p>
+<hr>
+<h2 id="2-接入-mcp-客户端">2. 接入 MCP 客户端<a class="anchor" href="#2-接入-mcp-客户端" aria-label="永久链接">#</a></h2>
+<p>服务入口固定是 <strong>stdio</strong>：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>node &lt;仓库路径&gt;/src/server.mjs</code></pre></div>
+<p><code>data/</code> 是相对脚本解析的，<strong>与启动目录无关</strong>；
+<code>secrets/</code> 的查找顺序是 <strong>显式参数 → 环境变量 → 包目录 → 启动方 cwd</strong>（见 <a href="#34-凭据文件放在哪">§3.4</a>）。</p>
+<blockquote><p>下面所有配置里的 <code>C:/path/to/bili-open-mcp</code> 都要换成<strong>你自己 clone 的实际路径</strong>。</p></blockquote>
+<h3 id="21-claude-desktop">2.1 Claude Desktop<a class="anchor" href="#21-claude-desktop" aria-label="永久链接">#</a></h3>
+<p><code>%APPDATA%\Claude\claude_desktop_config.json</code></p>
+<div class="code"><div class="code-head"><span class="code-lang">json</span><button class="code-copy" type="button">复制</button></div><pre><code>{
+  <span class="tok-str">"mcpServers"</span>: {
+    <span class="tok-str">"bili-open"</span>: {
+      <span class="tok-str">"command"</span>: <span class="tok-str">"node"</span>,
+      <span class="tok-str">"args"</span>: [<span class="tok-str">"C:/path/to/bili-open-mcp/src/server.mjs"</span>],
+      <span class="tok-str">"env"</span>: {
+        <span class="tok-str">"BILI_CLIENT_ID"</span>: <span class="tok-str">"your_client_id"</span>,
+        <span class="tok-str">"BILI_APP_SECRET"</span>: <span class="tok-str">"your_app_secret"</span>,
+        <span class="tok-str">"BILI_ACCESS_TOKEN"</span>: <span class="tok-str">"your_access_token"</span>
+      }
+    }
+  }
+}</code></pre></div>
+<p>改完<strong>完全退出</strong> Claude Desktop 再启动（托盘图标也要退），否则不会重读配置。</p>
+<h3 id="22-claude-code">2.2 Claude Code<a class="anchor" href="#22-claude-code" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-com"># 无凭据（只用文档类工具）</span>
+claude mcp add bili-open -- node <span class="tok-str">"C:/path/to/bili-open-mcp/src/server.mjs"</span>
+
+<span class="tok-com"># 带凭据</span>
+claude mcp add bili-open \
+  -e BILI_CLIENT_ID=xxx -e BILI_APP_SECRET=yyy -e BILI_ACCESS_TOKEN=zzz \
+  -- node <span class="tok-str">"C:/path/to/bili-open-mcp/src/server.mjs"</span>
+
+claude mcp list</code></pre></div>
+<h3 id="23-cursor">2.3 Cursor<a class="anchor" href="#23-cursor" aria-label="永久链接">#</a></h3>
+<p><code>~/.cursor/mcp.json</code>（全局）或项目里的 <code>.cursor/mcp.json</code>：</p>
+<div class="code"><div class="code-head"><span class="code-lang">json</span><button class="code-copy" type="button">复制</button></div><pre><code>{
+  <span class="tok-str">"mcpServers"</span>: {
+    <span class="tok-str">"bili-open"</span>: {
+      <span class="tok-str">"command"</span>: <span class="tok-str">"node"</span>,
+      <span class="tok-str">"args"</span>: [<span class="tok-str">"C:/path/to/bili-open-mcp/src/server.mjs"</span>],
+      <span class="tok-str">"env"</span>: { <span class="tok-str">"BILI_CLIENT_ID"</span>: <span class="tok-str">""</span>, <span class="tok-str">"BILI_APP_SECRET"</span>: <span class="tok-str">""</span>, <span class="tok-str">"BILI_ACCESS_TOKEN"</span>: <span class="tok-str">""</span> }
+    }
+  }
+}</code></pre></div>
+<p>在 <code>Cursor Settings → MCP</code> 里看到绿灯、工具列表出现 19 个即为成功。</p>
+<h3 id="24-codex">2.4 Codex<a class="anchor" href="#24-codex" aria-label="永久链接">#</a></h3>
+<p><code>~/.codex/config.toml</code>：</p>
+<div class="code"><div class="code-head"><span class="code-lang">toml</span><button class="code-copy" type="button">复制</button></div><pre><code>[mcp_servers.bili-open]
+command = <span class="tok-str">"node"</span>
+args = [<span class="tok-str">"C:/path/to/bili-open-mcp/src/server.mjs"</span>]
+env = { BILI_CLIENT_ID = <span class="tok-str">"your_client_id"</span>, BILI_APP_SECRET = <span class="tok-str">"your_app_secret"</span>, BILI_ACCESS_TOKEN = <span class="tok-str">"your_access_token"</span> }</code></pre></div>
+<h3 id="25-opencode">2.5 OpenCode<a class="anchor" href="#25-opencode" aria-label="永久链接">#</a></h3>
+<p>项目级 <code>opencode.json</code>（只对该项目生效，推荐）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">json</span><button class="code-copy" type="button">复制</button></div><pre><code>{
+  <span class="tok-str">"$schema"</span>: <span class="tok-str">"https://opencode.ai/config.json"</span>,
+  <span class="tok-str">"mcp"</span>: {
+    <span class="tok-str">"bili-open"</span>: {
+      <span class="tok-str">"type"</span>: <span class="tok-str">"local"</span>,
+      <span class="tok-str">"command"</span>: [<span class="tok-str">"node"</span>, <span class="tok-str">"C:/path/to/bili-open-mcp/src/server.mjs"</span>],
+      <span class="tok-str">"enabled"</span>: <span class="tok-key">true</span>,
+      <span class="tok-str">"timeout"</span>: <span class="tok-num">60000</span>,
+      <span class="tok-str">"environment"</span>: {
+        <span class="tok-str">"BILI_CLIENT_ID"</span>: <span class="tok-str">""</span>,
+        <span class="tok-str">"BILI_APP_SECRET"</span>: <span class="tok-str">""</span>,
+        <span class="tok-str">"BILI_ACCESS_TOKEN"</span>: <span class="tok-str">""</span>
+      }
+    }
+  }
+}</code></pre></div>
+<p>字段来自 <code>https://opencode.ai/config.json</code> 的 <code>McpLocalConfig</code>：<code>type</code> 必填 <code>"local"</code>，
+<code>command</code> 必填字符串数组，可选 <code>cwd</code> / <code>environment</code> / <code>enabled</code> / <code>timeout</code>
+（默认 5000ms，<strong>本服务建议 60000</strong> —— 上传、长连、批量检索会超 5 秒）。</p>
+<p>全局配置在 <code>%USERPROFILE%\.config\opencode\opencode.json</code>，把 <code>mcp</code> 那段合并进去。</p>
+<p>一个坑：<code>command</code> 用相对路径时，服务会以<strong>该项目的目录</strong>为 cwd 被拉起。
+本服务已把 <code>secrets/</code> 升级为包目录优先查找，所以凭据放在包目录下不受影响；
+要绝对确定，就给 <code>BILI_COOKIE_FILE</code> / <code>BILI_CRED_FILE</code> 填绝对路径，或在配置里显式给 <code>cwd</code>。</p>
+<h3 id="26-其他客户端">2.6 其他客户端<a class="anchor" href="#26-其他客户端" aria-label="永久链接">#</a></h3>
+<p>任何支持 MCP stdio 的客户端都行，本质就是"启动 <code>node src/server.mjs</code>，收发 JSON-RPC"。
+Windsurf / Cline / Roo Code / Continue 的字段名可能是 <code>mcpServers</code> 或 <code>mcp.servers</code>，语义一致。</p>
+<h3 id="27-怎么确认接上了">2.7 怎么确认接上了<a class="anchor" href="#27-怎么确认接上了" aria-label="永久链接">#</a></h3>
+<p>让 AI 调这两个，都可以在<strong>没有任何凭据</strong>时跑通：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_quickstart {}
+bili_docs_search { "query": "投稿" }</code></pre></div>
+<p><code>bili_docs_search {query:"投稿"}</code> 的真实输出：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>命中 16 条，显示 3:
+
+#16 [api] 唤起粉端投稿接口说明  (title)
+    POST /arcopen/fn/resource/add_share  ·  开放能力 / 视频稿件管理 / 用户端唤起粉端投稿
+
+#168 [event] 投稿失败消息  (title)
+    开放能力 / 消息推送 / 推送事件列表 / 视频稿件
+
+#167 [event] 投稿开发浏览消息  (title)
+    开放能力 / 消息推送 / 推送事件列表 / 视频稿件
+
+用 bili_api_spec {ref:"#num"} 看参数。</code></pre></div>
+<p>看到类似的就说明通了。</p>
+<hr>
+<h2 id="3-凭据两套体系别混">3. 凭据：两套体系，别混<a class="anchor" href="#3-凭据两套体系别混" aria-label="永久链接">#</a></h2>
+<p>这是本项目最容易踩的坑。<strong>开放平台</strong>和<strong>主站 Web</strong> 是两套完全独立的认证：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left"></th><th style="text-align:left">开放平台</th><th style="text-align:left">主站 Web</th></tr></thead><tbody><tr><td>用什么</td><td><code>client_id</code> + <code>app_secret</code> + <code>access_token</code></td><td>浏览器 <code>Cookie</code>（<code>SESSDATA</code> / <code>bili_jct</code>）</td></tr><tr><td>从哪来</td><td><a href="https://open.bilibili.com">open.bilibili.com</a> 控制台，需<strong>实名认证 + 开发者入驻</strong></td><td>浏览器登录 bilibili.com 后导出 cookie</td></tr><tr><td>认证方式</td><td>HMAC-SHA256 签名（<code>x-bili-*</code> 头 + <code>access-token</code>）</td><td>直接带 <code>Cookie</code> 头（POST 补 <code>csrf</code>）</td></tr><tr><td>存哪</td><td><code>secrets/open-platform.json</code>（<code>BILI_CRED_FILE</code>）</td><td><code>secrets/cookies.json</code>（<code>BILI_COOKIE_FILE</code>）</td></tr><tr><td>工具</td><td><code>bili_api_*</code> / <code>bili_oauth</code> / <code>bili_upload_plan</code></td><td><code>bili_cookie</code> / <code>bili_web_call</code></td></tr></tbody></table></div>
+<p><strong>Cookie 里永远没有 <code>client_id</code> / <code>app_secret</code> / <code>access_token</code></strong> —— 这三个不是 cookie，
+任何 cookie 导出插件都拿不到。反过来，<code>SESSDATA</code> 也换不来开放平台的 <code>access_token</code>。两边不能互填。</p>
+<h3 id="31-拿开放平台凭据">3.1 拿开放平台凭据<a class="anchor" href="#31-拿开放平台凭据" aria-label="永久链接">#</a></h3>
+<ol><li>登录 <a href="https://open.bilibili.com">https://open.bilibili.com</a> → <strong>实名认证</strong></li><li>完成<strong>开发者入驻</strong></li><li><strong>应用管理 → 创建应用</strong>，类型选「网页应用」</li><li>授权回调域填一个你能接住的地址，例如 <code>http://127.0.0.1:8848/callback</code></li><li>记下 <code>Client ID</code> 与 <code>Secret</code></li><li>一键跑完授权回环（自动起本地服务抓 <code>code</code> → 换 <code>token</code> → 落盘）：</li></ol>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>npm run login -- --client-id &lt;ClientID&gt; --secret &lt;Secret&gt;</code></pre></div>
+<p>跑完 <code>secrets/open-platform.json</code> 里就有 <code>accessToken</code> 了，<code>bili_api_call</code> 立刻能发真实请求。</p>
+<p><strong>不用命令行也行</strong>，直接对 AI 说：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_oauth { "action": "authorize-url", "gourl": "http://127.0.0.1:8848/callback" }</code></pre></div>
+<p>拿回授权链接 → 浏览器点同意 → 从回调地址里抠出 <code>code</code>：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_oauth { "action": "exchange", "code": "&lt;code&gt;" }</code></pre></div>
+<p><code>exchange</code> 成功后会自动把 token 写进 <code>secrets/open-platform.json</code>。
+<code>refresh_token</code> 是<strong>一次性的</strong>，续期用：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_oauth { "action": "refresh" }</code></pre></div>
+<blockquote><p>授权页地址格式（来自「接入指引 / 网页应用接入」）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>https://account.bilibili.com/pc/account-pc/auth/oauth?client_id=&lt;ClientID&gt;&amp;gourl=&lt;urlencoded 回调地址&gt;&amp;state=&lt;随机串&gt;</code></pre></div>
+<p><code>gourl</code> 与应用里配的「授权回调域」不一致会报「不合法的授权请求」。</p></blockquote>
+<h3 id="32-拿主站-cookie">3.2 拿主站 Cookie<a class="anchor" href="#32-拿主站-cookie" aria-label="永久链接">#</a></h3>
+<ol><li>浏览器登录 <a href="https://www.bilibili.com">https://www.bilibili.com</a></li><li>F12 → <code>Application → Cookies → https://www.bilibili.com</code></li><li>用 EditThisCookie 之类的插件导出，或手动复制</li></ol>
+<p>然后导入（三种格式都收）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>// EditThisCookie 数组
+bili_cookie { "action": "import", "jar": [{ "name": "SESSDATA", "value": "…" }, { "name": "bili_jct", "value": "…" }] }
+
+// {name: value} 对象
+bili_cookie { "action": "import", "jar": { "SESSDATA": "…", "bili_jct": "…" } }
+
+// "k=v; k=v" 字符串
+bili_cookie { "action": "import", "jar": "SESSDATA=…; bili_jct=…" }</code></pre></div>
+<p>导入后马上验证：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_cookie { "action": "whoami" }</code></pre></div>
+<p>也可以用环境变量临时注入，不落盘：</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>BILI_COOKIE=<span class="tok-str">"SESSDATA=…; bili_jct=…"</span></code></pre></div>
+<blockquote><p><strong><code>SESSDATA</code> 等同于账号登录凭证，泄露它等于交出账号。</strong>
+工具默认对所有凭据脱敏（<code>SESSDATA</code> 显示成 <code>abcdef…wxyz [len=124]</code>），
+只有显式传 <code>reveal:true</code> 才会输出原值。不要往截图、Issue、对话里贴。</p></blockquote>
+<h3 id="33-环境变量总表">3.3 环境变量总表<a class="anchor" href="#33-环境变量总表" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">变量</th><th style="text-align:left">含义</th><th style="text-align:left">备注</th></tr></thead><tbody><tr><td><code>BILI_CLIENT_ID</code></td><td>应用 client_id（= <code>x-bili-accesskeyid</code>）</td><td>别名 <code>BILI_ACCESS_KEY_ID</code></td></tr><tr><td><code>BILI_APP_SECRET</code></td><td>应用 secret</td><td>别名 <code>BILI_SECRET</code></td></tr><tr><td><code>BILI_ACCESS_TOKEN</code></td><td>OAuth2 access_token</td><td>别名 <code>BILI_TOKEN</code></td></tr><tr><td><code>BILI_COOKIE_FILE</code></td><td>主站 Cookie jar 路径</td><td>覆盖默认解析</td></tr><tr><td><code>BILI_CRED_FILE</code></td><td>开放平台凭据文件路径</td><td>覆盖默认解析</td></tr><tr><td><code>BILI_COOKIE</code></td><td>直接给 Cookie 字符串</td><td>不写文件</td></tr></tbody></table></div>
+<p><strong>开放平台凭据的解析顺序</strong>：显式参数 → 环境变量 → <code>secrets/open-platform.json</code>。
+用 <code>bili_oauth {action:"status"}</code> 能看清每一格到底有没有、<strong>从哪来</strong>（会标 <code>参数</code> / <code>环境变量 xxx</code> / <code>文件 clientId</code>）。</p>
+<h3 id="34-凭据文件放在哪">3.4 凭据文件放在哪<a class="anchor" href="#34-凭据文件放在哪" aria-label="永久链接">#</a></h3>
+<p>查找顺序：</p>
+<ol><li>工具入参（<code>bili_cookie</code> 的 <code>file</code>）</li><li>环境变量 <code>BILI_COOKIE_FILE</code> / <code>BILI_CRED_FILE</code></li><li><strong>包目录</strong>的 <code>secrets/&lt;文件名&gt;</code>（存在就用）</li><li><strong>启动方 cwd</strong> 的 <code>secrets/&lt;文件名&gt;</code>（存在就用）</li><li>都没有 → 用<strong>包目录</strong>的路径（写入也落在这里）</li></ol>
+<p><strong>放包目录下的 <code>secrets/</code> 最稳。</strong> MCP 客户端是用它自己的项目目录当 cwd 拉起服务的，
+只按 cwd 找会一直显示「文件不存在」。</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-com"># 想放别处，就给绝对路径</span>
+BILI_CRED_FILE=C:/my-creds/open-platform.json
+BILI_COOKIE_FILE=C:/my-creds/cookies.json</code></pre></div>
+<p><code>secrets/</code> 整个目录在 <code>.gitignore</code> 里。<strong>不要把它提交到任何仓库。</strong></p>
+<hr>
+<h2 id="4-工具详解19-个">4. 工具详解（19 个）<a class="anchor" href="#4-工具详解19-个" aria-label="永久链接">#</a></h2>
+<p>分五组：<strong>找文档 → 看懂接口 → 生成/发请求 → 专题能力 → 主站 Web</strong>。</p>
+<h3 id="41-找文档4-个">4.1 找文档（4 个）<a class="anchor" href="#41-找文档4-个" aria-label="永久链接">#</a></h3>
+<h4 id="bilidocslist-按目录或类型浏览"><code>bili_docs_list</code> —— 按目录或类型浏览<a class="anchor" href="#bilidocslist-按目录或类型浏览" aria-label="永久链接">#</a></h4>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">类型</th><th style="text-align:left">必填</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>folder</code></td><td>string</td><td></td><td>目录名<strong>包含匹配</strong>，如 <code>视频稿件</code> / <code>交易电商</code> / <code>消息推送</code></td></tr><tr><td><code>type</code></td><td>enum</td><td></td><td><code>api</code> | <code>guide</code> | <code>event</code> | <code>protocol</code> | <code>multi-api</code></td></tr><tr><td><code>limit</code></td><td>int</td><td></td><td>默认 60</td></tr></tbody></table></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_docs_list { "folder": "视频稿件" }
+bili_docs_list { "type": "event", "limit": 100 }</code></pre></div>
+<p>共 170 篇：95 篇单接口 + 2 篇多接口（合 100 个端点）、41 个推送事件、30 篇指南、2 篇协议说明。</p>
+<h4 id="bilidocssearch-全文检索"><code>bili_docs_search</code> —— 全文检索<a class="anchor" href="#bilidocssearch-全文检索" aria-label="永久链接">#</a></h4>
+<p>先按标题/目录/摘要命中，再回退全文。返回的 <code>ref(#num)</code> 可以直接喂给 <code>bili_api_spec</code> / <code>bili_docs_get</code>。</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_docs_search { "query": "upload_token" }
+bili_docs_search { "query": "refresh_token", "limit": 5 }</code></pre></div>
+<h4 id="bilidocsget-读原文"><code>bili_docs_get</code> —— 读原文<a class="anchor" href="#bilidocsget-读原文" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_docs_get { "ref": "#12" }
+bili_docs_get { "ref": "视频稿件提交", "maxChars": 8000 }</code></pre></div>
+<p><code>maxChars</code> 默认 40000。真实输出：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>doc: #12  id: f7fc57dd-55a1-5cb1-cba4-61fb2994bf0f  type: api  folder: 开放能力 / 视频稿件管理 / 服务端视频稿件投递  bytes: 3506
+(截断到 500/2736 字符，需要更多请提高 maxChars)
+
+---
+
+# 视频稿件提交
+
+Scope: `ARC_BASE`   &lt;font color="green"&gt;需要申请权限&lt;/font&gt;   &lt;font color="red"&gt;需要用户授权&lt;/font&gt;
+...</code></pre></div>
+<h4 id="biliendpoints-按维度筛端点"><code>bili_endpoints</code> —— 按维度筛端点<a class="anchor" href="#biliendpoints-按维度筛端点" aria-label="永久链接">#</a></h4>
+<p>比全文搜索准，适合「所有需要 <code>SHOP_ORDER_INFO</code> 的 POST 接口」这类问题。</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>method</code></td><td><code>GET</code> / <code>POST</code> / <code>PUT</code> / <code>DELETE</code> / <code>PATCH</code></td></tr><tr><td><code>scope</code></td><td>权限点，如 <code>ARC_BASE</code></td></tr><tr><td><code>host</code></td><td><code>member.bilibili.com</code> / <code>openupos.bilivideo.com</code> / <code>api.bilibili.com</code></td></tr><tr><td><code>pathContains</code></td><td>路径或标题关键词</td></tr><tr><td><code>limit</code></td><td>默认 40</td></tr></tbody></table></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_endpoints { "scope": "ARC_BASE", "method": "POST" }</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>命中 9 条，显示前 3
+
+#8 POST /arcopen/fn/archive/video/init ⟨member.bilibili.com⟩  [ARC_BASE]  文件上传预处理
+#9 POST /video/v2/part/upload ⟨openupos.bilivideo.com⟩  [ARC_BASE]  文件分片上传
+#10 POST /arcopen/fn/archive/video/complete ⟨member.bilibili.com⟩  [ARC_BASE]  文件分片合片</code></pre></div>
+<h3 id="42-看懂接口5-个">4.2 看懂接口（5 个）<a class="anchor" href="#42-看懂接口5-个" aria-label="永久链接">#</a></h3>
+<h4 id="biliquickstart-先读这一篇"><code>bili_quickstart</code> —— 先读这一篇<a class="anchor" href="#biliquickstart-先读这一篇" aria-label="永久链接">#</a></h4>
+<p>无参数。一次讲清：主机、OAuth2 全流程、2.0 签名算法、通用返回结构、错误码分段、投稿技术限制。
+<strong>第一次用、或者要写对接代码之前先调它。</strong></p>
+<h4 id="biliapispec-结构化规格"><code>bili_api_spec</code> —— 结构化规格<a class="anchor" href="#biliapispec-结构化规格" aria-label="永久链接">#</a></h4>
+<p>参数用<strong>接口 URL</strong> 或 <code>ref</code> 定位：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_api_spec { "ref": "#12" }
+bili_api_spec { "url": "https://member.bilibili.com/arcopen/fn/archive/add-by-utoken" }</code></pre></div>
+<p>真实输出：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code># 视频稿件提交  [api]
+doc: #12  id: f7fc57dd-55a1-5cb1-cba4-61fb2994bf0f  file: 012_视频稿件提交.md
+folder: 开放能力 / 视频稿件管理 / 服务端视频稿件投递
+scope: ARC_BASE
+POST https://member.bilibili.com/arcopen/fn/archive/add-by-utoken
+
+## url 参数
+- upload_token (string, 必填): 通过文件上传预处理(upload_token)授权获取
+
+## body 参数
+- title (string, 必填): 稿件标题，长度小于80，短时间内标题不能相同
+- cover (string, 可选): 封面地址，必须由上传封面接口得到
+- tid (int, 必填): 分区id，由获取分区信息接口得到
+- no_reprint (int, 可选): 是否允许转载 0-允许，1-不允许。默认0
+- desc (string, 可选): 视频描述，长度小于250
+- tag (string, 必填): 视频标签，多个标签用英文逗号分隔，总长度小于200
+- copyright (int, 必填): 1-原创，2-转载(转载时source必填)
+- source (string, 可选): 如果copyright为转载，则此字段表示转载来源
+...</code></pre></div>
+<h4 id="biliapiprepare-提交前先验一遍"><code>bili_api_prepare</code> —— 提交前先验一遍<a class="anchor" href="#biliapiprepare-提交前先验一遍" aria-label="永久链接">#</a></h4>
+<p>按文档类型做转换（<code>int</code>→数字、<code>bool</code>→布尔、<code>[]x</code>→数组），查必填缺失、查多传字段。</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_api_prepare { "ref": "#12", "body": { "title": "x" } }</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code># 视频稿件提交  (#12)
+POST https://member.bilibili.com/arcopen/fn/archive/add-by-utoken
+## query 缺必填
+- upload_token (string) 通过文件上传预处理(upload_token)授权获取
+## body 缺必填
+- tid (int) 分区id，由获取分区信息接口得到
+- tag (string) 视频标签，多个标签用英文逗号分隔，总长度小于200
+- copyright (int) 1-原创，2-转载(转载时source必填)
+## 最终 query
+```json
+{}
+```
+## 最终 body
+```json
+{"title":"x"}
+```
+## 下一步
+- 真调: bili_api_call { "ref": "12", "query": ..., "body": ... }
+- 看签名: bili_api_sign { "url": "https://member.bilibili.com/arcopen/fn/archive/add-by-utoken", "body": ... }</code></pre></div>
+<h4 id="biliscopes-确认要申请哪些权限"><code>bili_scopes</code> —— 确认要申请哪些权限<a class="anchor" href="#biliscopes-确认要申请哪些权限" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_scopes { }                              // 20 个 scope 全览
+bili_scopes { "scope": "SHOP_ORDER_INFO" }   // 该 scope 下的端点
+bili_scopes { "ref": "#12" }                 // 该接口要什么 scope</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>共 20 个 scope，94 个端点带标注:
+
+- ATC_BASE: 14 个端点  (例: #21 文章提交)
+- ARC_BASE: 12 个端点  (例: #8 文件上传预处理)
+- SHOP_COMMODITY_INFO: 10 个端点  (例: #68 商品发布)
+- SHOP_LOGISTICS_INFO: 10 个端点  (例: #86 发货回调)
+...
+- UPOWER_ORDER_DATA: 1 个端点  (例: #110 查询充电记录)</code></pre></div>
+<p><strong>创建应用时申请错了，后面所有调用都是权限错误</strong>，先查这里。</p>
+<h4 id="bilierrorlookup-错误码"><code>bili_error_lookup</code> —— 错误码<a class="anchor" href="#bilierrorlookup-错误码" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_error_lookup { "code": "4002" }</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>4002: 签名异常</code></pre></div>
+<p>前缀模糊查询（4 位前缀列出该模块全部码）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_error_lookup { "code": "1230", "fuzzy": true }</code></pre></div>
+<p>共 118 个错误码，分「通用 / OAuth / 视频稿件 / 直播 / 电商 / 充电」等段。</p>
+<h3 id="43-生成与发送5-个">4.3 生成与发送（5 个）<a class="anchor" href="#43-生成与发送5-个" aria-label="永久链接">#</a></h3>
+<h4 id="bilicodegen-生成可运行代码"><code>bili_codegen</code> —— 生成可运行代码<a class="anchor" href="#bilicodegen-生成可运行代码" aria-label="永久链接">#</a></h4>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>ref</code></td><td>必填，<code>#num</code> / 标题 / 接口 URL</td></tr><tr><td><code>lang</code></td><td><code>python</code>(默认) | <code>node</code> | <code>curl</code> | <code>java</code> | <code>php</code> | <code>go</code>，另有 <code>bash</code></td></tr></tbody></table></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_codegen { "ref": "#12", "lang": "python" }</code></pre></div>
+<p>生成的东西<strong>包含完整 2.0 签名实现</strong>——必填参数直接写进代码，可选参数注释掉，带返回码处理：</p>
+<div class="code"><div class="code-head"><span class="code-lang">python</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-com">#!/usr/bin/env python3</span>
+<span class="tok-com"># -*- coding: utf-8 -*-</span>
+<span class="tok-str">""</span><span class="tok-str">"
+接口: 视频稿件提交  (doc #12)
+POST https://member.bilibili.com/arcopen/fn/archive/add-by-utoken
+scope: ARC_BASE
+由 bili-open-mcp 生成；TODO 处需填真实值，未执行的步骤请自行补齐
+"</span><span class="tok-str">""</span>
+<span class="tok-key">import</span> hashlib, hmac, json, os, time, urllib.parse, urllib.request, uuid
+
+CLIENT_ID = os.environ.<span class="tok-fn">get</span>(<span class="tok-str">"BILI_CLIENT_ID"</span>, <span class="tok-str">"YOUR_CLIENT_ID"</span>)
+...</code></pre></div>
+<p><strong>自己手拼签名极容易错</strong>，优先用它。</p>
+<h4 id="biliapisign-只看签名不发请求"><code>bili_api_sign</code> —— 只看签名，不发请求<a class="anchor" href="#biliapisign-只看签名不发请求" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_api_sign { "url": "https://member.bilibili.com/arcopen/fn/archive/video/param", "query": { "a": 1 } }</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>## 待签名串
+x-bili-accesskeyid:YOUR_CLIENT_ID
+x-bili-content-md5:d41d8cd98f00b204e9800998ecf8427e
+x-bili-signature-method:HMAC-SHA256
+x-bili-signature-nonce:b8cdd7f4-cd3d-4f08-ac68-856bd82b7f05
+x-bili-signature-version:2.0
+x-bili-timestamp:1793433370
+## 请求头
+Accept: application/json
+Content-Type: application/json
+Authorization: 762e736a5a8970abbc7d63b7329ebd7d975c5007c275a0be6adff0884f6139af
+X-Bili-Accesskeyid: YOUR_CLIENT_ID
+X-Bili-Content-Md5: d41d8cd98f00b204e9800998ecf8427e
+...
+## curl
+curl --location --request GET 'https://member.bilibili.com/arcopen/fn/archive/video/param?a=1' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+...</code></pre></div>
+<p>没配凭据时会用 <code>YOUR_CLIENT_ID</code> / <code>YOUR_ACCESS_TOKEN</code> 占位，
+<strong>签名结构是真的，值要你填</strong> —— 拿去对照自己的实现排错正合适。</p>
+<h4 id="biliapicall-真发请求"><code>bili_api_call</code> —— 真发请求<a class="anchor" href="#biliapicall-真发请求" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_api_call { "ref": "#12", "query": { "upload_token": "…" }, "body": { … } }
+bili_api_call { "ref": "#12", "dryRun": true }        // 只看将要发的请求
+bili_api_call { "url": "https://member.bilibili.com/arcopen/fn/archive/video/param", "method": "GET" }</code></pre></div>
+<p><code>dryRun:true</code> 的真实输出：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>## dryRun — 未发送
+```
+curl --location --request POST 'https://member.bilibili.com/arcopen/fn/archive/add-by-utoken' \
+--header 'Accept: application/json' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: c0fdbe2094f5b288432f2d02374126735f4d19e266f26fb4ac70d663a5dff271' \
+--header 'X-Bili-Accesskeyid: YOUR_CLIENT_ID' \
+--header 'X-Bili-Content-Md5: d41d8cd98f00b204e9800998ecf8427e' \
+--header 'X-Bili-Signature-Method: HMAC-SHA256' \
+--header 'X-Bili-Signature-Nonce: 8bb260eb-b578-4f3d-8aac-35b63c811bf4' \
+--header 'X-Bili-Signature-Version: 2.0' \
+--header 'X-Bili-Timestamp: 1793433370' \
+--header 'Access-Token: YOUR_ACCESS_TOKEN'
+```</code></pre></div>
+<p><strong>先用 <code>dryRun</code> 看一遍再真调</strong>，尤其写操作。</p>
+<h4 id="biliuploadplan-投稿分片计划"><code>bili_upload_plan</code> —— 投稿分片计划<a class="anchor" href="#biliuploadplan-投稿分片计划" aria-label="永久链接">#</a></h4>
+<p>给文件大小，算单文件还是分片、分几片、每片 offset、<code>part_number</code> 起止，并给出完整调用顺序。</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_upload_plan { "fileSizeMB": 250 }
+bili_upload_plan { "fileSizeBytes": 314572800, "chunkMB": 10, "filename": "video.mp4" }</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code># 投稿上传计划
+文件: video.mp4  250.0 MB
+模式: 分片（10MB/片，utype=0）
+分片数: 25，请求数: 28
+
+## 调用顺序
+1. POST /arcopen/fn/archive/video/init          body {"name":"video.mp4","utype":"0"}  → upload_token
+2. POST https://openupos.bilivideo.com/video/v2/part/upload?upload_token=&lt;token&gt;&amp;part_number=N   body=裸分片字节  ×25
+3. POST /arcopen/fn/archive/video/complete        url upload_token=&lt;token&gt;
+4. POST /arcopen/fn/archive/add-by-utoken   url upload_token=&lt;token&gt;   body 见 #12
+
+## 分片表
+| part_number | 起始 offset | 结束 offset | 字节数 |
+| --- | --- | --- | --- |
+| 1 | 0 | 10485759 | 10485760 |
+| 2 | 10485760 | 20971519 | 10485760 |
+...</code></pre></div>
+<p>注意第 2 步走的是 <code>openupos.bilivideo.com</code>，<strong>裸二进制、不带签名头</strong>，靠 url 上的 <code>upload_token</code> 鉴权。</p>
+<h4 id="bilimock-官方沙盒"><code>bili_mock</code> —— 官方沙盒<a class="anchor" href="#bilimock-官方沙盒" aria-label="永久链接">#</a></h4>
+<p>不需要凭据（但应用仍需已申请对应 scope）。</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_mock { "action": "list" }                       // 43 个 mock 接口
+bili_mock { "action": "map", "ref": "12" }           // 正式接口 → mock 地址
+bili_mock { "action": "call", "mockUrl": "https://member.bilibili.com/mock/arcopen/fn/archive/add" }</code></pre></div>
+<p><strong>mock 路径与正式路径不总一致</strong>，务必先 <code>map</code> 换算。例如：</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">正式</th><th style="text-align:left">mock</th></tr></thead><tbody><tr><td><code>/arcopen/fn/archive/video/init</code></td><td><code>/mock/video/part/init</code></td></tr><tr><td><code>/arcopen/fn/archive/video/upload</code></td><td><code>/mock/video/part/upload</code></td></tr><tr><td><code>/arcopen/fn/archive/video/complete</code></td><td><code>/mock/video/part/complete</code></td></tr></tbody></table></div>
+<h3 id="44-专题能力4-个">4.4 专题能力（4 个）<a class="anchor" href="#44-专题能力4-个" aria-label="永久链接">#</a></h3>
+<h4 id="bilioauth"><code>bili_oauth</code><a class="anchor" href="#bilioauth" aria-label="永久链接">#</a></h4>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">作用</th></tr></thead><tbody><tr><td><code>help</code>（默认）</td><td>讲清整条链路</td></tr><tr><td><code>status</code></td><td>看 clientId / secret / token 各自有没有、<strong>从哪来</strong></td></tr><tr><td><code>authorize-url</code></td><td>拼授权页链接（<code>gourl</code>、<code>state</code>）</td></tr><tr><td><code>exchange</code></td><td><code>code</code> → <code>access_token</code>（自动落盘）</td></tr><tr><td><code>refresh</code></td><td>续期（<code>refresh_token</code> <strong>只能用一次</strong>）</td></tr></tbody></table></div>
+<h4 id="biliwebhook-41-个推送事件"><code>bili_webhook</code> —— 41 个推送事件<a class="anchor" href="#biliwebhook-41-个推送事件" aria-label="永久链接">#</a></h4>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">作用</th></tr></thead><tbody><tr><td><code>list</code>（默认）</td><td>41 个事件按模块分组</td></tr><tr><td><code>detail</code></td><td>某个事件的内容字段，<code>ref</code> 传 <code>#num</code> 或事件名</td></tr><tr><td><code>verify-code</code></td><td>生成验签 + 应答代码（<code>python</code> / <code>node</code>）</td></tr><tr><td><code>notes</code></td><td>配置与校验说明</td></tr></tbody></table></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_webhook { "action": "detail", "ref": "164" }
+bili_webhook { "action": "verify-code", "lang": "node" }</code></pre></div>
+<p>验签要点（<strong>最容易错的地方</strong>）：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>1. 取收到的原始 body 字节，拼 app_secret + body 做 SHA1
+2. 与请求头 x-bilibili-signature 比对
+⚠ 必须用原始字节，不要重新序列化 —— 重排 key 会验签失败</code></pre></div>
+<p>平台配置回调时会先发一次校验请求：</p>
+<div class="code"><div class="code-head"><span class="code-lang">json</span><button class="code-copy" type="button">复制</button></div><pre><code>{ <span class="tok-str">"event"</span>: <span class="tok-str">"verify_webhooks"</span>, <span class="tok-str">"content"</span>: { <span class="tok-str">"data"</span>: <span class="tok-num">1371848576</span> }, <span class="tok-str">"timestamp"</span>: <span class="tok-str">"2021-01-01 12:01:01"</span> }</code></pre></div>
+<p>要<strong>原样</strong>回 <code>{"data": 1371848576}</code>。失败最多重试 3 次（连接超时 5s），<strong>业务侧必须幂等去重</strong>。</p>
+<h4 id="biliwsprotocol-直播间长连"><code>bili_ws_protocol</code> —— 直播间长连<a class="anchor" href="#biliwsprotocol-直播间长连" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_ws_protocol { }
+bili_ws_protocol { "code": "python" }   // 额外生成内联 Python 客户端</code></pre></div>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code># 直播间长连协议（文档 #43 / #44 / #45 / #46）
+
+## 建立流程
+1. POST /arcopen/fn/live/room/ws-start  (scope LIVE_ROOM_DATA)
+   → data.conn_id, data.websocket_info.wss_link[], data.websocket_info.auth_body
+2. 连 wss_link[0]，第一个包必须是 OP_AUTH(7)，body = auth_body（JSON 字符串，UTF-8）
+3. 每 30s 发 OP_HEARTBEAT(2)，body 为空
+4. 服务端推 OP_SEND_SMS_REPLY(5) 即消息；OP_HEARTBEAT_REPLY(3) 是心跳回执
+
+## 包头（16 字节，全大端）
+  Packet Length uint32   # 含 header 的总长
+  Header Length uint16   # 固定 16
+  Version       uint16   # 0=body 为明文, 2=body 为 zlib 压缩
+  Operation     uint32   # 见下表
+  Sequence ID   uint32   # 保留字段，可忽略
+  Body          bytes</code></pre></div>
+<p>完整的可跑客户端在 <a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/blob/main/examples/live_ws.py"><code>examples/live_ws.py</code></a>（含 zlib 多包拆解）。</p>
+<h3 id="45-主站-web2-个">4.5 主站 Web（2 个）<a class="anchor" href="#45-主站-web2-个" aria-label="永久链接">#</a></h3>
+<p>主站走 Cookie，<strong>不走 2.0 签名</strong>，两套体系互不通用。</p>
+<h4 id="bilicookie"><code>bili_cookie</code><a class="anchor" href="#bilicookie" aria-label="永久链接">#</a></h4>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">action</th><th style="text-align:left">作用</th></tr></thead><tbody><tr><td><code>status</code>（默认）</td><td>列关键 cookie 与过期时间</td></tr><tr><td><code>whoami</code></td><td>验证登录态</td></tr><tr><td><code>import</code></td><td>收 EditThisCookie 数组 / <code>{name:value}</code> / <code>"k=v; k=v"</code></td></tr><tr><td><code>set</code></td><td>设单个（<code>name</code> / <code>value</code>）</td></tr><tr><td><code>clear</code></td><td>清空</td></tr><tr><td><code>export</code></td><td>导出</td></tr></tbody></table></div>
+<p><code>reveal:true</code> 才显示原值，默认脱敏。</p>
+<h4 id="biliwebcall"><code>bili_web_call</code><a class="anchor" href="#biliwebcall" aria-label="永久链接">#</a></h4>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_web_call { "path": "x/web-interface/nav" }
+bili_web_call { "path": "x/relation/modify", "method": "POST", "form": { "fid": 123, "act": 5, "re_src": 11 } }
+bili_web_call { "url": "https://api.bilibili.com/x/web-interface/view?bvid=BV1xx411c7mD" }</code></pre></div>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">参数</th><th style="text-align:left">说明</th></tr></thead><tbody><tr><td><code>path</code></td><td>如 <code>x/web-interface/nav</code>，默认拼到 <code>https://www.bilibili.com</code></td></tr><tr><td><code>url</code></td><td>完整 URL，给了就忽略 <code>path</code></td></tr><tr><td><code>method</code></td><td><code>GET</code> / <code>POST</code>，默认 GET（有 <code>form</code> 则 POST）</td></tr><tr><td><code>query</code></td><td>url 参数</td></tr><tr><td><code>form</code></td><td>表单参数，<strong>自动补 <code>csrf=bili_jct</code></strong></td></tr><tr><td><code>body</code></td><td>JSON body</td></tr><tr><td><code>wbi</code></td><td>强制开关 wbi 签名；留空按路径自动判断</td></tr><tr><td><code>dryRun</code></td><td>只看请求</td></tr><tr><td><code>maxBytes</code></td><td>响应截断，默认 60000</td></tr></tbody></table></div>
+<p><code>dryRun</code> 输出：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>## dryRun — 未发送
+```
+GET https://www.bilibili.com/x/web-interface/nav
+
+请求头:
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+  Referer: https://www.bilibili.com/
+  Accept: application/json, text/plain, */*
+```
+
+jar: C:\path\to\bili-open-mcp\secrets\cookies.json（0 个 cookie）</code></pre></div>
+<p>自动补的请求头：<code>Cookie</code>、<code>User-Agent</code>（桌面 Chrome）、<code>Referer: https://www.bilibili.com/</code>。</p>
+<h3 id="46-wbi-签名">4.6 wbi 签名<a class="anchor" href="#46-wbi-签名" aria-label="永久链接">#</a></h3>
+<p>2023 起 <code>/x/space/wbi/*</code>、<code>/x/polymer/*</code>、<code>/x/v2/reply/wbi/*</code> 这些要 <strong>wbi 签名</strong>。
+<code>bili_web_call</code> 按路径自动判断（<code>/wbi/</code>、<code>/polymer/</code> 等命中），也可以用 <code>wbi:true/false</code> 强制。</p>
+<p>算法（<code>src/wbi.mjs</code>）：</p>
+<ol><li>从 <code>/x/web-interface/nav</code> 的 <code>data.wbi_img</code> 取 <code>img_key</code> / <code>sub_key</code></li><li>按固定重排表拼出 32 位 <code>mixin_key</code></li><li>参数按字典序 → 去掉 <code>!'()*</code> → urlencode → 末尾接 <code>mixin_key</code> → md5 = <code>w_rid</code></li><li>请求带上 <code>wts</code> + <code>w_rid</code></li></ol>
+<p>实测：</p>
+<ul><li><code>/x/space/wbi/acc/info?mid=&lt;uid&gt;</code> 带签名 → <code>code:0</code>；<code>wbi:false</code> → <code>-403 访问权限不足</code></li><li>坑：<code>/x/space/wbi/arc/search</code>（投稿列表）现在<strong>直接 <code>-403</code></strong>，补 <code>dm_img_list</code>/<code>dm_img_str</code>/<code>dm_img_inter</code>
+三件套也没用；<strong>旧路径 <code>/x/space/arc/search</code> 仍然 <code>code:0</code> 可用</strong></li></ul>
+<h3 id="47-资源与提示">4.7 资源与提示<a class="anchor" href="#47-资源与提示" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">类型</th><th style="text-align:left">名称</th><th style="text-align:left">内容</th></tr></thead><tbody><tr><td>resource</td><td><code>bili://catalog</code></td><td>170 篇压成的一页纸清单（<code>data/llms.txt</code>）</td></tr><tr><td>resource template</td><td><code>bili://doc/{ref}</code></td><td>单篇文档原文 Markdown</td></tr><tr><td>prompt</td><td><code>integrate-bili-api</code></td><td>按开放平台规范生成接入任务说明（参数 <code>ref</code>）</td></tr></tbody></table></div>
+<hr>
+<h2 id="5-端到端工作流">5. 端到端工作流<a class="anchor" href="#5-端到端工作流" aria-label="永久链接">#</a></h2>
+<h3 id="流程-a从我要投稿到能跑的代码不需要凭据">流程 A：从"我要投稿"到能跑的代码（不需要凭据）<a class="anchor" href="#流程-a从我要投稿到能跑的代码不需要凭据" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>你   ：我想用开放平台投稿视频，帮我理一遍。
+AI   ：bili_docs_search { "query": "投稿" }
+       → bili_api_spec { "ref": "#12" }
+       → bili_scopes { "ref": "#12" }          // 需要申请 ARC_BASE
+       → bili_upload_plan { "fileSizeMB": 250 } // 分片计划
+       → bili_codegen { "ref": "#12", "lang": "python" }</code></pre></div>
+<h3 id="流程-b真调一个只读接口需要开放平台凭据">流程 B：真调一个只读接口（需要开放平台凭据）<a class="anchor" href="#流程-b真调一个只读接口需要开放平台凭据" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_oauth  { "action": "status" }                          // 先确认凭据在
+bili_api_prepare { "ref": "#4" }                            // 查必填
+bili_api_call { "ref": "#4", "dryRun": true }               // 看请求
+bili_api_call { "ref": "#4" }                               // 真发
+bili_error_lookup { "code": "&lt;返回的 code&gt;" }                // 非 0 就查</code></pre></div>
+<h3 id="流程-c完整投稿">流程 C：完整投稿<a class="anchor" href="#流程-c完整投稿" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>1. bili_upload_plan { "fileSizeMB": 250 }                    // 拿调用顺序与分片表
+2. POST /arcopen/fn/archive/video/init          → upload_token
+3. POST openupos.bilivideo.com/video/v2/part/upload?upload_token=…&amp;part_number=N   ×25   （裸二进制）
+4. POST /arcopen/fn/archive/video/complete
+5. POST /arcopen/fn/archive/add-by-utoken       （body 见 #12）
+6. 收 Webhook「投稿成功 / 投稿失败」事件（bili_webhook {action:"detail", ref:"…"}）</code></pre></div>
+<h3 id="流程-d用主站-cookie-做只读查询">流程 D：用主站 Cookie 做只读查询<a class="anchor" href="#流程-d用主站-cookie-做只读查询" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_cookie { "action": "import", "jar": "SESSDATA=…; bili_jct=…" }
+bili_cookie { "action": "whoami" }
+bili_web_call { "path": "x/web-interface/nav" }
+bili_web_call { "path": "x/space/wbi/acc/info", "query": { "mid": 2 } }   // 自动 wbi 签名</code></pre></div>
+<h3 id="流程-e接直播间长连">流程 E：接直播间长连<a class="anchor" href="#流程-e接直播间长连" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_ws_protocol { }                       // 先读协议
+bili_api_call { "url": "https://member.bilibili.com/arcopen/fn/live/room/ws-start", "method": "POST" }
+→ python examples/live_ws.py --conn-id &lt;id&gt; --auth-body '&lt;auth_body&gt;' --wss 'wss://…'</code></pre></div>
+<h3 id="流程-f接-webhook-推送">流程 F：接 Webhook 推送<a class="anchor" href="#流程-f接-webhook-推送" aria-label="永久链接">#</a></h3>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>bili_webhook { "action": "list" }                       // 选事件
+bili_webhook { "action": "detail", "ref": "164" }       // 看字段
+bili_webhook { "action": "verify-code", "lang": "python" }   // 拿验签代码</code></pre></div>
+<hr>
+<h2 id="6-报错与排查">6. 报错与排查<a class="anchor" href="#6-报错与排查" aria-label="永久链接">#</a></h2>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">现象</th><th style="text-align:left">原因</th><th style="text-align:left">处理</th></tr></thead><tbody><tr><td>客户端里看不到工具</td><td>路径写错 / Node &lt; 18 / 没重启客户端</td><td><code>node src/server.mjs</code> 手动起一次；<code>npm run selftest</code>；完全退出客户端再开</td></tr><tr><td>一直显示「凭据文件不存在」</td><td>客户端用<strong>它自己的项目目录</strong>当 cwd</td><td>把 <code>secrets/</code> 放在包目录下（本版已支持），或给 <code>BILI_CRED_FILE</code> 绝对路径</td></tr><tr><td><code>bili_api_call</code> 返回 <code>4002 签名异常</code></td><td>secret 不对 / 时间戳偏移 / body md5 与实际 body 不一致</td><td>用 <code>bili_api_sign</code> 对照<strong>待签名串</strong>，逐行比</td></tr><tr><td>返回 <code>-352</code></td><td>风控</td><td>降低频率、加设备指纹 cookie；<strong>不要重试轰炸</strong></td></tr><tr><td>返回 <code>-509</code> / <code>12019</code></td><td>请求过于频繁</td><td>退避重试（指数），并发降到 1</td></tr><tr><td>返回 <code>-111</code></td><td><code>csrf</code> 失败</td><td><code>bili_jct</code> 过期，重新导入 cookie</td></tr><tr><td>返回权限错误</td><td>应用没申请该 scope</td><td><code>bili_scopes { "ref": "…" }</code> 查需要哪个，去控制台申请</td></tr><tr><td><code>-403 访问权限不足</code>（主站 wbi）</td><td>漏了 wbi 签名</td><td>别关 <code>wbi</code>，或看 §4.6 的路径现状</td></tr><tr><td>Webhook 验签一直失败</td><td>重新序列化了 body</td><td>用<strong>原始字节</strong>，字段顺序不能动</td></tr><tr><td>长连收到乱码</td><td><code>Version=2</code> 是 zlib</td><td>按 <code>Packet Length</code> 循环拆包后分别解压</td></tr><tr><td><code>bili_upload_plan</code> 说分片，实际失败</td><td>分片走的是 openupos 裸二进制</td><td>不要加签名头，用 url 上的 <code>upload_token</code></td></tr><tr><td>投稿 <code>code</code> 非 0 但说不清</td><td>分区分片等限制</td><td><code>bili_quickstart</code> 有投稿技术限制一节</td></tr></tbody></table></div>
+<p><strong>通用第一步</strong>：任何报错都先 <code>bili_error_lookup { "code": "&lt;code&gt;" }</code>。</p>
+<hr>
+<h2 id="7-数据从哪来-怎么更新">7. 数据从哪来 / 怎么更新<a class="anchor" href="#7-数据从哪来-怎么更新" aria-label="永久链接">#</a></h2>
+<p><code>data/</code> 由 <code>scripts/build-spec.mjs</code> 从 Markdown 生成，Markdown 来自开放平台的目录接口：</p>
+<div class="code"><div class="code-head"><span class="code-lang">text</span><button class="code-copy" type="button">复制</button></div><pre><code>GET https://open.bilibili.com/arcopen/user/open-doc/view?id=4</code></pre></div>
+<p><code>data.online_doc</code> 是整棵目录树，每个 Article 节点带 <code>md_url</code>。文档更新后：</p>
+<div class="code"><div class="code-head"><span class="code-lang">bash</span><button class="code-copy" type="button">复制</button></div><pre><code>npm run build     <span class="tok-com"># 重新解析</span>
+npm run audit     <span class="tok-com"># 校验一致性</span></code></pre></div>
+<p>规模：</p>
+<ul><li>文档 <strong>170 篇</strong> = 95 篇单接口 + 2 篇多接口（共 <strong>100 个端点</strong>）+ 41 个推送事件 + 30 篇指南 + 2 篇协议说明</li><li><strong>1243 个参数对象，100% 带类型</strong>；359/364 个请求参数带「必传」标记</li><li><strong>20 个 scope、118 个错误码、43 个沙盒 mock 接口</strong></li></ul>
+<hr>
+<h2 id="8-免责声明">8. 免责声明<a class="anchor" href="#8-免责声明" aria-label="永久链接">#</a></h2>
+<p><strong>使用本项目前请先读全文：<a href="disclaimer.html">DISCLAIMER.md</a>。</strong> 摘要（各条完整表述见原文）：</p>
+<ol><li><strong>接口来源</strong>：本项目调用的所有接口均为<strong>哔哩哔哩官方提供并公开的接口</strong>
+（开放平台文档 / 官方业务域名 / 官方 OAuth2 / 官方上传域名 / 官方直播间长连协议 / 官方 Webhook 规范），
+不含私有接口、破解接口或绕过鉴权的实现。</li><li><strong>无隶属关系</strong>：第三方项目，与哔哩哔哩（上海幻电信息科技有限公司 / 上海宽娱数码科技有限公司）没有隶属、赞助、合作或背书关系。</li><li><strong>凭据自备、缺失即功能受限</strong>：不内置、不收集、不上传任何凭据；没有 <code>BILI_COOKIE_FILE</code> 和
+<code>BILI_CRED_FILE</code> 时，开放平台接口与主站 Web 接口<strong>全部不可用</strong>（见 <a href="#0-先确认你能用哪些功能">§0</a>）。</li><li><strong>账号安全</strong>：<code>SESSDATA</code> 等同登录凭证，泄露即交出账号；勿在日志、截图、Issue、对话中暴露。</li><li><strong>使用者责任</strong>：遵守用户协议、社区公约、开放平台开发者协议与当地法律；<strong>本项目不做自动限速，
+节流责任在调用方</strong>，滥用会导致<strong>你自己的账号</strong>被限流或封停。</li><li><strong>无担保</strong>：按"现状"提供，官方接口随时可能变更，不承担因使用本项目造成的任何损失。</li><li><strong>数据为快照</strong>：<code>data/</code> 是某一时点抓取的结构化快照，<strong>一切以官方文档与实际返回为准</strong>；
+生成的代码是骨架，边界条件与错误处理需自行补齐测试。</li><li><strong>隐私</strong>：本地服务，<strong>无遥测、无上报</strong>；但通过 AI 客户端使用时，你发送的内容与工具返回值会经过该客户端与模型提供方。</li><li><strong>不构成法律/合规建议</strong>；第三方依赖（<code>@modelcontextprotocol/sdk</code>、<code>zod</code>）请自行评估。</li><li><strong>下架通道</strong>：权利人如认为本仓库内容侵犯权益，开 Issue 或联系仓库所有者，会尽快处理。</li></ol></article><div class="callout callout-note" style="margin-top:40px"><span class="callout-ico">📄</span><div>这是 <code>USAGE.md</code> 的站点渲染版，原文在仓库根目录；<a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/blob/main/USAGE.md" target="_blank" rel="noopener">在 GitHub 上查看 Markdown 源码</a>。</div></div></main><aside class="toc"><div class="toc-title">本页目录</div><a class="lvl-2" href="#目录">目录</a><a class="lvl-2" href="#0-先确认你能用哪些功能">0. 先确认你能用哪些功能</a><a class="lvl-2" href="#1-安装">1. 安装</a><a class="lvl-2" href="#2-接入-mcp-客户端">2. 接入 MCP 客户端</a><a class="lvl-3" href="#21-claude-desktop">2.1 Claude Desktop</a><a class="lvl-3" href="#22-claude-code">2.2 Claude Code</a><a class="lvl-3" href="#23-cursor">2.3 Cursor</a><a class="lvl-3" href="#24-codex">2.4 Codex</a><a class="lvl-3" href="#25-opencode">2.5 OpenCode</a><a class="lvl-3" href="#26-其他客户端">2.6 其他客户端</a><a class="lvl-3" href="#27-怎么确认接上了">2.7 怎么确认接上了</a><a class="lvl-2" href="#3-凭据两套体系别混">3. 凭据：两套体系，别混</a><a class="lvl-3" href="#31-拿开放平台凭据">3.1 拿开放平台凭据</a><a class="lvl-3" href="#32-拿主站-cookie">3.2 拿主站 Cookie</a><a class="lvl-3" href="#33-环境变量总表">3.3 环境变量总表</a><a class="lvl-3" href="#34-凭据文件放在哪">3.4 凭据文件放在哪</a><a class="lvl-2" href="#4-工具详解19-个">4. 工具详解（19 个）</a><a class="lvl-3" href="#41-找文档4-个">4.1 找文档（4 个）</a><a class="lvl-4" href="#bilidocslist-按目录或类型浏览">bilidocslist —— 按目录或类型浏览</a><a class="lvl-4" href="#bilidocssearch-全文检索">bilidocssearch —— 全文检索</a><a class="lvl-4" href="#bilidocsget-读原文">bilidocsget —— 读原文</a><a class="lvl-4" href="#biliendpoints-按维度筛端点">biliendpoints —— 按维度筛端点</a><a class="lvl-3" href="#42-看懂接口5-个">4.2 看懂接口（5 个）</a><a class="lvl-4" href="#biliquickstart-先读这一篇">biliquickstart —— 先读这一篇</a><a class="lvl-4" href="#biliapispec-结构化规格">biliapispec —— 结构化规格</a><a class="lvl-4" href="#biliapiprepare-提交前先验一遍">biliapiprepare —— 提交前先验一遍</a><a class="lvl-4" href="#biliscopes-确认要申请哪些权限">biliscopes —— 确认要申请哪些权限</a><a class="lvl-4" href="#bilierrorlookup-错误码">bilierrorlookup —— 错误码</a><a class="lvl-3" href="#43-生成与发送5-个">4.3 生成与发送（5 个）</a><a class="lvl-4" href="#bilicodegen-生成可运行代码">bilicodegen —— 生成可运行代码</a><a class="lvl-4" href="#biliapisign-只看签名不发请求">biliapisign —— 只看签名，不发请求</a><a class="lvl-4" href="#biliapicall-真发请求">biliapicall —— 真发请求</a><a class="lvl-4" href="#biliuploadplan-投稿分片计划">biliuploadplan —— 投稿分片计划</a><a class="lvl-4" href="#bilimock-官方沙盒">bilimock —— 官方沙盒</a><a class="lvl-3" href="#44-专题能力4-个">4.4 专题能力（4 个）</a><a class="lvl-4" href="#bilioauth">bilioauth</a><a class="lvl-4" href="#biliwebhook-41-个推送事件">biliwebhook —— 41 个推送事件</a><a class="lvl-4" href="#biliwsprotocol-直播间长连">biliwsprotocol —— 直播间长连</a><a class="lvl-3" href="#45-主站-web2-个">4.5 主站 Web（2 个）</a><a class="lvl-4" href="#bilicookie">bilicookie</a><a class="lvl-4" href="#biliwebcall">biliwebcall</a><a class="lvl-3" href="#46-wbi-签名">4.6 wbi 签名</a><a class="lvl-3" href="#47-资源与提示">4.7 资源与提示</a><a class="lvl-2" href="#5-端到端工作流">5. 端到端工作流</a><a class="lvl-3" href="#流程-a从我要投稿到能跑的代码不需要凭据">流程 A：从"我要投稿"到能跑的代码（不需要凭据）</a><a class="lvl-3" href="#流程-b真调一个只读接口需要开放平台凭据">流程 B：真调一个只读接口（需要开放平台凭据）</a><a class="lvl-3" href="#流程-c完整投稿">流程 C：完整投稿</a><a class="lvl-3" href="#流程-d用主站-cookie-做只读查询">流程 D：用主站 Cookie 做只读查询</a><a class="lvl-3" href="#流程-e接直播间长连">流程 E：接直播间长连</a><a class="lvl-3" href="#流程-f接-webhook-推送">流程 F：接 Webhook 推送</a><a class="lvl-2" href="#6-报错与排查">6. 报错与排查</a><a class="lvl-2" href="#7-数据从哪来-怎么更新">7. 数据从哪来 / 怎么更新</a><a class="lvl-2" href="#8-免责声明">8. 免责声明</a></aside></div>
+<footer class="footer"><div class="wrap"><div class="footer-grid"><div><h4>bili-open-mcp</h4><p style="margin:0 0 10px;max-width:38ch">哔哩哔哩 / B站 MCP Server。把开放平台的 170 篇文档变成 AI 能直接检索、直接调用、直接生成签名的东西。</p><span class="badge badge-warn">第三方 · 与哔哩哔哩无隶属关系</span></div><div><h4>文档</h4><a href="usage.html">使用方法</a><a href="readme.html">README</a><a href="agents.html">AI 契约</a><a href="disclaimer.html">免责声明</a></div><div><h4>参考</h4><a href="tools.html">19 个工具</a><a href="endpoints.html">100 个端点</a><a href="guides.html">指南与协议</a><a href="webhooks.html">41 个推送事件</a><a href="errors.html">118 个错误码</a><a href="mock.html">43 个沙盒接口</a></div><div><h4>相关</h4><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener">GitHub 仓库</a><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/issues" target="_blank" rel="noopener">问题反馈</a><a href="https://open.bilibili.com/doc/4" target="_blank" rel="noopener">开放平台文档</a><a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP 规范</a></div></div><div class="footer-note">本页所有接口均为哔哩哔哩官方提供并公开的接口，不含私有接口、破解接口或绕过鉴权的实现。本站为静态文档站，不含任何凭据，也不会发起任何接口请求。哔哩哔哩、bilibili、小电视是相应权利人的商标；本项目与哔哩哔哩无隶属、赞助或背书关系。内容按「现状」提供，不构成任何担保 —— 详见 <a href="disclaimer.html">免责声明</a>。<span style="display:block;margin-top:8px">© 2026 bili-open-mcp contributors · MIT License · 构建于 2026-10-31</span></div></div></footer>
+<button class="to-top" type="button" aria-label="回到顶部">↑</button>
+<div class="modal" hidden><div class="modal-box"><input class="modal-input" type="search" placeholder="搜索文档、接口、工具、错误码…" aria-label="站内搜索"><div class="modal-results"></div><div class="modal-foot"><span>↑↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span><span>Ctrl/⌘ + K 唤起</span></div></div></div>
+<script src="assets/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>接口签名和状态码 · bili-open-mcp</title>
+<meta name="description" content="接口签名和状态码 — 开放能力 — ">
+<meta name="keywords" content="哔哩哔哩 MCP,B站 MCP,bilibili MCP,bilibili mcp server,哔哩哔哩开放平台,MCP Server,Model Context Protocol,开放平台 API,B站接口">
+<link rel="canonical" href="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/guide/002.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="接口签名和状态码 · bili-open-mcp">
+<meta property="og:description" content="接口签名和状态码 — 开放能力 — ">
+<meta property="og:url" content="https://3810220770.github.io/bili-open-mcp-bilibili-mcp-server/guide/002.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23fb7299%22%2F%3E%3Cpath%20d%3D%22M9%2012h14v9a2%202%200%200%201-2%202H11a2%202%200%200%201-2-2z%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M12%207l2.5%203M20%207l-2.5%203%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E">
+<script>try{var t=localStorage.getItem('bili-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>window.__ROOT__="../";</script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="topbar">
+<button class="icon-btn menu-btn" type="button" aria-label="打开目录">☰</button>
+<a class="brand" href="../"><span class="brand-mark">B</span>bili-open-mcp<small>MCP</small></a>
+<nav class="topnav"><a href="../">首页</a><a href="../tools.html">工具</a><a href="../endpoints.html">接口</a><a href="../guides.html">指南</a><a href="../webhooks.html">推送</a><a href="../errors.html">错误码</a><a href="../mock.html">沙盒</a><a href="../usage.html">使用</a></nav>
+<div class="topbar-spacer"></div>
+<div class="topbar-actions">
+<button class="search-trigger" type="button"><span>🔍</span><span class="label">搜索文档 / 接口 / 工具</span><kbd>Ctrl K</kbd></button>
+<button class="icon-btn theme-toggle" type="button" aria-label="切换主题">☾</button>
+<a class="icon-btn" href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub">★</a>
+</div></header>
+
+<div class="layout"><aside class="sidebar"><div class="sidebar-group"><div class="sidebar-title">文档站</div><a href="../" class="is-active">首页</a><a href="../tools.html">19 个工具</a><a href="../endpoints.html">接口总览</a><a href="../guides.html">指南与协议</a><a href="../webhooks.html">推送事件</a><a href="../errors.html">错误码</a><a href="../mock.html">沙盒环境</a><a href="../usage.html">使用方法</a><a href="../readme.html">README</a><a href="../agents.html">AI 契约</a><a href="../disclaimer.html">免责声明</a></div><div class="sidebar-group"><div class="sidebar-title">开放能力 · 97 个接口</div><a href="../endpoints.html#%E5%BC%80%E6%94%BE%E8%83%BD%E5%8A%9B">开放能力<span class="count">1</span></a><a href="../endpoints.html#%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86">用户管理<span class="count">3</span></a><a href="../endpoints.html#%E8%A7%86%E9%A2%91%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">视频稿件管理<span class="count">12</span></a><a href="../endpoints.html#%E4%B8%93%E6%A0%8F%E7%A8%BF%E4%BB%B6%E7%AE%A1%E7%90%86">专栏稿件管理<span class="count">14</span></a><a href="../endpoints.html#%E6%95%B0%E6%8D%AE%E5%BC%80%E6%94%BE%E6%9C%8D%E5%8A%A1">数据开放服务<span class="count">5</span></a><a href="../endpoints.html#%E7%9B%B4%E6%92%AD%E8%83%BD%E5%8A%9B">直播能力<span class="count">9</span></a><a href="../endpoints.html#%E7%BB%8F%E8%90%A5%E5%8F%B7%E5%AE%A2%E6%9C%8D">经营号客服<span class="count">7</span></a><a href="../endpoints.html#%E4%BA%A4%E6%98%93%E7%94%B5%E5%95%86">交易电商<span class="count">39</span></a><a href="../endpoints.html#%E5%85%85%E7%94%B5%E4%B8%9A%E5%8A%A1">充电业务<span class="count">1</span></a><a href="../endpoints.html#%E8%AF%BE%E5%A0%82%E4%B8%9A%E5%8A%A1">课堂业务<span class="count">3</span></a><a href="../endpoints.html#%E7%AB%99%E5%86%85%E7%89%88%E6%9D%83%E6%8E%88%E6%9D%83%E6%9B%B2%E5%BA%93">站内版权授权曲库<span class="count">3</span></a></div><div class="sidebar-group"><div class="sidebar-title">指南与协议 · 32 篇</div><a href="../guide/002.html">接口签名和状态码</a><a href="../guide/003.html">接口权限白名单</a><a href="../guide/007.html">接口概览</a><a href="../guide/015.html">业务说明</a><a href="../guide/040.html">接入指引</a><a href="../guide/044.html">直播间消息websocket协议</a><a href="../guide/047.html">长连CMD说明</a><a href="../guide/048.html">一键开播能力说明</a><a href="../guide/049.html">业务流程说明</a><a href="../guide/051.html">授权回调</a><a href="../guide/055.html">发送弹幕</a><a href="../guide/056.html">接入指引</a><a href="../guide/057.html">通用奖励接口</a><a href="../guide/058.html">服务说明</a><a href="../guide/066.html">服务说明</a><a href="../guide/085.html">抽卡机抽卡结果回调</a><a href="../guide/096.html">上传文件</a><a href="../guide/106.html">服务说明</a><a href="../guide/109.html">服务说明</a><a href="../guide/111.html">服务说明</a><a href="../guide/115.html">接入指引</a><a href="../guide/116.html">三方通用资源接口</a><a href="../guide/117.html">用前须知</a><a href="../guide/121.html">概述</a><a href="../guide/122.html">用户授权</a><a href="../guide/123.html">解除授权</a><a href="../guide/132.html">买家修改地址通知</a><a href="../guide/133.html">发货物流信息变更</a><a href="../guide/163.html">用户进入对话</a><a href="../guide/166.html">留资结果</a><a href="../guide/169.html">沙盒</a><a href="../guide/170.html">文档中未列出的功能</a></div></aside><main class="main"><nav class="breadcrumb"><a href="../guides.html">指南与协议</a><span class="sep">/</span>开放能力<span class="sep">/</span><span>接口签名和状态码</span></nav><h1 class="page-title">接口签名和状态码</h1><div class="api-head"><div class="api-meta"><span class="badge badge-info">guide</span><span class="badge badge-muted">#2</span><span class="badge badge-muted">接口签名实现标准和状态码</span></div></div><article class="prose"><h2 id="签名">签名<a class="anchor" href="#签名" aria-label="永久链接">#</a></h2>
+<ul><li>不是所有接口都需要实现该接口，本签名为特定接口的请求签名，如相关文档没注明需要公共签名或者文档有单独签名说明，请根据具体接口文档提示进行签名</li></ul>
+<h3 id="请求规范">请求规范<a class="anchor" href="#请求规范" aria-label="永久链接">#</a></h3>
+<p><strong>接入前请确保已入驻开放平台，且创建开放平台应用以获取<code>client_id</code>和<code>app_secret</code></strong>
+<strong>需使用B站侧提供的签名算法及header头信息进行返回；</strong>
+<strong>加密时<code>client_id</code>和<code>app_secret</code>以B站侧提供的信息为准；</strong></p>
+<h3 id="签名算法">签名算法<a class="anchor" href="#签名算法" aria-label="永久链接">#</a></h3>
+<h4 id="公共参数">公共参数<a class="anchor" href="#公共参数" aria-label="永久链接">#</a></h4>
+<p>下表描述的公共请求头（Request Header）适用于通过URL发送HTTP请求调用API。</p>
+<div class="prose-table"><table><thead><tr><th style="text-align:left"><strong>名称</strong></th><th style="text-align:left"><strong>类型</strong></th><th style="text-align:left"><strong>是否必填</strong></th><th style="text-align:left"><strong>描述</strong></th></tr></thead><tbody><tr><td>Accept</td><td>String</td><td>是</td><td>接受的返回结果的类型。目前只支持JSON类型。取值：<code>application/json</code></td></tr><tr><td>Content-Type</td><td>String</td><td>是</td><td>当前请求体（Request Body）的数据类型。取值：<code>application/json</code>或<code>multipart/form-data</code></td></tr><tr><td>x-bili-content-md5</td><td>String</td><td>是</td><td>请求体的编码值，根据请求体计算所得(全小写字母)。<br><br>算法说明：将body的请求体内容（除文件外）当作字符串进行<code>MD5</code>编码。<br>如果为<code>GET</code>请求或者请求的<code>body</code>为空，<code>x-bili-content-md5</code>的值请直接使用<code>空字符串(string.Empty)</code>进行求md5。</td></tr><tr><td>x-bili-timestamp</td><td>String</td><td>是</td><td>unix时间戳，单位是秒。请求时间戳不能超过当前时间10分钟，否则请求会被丢弃。</td></tr><tr><td>x-bili-signature-method</td><td>String</td><td>是</td><td>签名方式。取值：<code>HMAC-SHA256</code></td></tr><tr><td>x-bili-signature-nonce</td><td>String</td><td>是</td><td>全网签名唯一随机数。用于防止网络重放攻击，建议您每一次请求都使用不同的随机数，例如GUID。</td></tr><tr><td>x-bili-accesskeyid</td><td>String</td><td>是</td><td>B站侧给出的<code>Access Key</code>(申请应用时获得的client_id)</td></tr><tr><td>x-bili-signature-version</td><td>String</td><td>是</td><td>如无单独说明，请取值<code>2.0</code></td></tr><tr><td>access-token</td><td>String</td><td>否</td><td><code>x-bili-signature-version</code>为<code>2.0</code>时必填，为通过OAuth2授权获取到的access_token</td></tr><tr><td>Authorization</td><td>String</td><td>是</td><td>请求签名。关于请求签名的计算方法，请参见签名机制。</td></tr></tbody></table></div>
+<h4 id="签名算法-2">签名算法<a class="anchor" href="#签名算法-2" aria-label="永久链接">#</a></h4>
+<p>签名算法使用HMAC-SHA256</p>
+<h4 id="编码格式">编码格式<a class="anchor" href="#编码格式" aria-label="永久链接">#</a></h4>
+<p>请求必须为UTF-8编码</p>
+<h4 id="签名机制">签名机制<a class="anchor" href="#签名机制" aria-label="永久链接">#</a></h4>
+<h5 id="1构建完整的待签名字符串">1.构建完整的待签名字符串<a class="anchor" href="#1构建完整的待签名字符串" aria-label="永久链接">#</a></h5>
+<p>抽取带"x-bili-"前缀的自定义header，按字典排序拼接，构建完整的待签名字符串：</p>
+<ul><li>请注意：<ul><li>待签名字符串包含换行符<code>\n</code></li><li>如果为<code>GET</code>请求或者请求的<code>body</code>为空，<code>x-bili-content-md5</code>的值请直接使用<code>空字符串(string.Empty)</code>进行求md5</li></ul></li></ul>
+<div class="code"><div class="code-head"><span class="code-lang">Plain-text</span><button class="code-copy" type="button">复制</button></div><pre><code>"x-bili-accesskeyid:$accesskeyidValue"
+"x-bili-content-md5:$contentMd5Value"
+"x-bili-signature-method:HMAC-SHA256"
+"x-bili-signature-nonce:$signatureNonceValue"
+"x-bili-signature-version:2.0"
+"x-bili-timestamp:$timestamp"</code></pre></div>
+<p>待签名字符串示例：</p>
+<div class="code"><div class="code-head"><span class="code-lang">Plain-text</span><button class="code-copy" type="button">复制</button></div><pre><code>x-bili-accesskeyid:xxxx
+x-bili-content-md5:fa6837e35b2f591865b288dfd859ce9d
+x-bili-signature-method:HMAC-SHA256
+x-bili-signature-nonce:ad184c09-095f-91c3-0849-230dd3744045
+x-bili-signature-version:2.0
+x-bili-timestamp:1624594467</code></pre></div>
+<h5 id="2生成签名">2.生成签名<a class="anchor" href="#2生成签名" aria-label="永久链接">#</a></h5>
+<p>对步骤1中得到的字符串，使用app_secret进行HMAC-SHA256算法进行签名。</p>
+<p>go示例代码如下：</p>
+<div class="code"><div class="code-head"><span class="code-lang">go</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-key">func</span> <span class="tok-fn">HmacSHA256</span>(key string, data string) string {
+    mac := hmac.<span class="tok-fn">New</span>(sha256.New, []<span class="tok-fn">byte</span>(key))
+    mac.<span class="tok-fn">Write</span>([]<span class="tok-fn">byte</span>(data))
+    <span class="tok-key">return</span> hex.<span class="tok-fn">EncodeToString</span>(mac.<span class="tok-fn">Sum</span>(<span class="tok-key">nil</span>))
+}</code></pre></div>
+<p>将最后签名得到的字符串添加到Header的<code>Authorization</code>字段中</p>
+<h5 id="签名验证工具">签名验证工具<a class="anchor" href="#签名验证工具" aria-label="永久链接">#</a></h5>
+<ul><li><a href="https://activity.hdslb.com/blackboard/static/20250217/cc51945399520f91bb65629803b43743/SignatureVerificationTool.zip">点击下载工具</a></li></ul>
+<p>工具运行环境需要为Windows 64位环境</p>
+<hr>
+<p>如果是其他系统环境，或上面下载的工具不可用，请到 <a href="https://github.com/bilibili-openplatform/SignatureAlgorithm_DotnetDemo/releases">Releases</a> 进行下载</p>
+<h5 id="签名机制参考demo">签名机制参考Demo<a class="anchor" href="#签名机制参考demo" aria-label="永久链接">#</a></h5>
+<p><a href="https://github.com/bilibili-openplatform/SignatureAlgorithm_DotnetDemo">签名算法C#版本Demo</a></p>
+<h5 id="签名机制参考demogo">签名机制参考DEMO(Go)<a class="anchor" href="#签名机制参考demogo" aria-label="永久链接">#</a></h5>
+<div class="code"><div class="code-head"><span class="code-lang">go</span><button class="code-copy" type="button">复制</button></div><pre><code><span class="tok-key">package</span> main
+
+<span class="tok-fn">import</span> (
+    <span class="tok-str">"crypto/hmac"</span>
+    <span class="tok-str">"crypto/md5"</span>
+    <span class="tok-str">"crypto/sha256"</span>
+    <span class="tok-str">"encoding/hex"</span>
+    <span class="tok-str">"encoding/json"</span>
+    <span class="tok-str">"fmt"</span>
+    <span class="tok-str">"github.com/monaco-io/request"</span>
+    <span class="tok-str">"sort"</span>
+    <span class="tok-str">"strconv"</span>
+    <span class="tok-str">"strings"</span>
+    <span class="tok-str">"time"</span>
+)
+
+<span class="tok-key">type</span> BaseResp <span class="tok-key">struct</span> {
+    Code      int64       <span class="tok-str">`json:"code"`</span>
+    Message   string      <span class="tok-str">`json:"message"`</span>
+    RequestId string      <span class="tok-str">`json:"request_id"`</span>
+    Data      <span class="tok-key">interface</span>{} <span class="tok-str">`json:"data"`</span>
+}
+
+<span class="tok-fn">const</span> (
+    ClientIdProd    = <span class="tok-str">"yourclientid"</span>
+    AppSecretProd   = <span class="tok-str">"yoursecret"</span>
+    AccessTokenProd = <span class="tok-str">"youraccesstoken"</span>
+)
+
+<span class="tok-fn">const</span> (
+    AcceptHeader              = <span class="tok-str">"Accept"</span>
+    ContentTypeHeader         = <span class="tok-str">"Content-Type"</span>
+    AuthorizationHeader       = <span class="tok-str">"Authorization"</span>
+    JsonType                  = <span class="tok-str">"application/json"</span>
+    HmacSha256                = <span class="tok-str">"HMAC-SHA256"</span>
+    BiliTimestampHeader       = <span class="tok-str">"x-bili-timestamp"</span>
+    BiliSignatureMethodHeader = <span class="tok-str">"x-bili-signature-method"</span>
+    BiliSignatureNonceHeader  = <span class="tok-str">"x-bili-signature-nonce"</span>
+    BiliAccessKeyIdHeader     = <span class="tok-str">"x-bili-accesskeyid"</span>
+    BiliSignVersionHeader     = <span class="tok-str">"x-bili-signature-version"</span>
+    BiliContentMD5Header      = <span class="tok-str">"x-bili-content-md5"</span>
+    AccessToken               = <span class="tok-str">"access-token"</span>
+    BiliVersionV2             = <span class="tok-str">"2.0"</span>
+
+    MainOpenPlatformHttpHost = <span class="tok-str">"https://member.bilibili.com"</span>
+
+)
+
+<span class="tok-key">type</span> CommonHeader <span class="tok-key">struct</span> {
+    ContentType       string
+    ContentAcceptType string
+    Timestamp         string
+    SignatureMethod   string
+    SignatureVersion  string
+    Authorization     string
+    Nonce             string
+    AccessKeyId       string
+    ContentMD5        string
+    X1BilispyColor    string
+    AccessToken       string
+}
+
+
+
+<span class="tok-com">// ApiRequestV2 http request demo方法</span>
+<span class="tok-key">func</span> <span class="tok-fn">ApiRequestV2</span>(reqJson, requestUrl string) (resp BaseResp, err error) {
+    resp = BaseResp{}
+    header := &amp;CommonHeader{
+       AccessToken:       AccessTokenProd,
+       ContentType:       JsonType,
+       ContentAcceptType: JsonType,
+       Timestamp:         strconv.<span class="tok-fn">FormatInt</span>(time.<span class="tok-fn">Now</span>().<span class="tok-fn">Unix</span>(), <span class="tok-num">10</span>),
+       SignatureMethod:   HmacSha256,
+       SignatureVersion:  BiliVersionV2,
+       Authorization:     <span class="tok-str">""</span>,
+       Nonce:             strconv.<span class="tok-fn">FormatInt</span>(time.<span class="tok-fn">Now</span>().<span class="tok-fn">UnixNano</span>(), <span class="tok-num">10</span>), <span class="tok-com">//用于幂等,记得替换</span>
+       AccessKeyId:       ClientIdProd,
+       ContentMD5:        <span class="tok-fn">Md5</span>(reqJson),
+       <span class="tok-com">//X1BilispyColor:    model.Color,</span>
+    }
+    header.Authorization = <span class="tok-fn">CreateSignature</span>(header, AppSecretProd)
+    cli := request.Client{
+       Method: <span class="tok-str">"POST"</span>,
+       URL:    fmt.<span class="tok-fn">Sprintf</span>(<span class="tok-str">"%s%s"</span>, MainOpenPlatformHttpHost, requestUrl),
+       Header: <span class="tok-fn">ToMap</span>(header),
+       String: reqJson,
+    }
+
+    <span class="tok-com">// 打印请求的cURL命令</span>
+    fmt.<span class="tok-fn">Println</span>(<span class="tok-str">"cURL Command:"</span>)
+    cli.<span class="tok-fn">PrintCURL</span>()
+
+    <span class="tok-key">var</span> respTest <span class="tok-key">interface</span>{}
+    cliResp := cli.<span class="tok-fn">Send</span>().<span class="tok-fn">Scan</span>(&amp;respTest)
+    <span class="tok-key">if</span> !cliResp.<span class="tok-fn">OK</span>() {
+       err = fmt.<span class="tok-fn">Errorf</span>(<span class="tok-str">"[error] req:%+v resp:%+v err:%+v"</span>, reqJson, resp, cliResp.<span class="tok-fn">Error</span>())
+    }
+    <span class="tok-com">// 使用json.MarshalIndent来格式化JSON数据</span>
+    jsonData, err := json.<span class="tok-fn">MarshalIndent</span>(respTest, <span class="tok-str">""</span>, <span class="tok-str">"    "</span>)
+    <span class="tok-key">if</span> err != <span class="tok-key">nil</span> {
+       fmt.<span class="tok-fn">Println</span>(<span class="tok-str">"Error marshaling JSON:"</span>, err)
+       <span class="tok-key">return</span>
+    }
+
+    <span class="tok-com">// 打印格式化后的JSON字符串</span>
+    fmt.<span class="tok-fn">Println</span>(<span class="tok-fn">string</span>(jsonData))
+    <span class="tok-key">return</span>
+}
+
+<span class="tok-com">// CreateSignature 生成Authorization加密串</span>
+<span class="tok-key">func</span> <span class="tok-fn">CreateSignature</span>(header *CommonHeader, accessKeySecret string) string {
+    sStr := <span class="tok-fn">ToSortedString</span>(header)
+    <span class="tok-key">return</span> <span class="tok-fn">HmacSHA256</span>(accessKeySecret, sStr)
+}
+
+<span class="tok-com">// Md5 md5加密</span>
+<span class="tok-key">func</span> <span class="tok-fn">Md5</span>(str string) (md5str string) {
+    data := []<span class="tok-fn">byte</span>(str)
+    has := md5.<span class="tok-fn">Sum</span>(data)
+    md5str = fmt.<span class="tok-fn">Sprintf</span>(<span class="tok-str">"%x"</span>, has)
+    <span class="tok-key">return</span> md5str
+}
+
+<span class="tok-com">// HmacSHA256 HMAC-SHA256算法</span>
+<span class="tok-key">func</span> <span class="tok-fn">HmacSHA256</span>(key string, data string) string {
+    mac := hmac.<span class="tok-fn">New</span>(sha256.New, []<span class="tok-fn">byte</span>(key))
+    mac.<span class="tok-fn">Write</span>([]<span class="tok-fn">byte</span>(data))
+    <span class="tok-key">return</span> hex.<span class="tok-fn">EncodeToString</span>(mac.<span class="tok-fn">Sum</span>(<span class="tok-key">nil</span>))
+}
+
+<span class="tok-com">// ToMap 所有字段转map&lt;string, string&gt;</span>
+<span class="tok-key">func</span> <span class="tok-fn">ToMap</span>(h *CommonHeader) <span class="tok-key">map</span>[string]string {
+    <span class="tok-key">return</span> <span class="tok-key">map</span>[string]string{
+       BiliTimestampHeader:       h.Timestamp,
+       BiliSignatureMethodHeader: h.SignatureMethod,
+       BiliSignatureNonceHeader:  h.Nonce,
+       BiliAccessKeyIdHeader:     h.AccessKeyId,
+       BiliSignVersionHeader:     h.SignatureVersion,
+       BiliContentMD5Header:      h.ContentMD5,
+       AuthorizationHeader:       h.Authorization,
+        ContentTypeHeader:         h.ContentType,
+       AcceptHeader:              h.ContentAcceptType,
+       AccessToken: h.AccessToken,
+    }
+}
+
+<span class="tok-com">// ToSortMap 参与加密的字段转map&lt;string, string&gt;</span>
+<span class="tok-key">func</span> <span class="tok-fn">ToSortMap</span>(h *CommonHeader) <span class="tok-key">map</span>[string]string {
+    <span class="tok-key">return</span> <span class="tok-key">map</span>[string]string{
+       BiliTimestampHeader:       h.Timestamp,
+       BiliSignatureMethodHeader: h.SignatureMethod,
+       BiliSignatureNonceHeader:  h.Nonce,
+       BiliAccessKeyIdHeader:     h.AccessKeyId,
+       BiliSignVersionHeader:     h.SignatureVersion,
+       BiliContentMD5Header:      h.ContentMD5,
+    }
+}
+
+<span class="tok-com">// ToSortedString 生成需要加密的文本</span>
+<span class="tok-key">func</span> <span class="tok-fn">ToSortedString</span>(h *CommonHeader) (sign string) {
+    hMap := <span class="tok-fn">ToSortMap</span>(h)
+    <span class="tok-key">var</span> hSil []string
+    <span class="tok-key">for</span> k := <span class="tok-key">range</span> hMap {
+       hSil = <span class="tok-fn">append</span>(hSil, k)
+    }
+    sort.<span class="tok-fn">Strings</span>(hSil)
+    <span class="tok-key">for</span> _, v := <span class="tok-key">range</span> hSil {
+       sign += v + <span class="tok-str">":"</span> + hMap[v] + <span class="tok-str">"\n"</span>
+    }
+    sign = strings.<span class="tok-fn">TrimRight</span>(sign, <span class="tok-str">"\n"</span>)
+    <span class="tok-key">return</span>
+}</code></pre></div>
+<h3 id="第三方平台约定返回结构体">第三方平台约定返回结构体<a class="anchor" href="#第三方平台约定返回结构体" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left"><strong>名称</strong></th><th style="text-align:left"><strong>类型</strong></th><th style="text-align:left"><strong>是否必填</strong></th><th style="text-align:left"><strong>例子</strong></th><th style="text-align:left"><strong>描述</strong></th></tr></thead><tbody><tr><td>code</td><td>int</td><td>是</td><td>0</td><td>返回码，业务错误码参考下方。</td></tr><tr><td>message</td><td>string</td><td>是</td><td>success</td><td>返回信息，业务错误信息参考下方。</td></tr><tr><td>data</td><td>object</td><td>是</td><td></td><td>业务信息。</td></tr><tr><td>request_id</td><td>string</td><td>是</td><td>abcd123456</td><td>每次请求生成的唯一id，用于问题排查。</td></tr></tbody></table></div>
+<h1 id="状态码">状态码<a class="anchor" href="#状态码" aria-label="永久链接">#</a></h1>
+<p>&lt;!--</p>
+<h2 id="状态码排查工具">状态码排查工具<a class="anchor" href="#状态码排查工具" aria-label="永久链接">#</a></h2>
+<p>开放平台接口的状态码查询，可直接进入<a href="https://openhome.bilibili.com/tool">【状态码查询工具】</a>
+--&gt;</p>
+<h2 id="状态码列表">状态码列表<a class="anchor" href="#状态码列表" aria-label="永久链接">#</a></h2>
+<h3 id="请求通用错误">请求通用错误<a class="anchor" href="#请求通用错误" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>4000</td><td>参数错误(一般是缺少参数)</td></tr><tr><td>4001</td><td>配置无效</td></tr><tr><td>4002</td><td>签名异常</td></tr><tr><td>4003</td><td>请求过期</td></tr><tr><td>4004</td><td>重复请求</td></tr><tr><td>4005</td><td>签名method异常</td></tr><tr><td>4006</td><td>签名版本异常</td></tr><tr><td>4007</td><td>Content-Type不为application/json</td></tr><tr><td>4008</td><td>MD5校验失败</td></tr><tr><td>4009</td><td>Accept不为application/json</td></tr><tr><td>4010</td><td>服务异常</td></tr><tr><td>4011</td><td>内部错误</td></tr><tr><td>4012</td><td>BizCode不支持该方法</td></tr></tbody></table></div>
+<h3 id="oauth2">OAuth2：<a class="anchor" href="#oauth2" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>122000</td><td>client_id错误</td></tr><tr><td>122001</td><td>client_secret 错误</td></tr><tr><td>122002</td><td>code未找到</td></tr><tr><td>122007</td><td>refreshToken不合法</td></tr><tr><td>122008</td><td>app_id不匹配</td></tr><tr><td>122009</td><td>系统繁忙，获取用户数据失败，请稍后再试</td></tr><tr><td>122010</td><td>系统异常，相关用户操作失败</td></tr></tbody></table></div>
+<h3 id="鉴权与限频限流">鉴权与限频限流：<a class="anchor" href="#鉴权与限频限流" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>127000</td><td>缺少鉴权参数</td></tr><tr><td>127001</td><td>access_token验证错误</td></tr><tr><td>127002</td><td>sign验证错误</td></tr><tr><td>127003</td><td>缺少mid或mid不匹配</td></tr><tr><td>127004</td><td>client_id验证错误</td></tr><tr><td>127005</td><td>机构认证未通过</td></tr><tr><td>127006</td><td>应用认证未通过</td></tr><tr><td>127007</td><td>应用无该接口权限</td></tr><tr><td>127008</td><td>mid验证失败</td></tr><tr><td>127009</td><td>接口请求次数达到上限</td></tr><tr><td>127010</td><td>sign白名单验证错误</td></tr><tr><td>127011</td><td>该接口用户未授权</td></tr><tr><td>127022</td><td>upload_token验证错误</td></tr><tr><td>127023</td><td>client_token校验错误</td></tr></tbody></table></div>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>127009</td><td>接口繁忙，请稍后再试</td></tr><tr><td>127304</td><td>接口访问受限，请确认应用已申请相关权限，且授权账号状态正常</td></tr><tr><td>127305</td><td>白名单限制</td></tr><tr><td>127306</td><td>接口请求频率过高，请确保请求量正常。如果使用量大请联系运营进行相关业务咨询</td></tr></tbody></table></div>
+<h3 id="视频稿件">视频稿件：<a class="anchor" href="#视频稿件" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>123001</td><td>账号无权限操作</td></tr><tr><td>123002</td><td>服务不可用</td></tr><tr><td>123003</td><td>该类型不支持投稿</td></tr><tr><td>123004</td><td>不存在该稿件</td></tr><tr><td>123005</td><td>稿件已经被删除</td></tr><tr><td>123006</td><td>异常视频提交</td></tr><tr><td>123007</td><td>当前稿件已锁定</td></tr><tr><td>123008</td><td>参数错误</td></tr><tr><td>123009</td><td>该分区不存在</td></tr><tr><td>123010</td><td>该稿件类型不合法</td></tr><tr><td>123011</td><td>该活动不存在</td></tr><tr><td>123012</td><td>Tag参数不合法</td></tr><tr><td>123013</td><td>标题不合法</td></tr><tr><td>123014</td><td>描述信息不合法</td></tr><tr><td>123015</td><td>新增稿件同一个标题短时间内不能重复提交</td></tr><tr><td>123016</td><td>稿件转载来源不能为空</td></tr><tr><td>123017</td><td>稿件描述长度为零</td></tr><tr><td>123018</td><td>稿件描述长度太长，已超过限制</td></tr><tr><td>123019</td><td>稿件描述类型不存在或者不匹配</td></tr><tr><td>123020</td><td>稿件描述类型和对应的分区类型不匹配</td></tr><tr><td>123021</td><td>稿件描述类型和对应的创作类型不匹配</td></tr><tr><td>123022</td><td>第(%d)个Tag已被封印</td></tr><tr><td>123023</td><td>投稿暂不可用</td></tr><tr><td>123024</td><td>当前输入有敏感信息,请修正</td></tr><tr><td>123026</td><td>您投稿的频率过快，请稍等30秒</td></tr><tr><td>123027</td><td>转载类型稿件不支持活动参加哦~</td></tr><tr><td>123028</td><td>稿件后台处理中,请10秒后再尝试</td></tr><tr><td>123029</td><td>当前总提交视频个数已经超过上限</td></tr><tr><td>123030</td><td>稿件标题过长,已经超过80个字符</td></tr><tr><td>123033</td><td>第(%d)个视频的标题过长,已经超过80个字符</td></tr><tr><td>123034</td><td>开放联合投稿权限前的稿件，不可编辑为合作稿件</td></tr><tr><td>123035</td><td>当前稿件已开放，不允许再次设置定时发布，请刷新列表查看</td></tr><tr><td>123036</td><td>非正式会员单日只能投递五个稿件，赶紧去答题转正吧</td></tr><tr><td>123037</td><td>您当前等级太低，无法投稿，请先答题到1级，谢谢</td></tr><tr><td>123038</td><td>封面不允许使用gif</td></tr><tr><td>123039</td><td>网络繁忙 请稍后再试</td></tr><tr><td>123040</td><td>不存该视频</td></tr><tr><td>123041</td><td>该视频已经被UP主删除</td></tr><tr><td>123042</td><td>视频提交需要二次确认</td></tr><tr><td>123043</td><td>稿件任务已被取消</td></tr><tr><td>123044</td><td>新人单P 系统升级中，敬请谅解</td></tr><tr><td>123045</td><td>定时发布设置错误</td></tr><tr><td>123046</td><td>视频章节内容含有非法字符</td></tr><tr><td>123047</td><td>当前话题和分区不匹配，请重新选择话题或者分区</td></tr><tr><td>123048</td><td>活动话题不允许修改</td></tr><tr><td>123049</td><td>当前话题无效</td></tr><tr><td>123050</td><td>投稿需要图片验证</td></tr><tr><td>123051</td><td>投稿图片验证失败</td></tr><tr><td>123052</td><td>您投稿的内容不符合平台社区规范</td></tr><tr><td>123053</td><td>稿件批量提交时mtime校验失败</td></tr><tr><td>123054</td><td>稿件提交时mtime校验失败</td></tr><tr><td>123055</td><td>稿件审核机器提交时mtime校验失败</td></tr><tr><td>123056</td><td>稿件审核人工提交时mtime校验失败</td></tr></tbody></table></div>
+<h3 id="专栏">专栏<a class="anchor" href="#专栏" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>129000</td><td>相同标题的专栏短时间内不能重复提交</td></tr><tr><td>129001</td><td>专栏不存在</td></tr><tr><td>129002</td><td>分类错误</td></tr><tr><td>129003</td><td>标签错误</td></tr><tr><td>129004</td><td>封面图地址错误</td></tr><tr><td>129005</td><td>专栏标题含有特殊文字或者标题长度大于40</td></tr><tr><td>129006</td><td>正文要超过200字以上或者超过三张图哦</td></tr><tr><td>129009</td><td>创建失败，文集数量达到上限</td></tr><tr><td>129010</td><td>文集标题不合法</td></tr><tr><td>129012</td><td>添加失败，文章数量达到上限</td></tr><tr><td>129015</td><td>文集状态不能修改</td></tr><tr><td>129018</td><td>当日投稿数量已到达上限</td></tr><tr><td>129020</td><td>系统繁忙，获取专栏信息失败，请稍后再试</td></tr><tr><td>129021</td><td>系统异常，相关专栏操作失败</td></tr><tr><td>129022</td><td>文件上传失败，请检查后重试</td></tr></tbody></table></div>
+<h3 id="用户管理">用户管理<a class="anchor" href="#用户管理" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>122009</td><td>系统繁忙，获取用户数据失败，请稍后再试</td></tr><tr><td>122010</td><td>系统异常，相关用户操作失败</td></tr></tbody></table></div>
+<h3 id="直播长链">直播长链<a class="anchor" href="#直播长链" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>141001</td><td>没有订阅的CMD</td></tr><tr><td>141002</td><td>心跳超时</td></tr><tr><td>141003</td><td>心跳不存在</td></tr><tr><td>141004</td><td>用户没有直播间</td></tr><tr><td>141005</td><td>获取长连失败</td></tr></tbody></table></div>
+<h3 id="服务市场">服务市场<a class="anchor" href="#服务市场" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>130001</td><td>未授权的店铺信息</td></tr><tr><td>130002</td><td>店铺信息不存在</td></tr><tr><td>130003</td><td>参数错误</td></tr><tr><td>130004</td><td>订单服务异常</td></tr><tr><td>130005</td><td>系统繁忙，获取服务市场数据失败，请稍后再试</td></tr><tr><td>130006</td><td>系统异常，服务市场操作失败</td></tr><tr><td>130007</td><td>文件上传失败，请检查后重试</td></tr></tbody></table></div>
+<h3 id="创作中心">创作中心<a class="anchor" href="#创作中心" aria-label="永久链接">#</a></h3>
+<div class="prose-table"><table><thead><tr><th style="text-align:left">错误码</th><th style="text-align:left">含义</th></tr></thead><tbody><tr><td>131001</td><td>系统繁忙，获取数据失败，请稍后再试</td></tr></tbody></table></div></article><hr><p style="color:var(--muted);font-size:14px">原始文档：<code>002_接口签名和状态码.md</code>（19791 字节）。用 <code>bili_docs_get { "ref": "2" }</code> 读全文，用 <code>bili_docs_search { "query": "…" }</code> 检索。</p></main><aside class="toc"><div class="toc-title">本页目录</div><a class="lvl-2" href="#签名">签名</a><a class="lvl-3" href="#请求规范">请求规范</a><a class="lvl-3" href="#签名算法">签名算法</a><a class="lvl-4" href="#公共参数">公共参数</a><a class="lvl-4" href="#签名算法-2">签名算法</a><a class="lvl-4" href="#编码格式">编码格式</a><a class="lvl-4" href="#签名机制">签名机制</a><a class="lvl-5" href="#1构建完整的待签名字符串">1.构建完整的待签名字符串</a><a class="lvl-5" href="#2生成签名">2.生成签名</a><a class="lvl-5" href="#签名验证工具">签名验证工具</a><a class="lvl-5" href="#签名机制参考demo">签名机制参考Demo</a><a class="lvl-5" href="#签名机制参考demogo">签名机制参考DEMO(Go)</a><a class="lvl-3" href="#第三方平台约定返回结构体">第三方平台约定返回结构体</a><a class="lvl-2" href="#状态码排查工具">状态码排查工具</a><a class="lvl-2" href="#状态码列表">状态码列表</a><a class="lvl-3" href="#请求通用错误">请求通用错误</a><a class="lvl-3" href="#oauth2">OAuth2：</a><a class="lvl-3" href="#鉴权与限频限流">鉴权与限频限流：</a><a class="lvl-3" href="#视频稿件">视频稿件：</a><a class="lvl-3" href="#专栏">专栏</a><a class="lvl-3" href="#用户管理">用户管理</a><a class="lvl-3" href="#直播长链">直播长链</a><a class="lvl-3" href="#服务市场">服务市场</a><a class="lvl-3" href="#创作中心">创作中心</a></aside></div>
+<footer class="footer"><div class="wrap"><div class="footer-grid"><div><h4>bili-open-mcp</h4><p style="margin:0 0 10px;max-width:38ch">哔哩哔哩 / B站 MCP Server。把开放平台的 170 篇文档变成 AI 能直接检索、直接调用、直接生成签名的东西。</p><span class="badge badge-warn">第三方 · 与哔哩哔哩无隶属关系</span></div><div><h4>文档</h4><a href="../usage.html">使用方法</a><a href="../readme.html">README</a><a href="../agents.html">AI 契约</a><a href="../disclaimer.html">免责声明</a></div><div><h4>参考</h4><a href="../tools.html">19 个工具</a><a href="../endpoints.html">100 个端点</a><a href="../guides.html">指南与协议</a><a href="../webhooks.html">41 个推送事件</a><a href="../errors.html">118 个错误码</a><a href="../mock.html">43 个沙盒接口</a></div><div><h4>相关</h4><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server" target="_blank" rel="noopener">GitHub 仓库</a><a href="https://github.com/3810220770/bili-open-mcp-bilibili-mcp-server/issues" target="_blank" rel="noopener">问题反馈</a><a href="https://open.bilibili.com/doc/4" target="_blank" rel="noopener">开放平台文档</a><a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP 规范</a></div></div><div class="footer-note">本页所有接口均为哔哩哔哩官方提供并公开的接口，不含私有接口、破解接口或绕过鉴权的实现。本站为静态文档站，不含任何凭据，也不会发起任何接口请求。哔哩哔哩、bilibili、小电视是相应权利人的商标；本项目与哔哩哔哩无隶属、赞助或背书关系。内容按「现状」提供，不构成任何担保 —— 详见 <a href="../disclaimer.html">免责声明</a>。<span style="display:block;margin-top:8px">© 2026 bili-open-mcp contributors · MIT License · 构建于 2026-10-31</span></div></div></footer>
+<button class="to-top" type="button" aria-label="回到顶部">↑</button>
+<div class="modal" hidden><div class="modal-box"><input class="modal-input" type="search" placeholder="搜索文档、接口、工具、错误码…" aria-label="站内搜索"><div class="modal-results"></div><div class="modal-foot"><span>↑↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span><span>Ctrl/⌘ + K 唤起</span></div></div></div>
+<script src="../assets/app.js" defer></script>
+</body>
+</html>
