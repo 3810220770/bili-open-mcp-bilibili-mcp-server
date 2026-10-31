@@ -3,7 +3,7 @@
   "title": "主站 Web 隐藏能力",
   "subtitle": "开放平台文档里没有的那些接口",
   "generatedAt": "2026-10-31",
-  "lede": "开放平台（open.bilibili.com）只放出已商务合作的能力，文档自己也写着「其它能力不走文档，请发邮件咨询」（见 170_文档中未列出的功能）。剩下那一大片 —— 举报、拉黑、动态、评论、收藏、历史、消息、直播、创作中心 —— 都在主站 www/api.bilibili.com 与 api.live.bilibili.com 上，走浏览器 Cookie，不走 2.0 签名。这一页把它们收齐：方法、地址、参数、返回码、实测状态、坑，一条不落，全部可以通过 bili_web_call 直接调。",
+  "lede": "开放平台（open.bilibili.com）只放出已商务合作的能力，文档自己也写着「其它能力不走文档，请发邮件咨询」（见 170_文档中未列出的功能）。剩下那一大片 —— 举报、拉黑、动态、评论、弹幕、私信、收藏、历史、合集、消息、番剧、直播、创作中心 —— 都在主站 www/api.bilibili.com、api.vc.bilibili.com 与 api.live.bilibili.com 上，走浏览器 Cookie，不走 2.0 签名。这一页把它们收齐：方法、地址、参数、返回码、实测状态、坑，一条不落，全部可以通过 bili_web_call 直接调。",
   "authNote": "主站体系只认 Cookie（SESSDATA / bili_jct 等），与开放平台的 client_id + secret + HMAC 签名互不通用。写操作会自动补 csrf=bili_jct；/wbi/、/polymer/、/v2/reply/wbi/ 路径会自动算 w_rid + wts。",
   "probe": {
     "at": "2026-10-31",
