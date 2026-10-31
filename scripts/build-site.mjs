@@ -557,10 +557,15 @@ function tocHtml(toc, title) {
    5. 生成
    ========================================================================== */
 const OUT_FILES = [];
+/* GitHub Pages 强制 HTTPS，页面里任何 http:// 的图片/脚本都会被浏览器按混合内容拦掉。
+   原文里 7 张 bilibili CDN 图写的是 http://（同样的 https:// 地址实测 200），统一升到 https。 */
+const upgradeMixed = (html) =>
+  html.replace(/(\s(?:src|srcset|poster))="http:\/\//g, "$1=\"https://");
+
 function write(rel, content) {
   const p = path.join(OUT, rel);
   fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, content, "utf8");
+  fs.writeFileSync(p, upgradeMixed(content), "utf8");
   OUT_FILES.push(rel.replace(/\\/g, "/"));
 }
 

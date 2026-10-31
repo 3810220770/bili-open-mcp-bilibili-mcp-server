@@ -62,6 +62,7 @@ const dead = [];      // 目标文件不存在
 const badAnchor = []; // 锚点不存在
 const missing = [];   // 站内资源缺失
 const junk = [];      // 模板残留
+const mixed = [];     // http:// 子资源（HTTPS 站上被浏览器拦截）
 
 for (const f of htmlFiles) {
   const rel = relOf(f);
@@ -94,6 +95,10 @@ for (const f of htmlFiles) {
     const hit = h.match(pat);
     if (hit) junk.push(`${rel} 含 ${hit[0]}`);
   }
+
+  for (const m of h.matchAll(/\b(?:src|srcset|poster)="(http:\/\/[^"]+)"/g)) {
+    mixed.push(`${rel} -> ${m[1].slice(0, 80)}`);
+  }
 }
 
 /* ---------- 输出 ---------- */
@@ -102,8 +107,9 @@ const deadU = uniq(dead);
 const anchorU = uniq(badAnchor);
 const missingU = uniq(missing);
 const junkU = uniq(junk);
+const mixedU = uniq(mixed);
 
-const total = deadU.length + anchorU.length + missingU.length + junkU.length;
+const total = deadU.length + anchorU.length + missingU.length + junkU.length + mixedU.length;
 
 console.log("站点检查  " + ROOT);
 console.log("  HTML 页面 : " + htmlFiles.length);
@@ -112,6 +118,7 @@ console.log("  死链      : " + deadU.length);
 console.log("  锚点失效  : " + anchorU.length);
 console.log("  资源缺失  : " + missingU.length);
 console.log("  模板残留  : " + junkU.length);
+console.log("  混合内容  : " + mixedU.length);
 
 const dump = (label, arr, n = 25) => {
   if (!arr.length) return;
@@ -123,6 +130,7 @@ dump("死链", deadU);
 dump("锚点失效", anchorU);
 dump("资源缺失", missingU);
 dump("模板残留", junkU);
+dump("混合内容", mixedU);
 
 if (total) {
   console.log("\n检查未通过：" + total + " 处问题");

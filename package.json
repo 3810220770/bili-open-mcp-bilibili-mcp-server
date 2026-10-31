@@ -58,7 +58,8 @@
     "check-config": "node scripts/check-project-config.mjs",
     "login": "node scripts/oauth-login.mjs",
     "site": "node scripts/build-site.mjs",
-    "site:check": "node scripts/build-site.mjs && node scripts/check-site.mjs"
+    "site:check": "node scripts/build-site.mjs && node scripts/check-site.mjs",
+    "site:serve": "node scripts/serve-docs.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
